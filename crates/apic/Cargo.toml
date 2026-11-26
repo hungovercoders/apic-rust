@@ -1,0 +1,16 @@
+[package]
+name = "apic"
+description = "Run .http request files from the terminal, CI, or an AI agent"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "apic"
+path = "src/main.rs"
+
+[dependencies]

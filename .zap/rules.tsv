@@ -1,0 +1,34 @@
+# .zap/rules.tsv: seeded by slopstopper install.sh.
+#
+# OWASP ZAP rule overrides for the DAST scan. Two common false positives
+# for content-heavy sites ship commented-out below. Uncomment ONLY the
+# rules that apply to your site, and keep the `# why` line so the
+# exception is documented at the point of suppression.
+#
+# Format: <rule>\tIGNORE\t# why this is accepted on this site
+# <rule> is a plugin id (10055: every alert that plugin raises) or an
+# alert ref (10055-13: just that one). Prefer the alert ref; some plugins
+# bundle unrelated alerts. See https://www.zaproxy.org/docs/alerts/.
+# Static host with a <meta> CSP? docs/security/DAST.md lists the three
+# header-only alerts to accept.
+#
+# Honoured by slopstopper's dast:analyze task AND by the DAST gate
+# (cli/slopstopper/dast_gate.py), which names the entry behind each
+# finding it swallows.
+
+# 90003	IGNORE	# SRI: GTM script and similar cross-domain scripts are
+#                # rotated by the third party; no stable SRI hash is viable
+
+10099	IGNORE	# Source Code Disclosure (every language the plugin matches: SQL,
+#                # PHP, JSP, ASP, Java, Python, Ruby): apic.sh is static files
+#                # with no server code or database, so there is no source to
+#                # leak in any of them. The matchers read prose and code blocks
+#                # as leaks: the SQL one fired on llms-full.txt (every page as
+#                # one text file) where "apic select" ran into "from" on the
+#                # next line (#49, #63), and the docs quote code in every
+#                # language on purpose.
+
+10055-6	IGNORE	# style-src 'unsafe-inline': Starlight sets CSS custom properties
+#                # through style attributes (--sl-icon-size on every icon) and
+#                # inlines component <style> blocks, which hashes cannot cover.
+#                # Scripts are hashed (website/plugins/security-headers.mjs).

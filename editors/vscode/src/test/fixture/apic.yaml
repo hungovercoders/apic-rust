@@ -1,0 +1,2 @@
+# yaml-language-server: $schema=https://apic.sh/schemas/apic.schema.json
+env: dev

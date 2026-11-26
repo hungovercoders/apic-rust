@@ -1,0 +1,164 @@
+# The docs site, the course and the generated pages
+
+`website/` is [apic.sh](https://apic.sh/), the user documentation. This page
+is the layout, the link contract the binary depends on, the generators and
+the prose checks. The site's content is not reference for working on apic;
+`docs/` is.
+
+## Layout
+
+- Astro with Starlight, pages in `src/content/docs/` (Markdown;
+  `getting-started.mdx` and `index.mdx` are MDX for the tab components), the
+  sidebar in `src/sidebar.mjs` (which `astro.config.mjs`, `llms.txt` and
+  `llms-full.txt` all read), apic's colours, and the few overrides of Starlight's layout, in `src/styles/custom.css`.
+  Every page needs a `title:` and a one-line `description:` in its front
+  matter, not an H1. Asides are
+  `:::tip[Title]` … `:::`; collapsible blocks are `<details>` with a
+  `<summary>`. A lesson stays Markdown (`<!-- learn -->` is an HTML comment,
+  which MDX rejects and `scripts/learncheck` needs).
+- The course is under `src/content/docs/learn/`, and the migration guides
+  under `migrate/`, whose runnable blocks `task learn:check` runs too. A
+  lesson is written from `learn/_template.md` in this directory, its episode
+  from `learn/_episode-template.md`.
+- Pages link to each other as `format.md#anchor`, the way GitHub renders
+  them, and to files under `public/` by their path from the content root
+  (`assets/apic-ui.svg`); `plugins/remark-doc-links.mjs` turns both into the
+  URLs the site serves. `scripts/skilldocs` relies on the `.md` form, so keep
+  writing links that way.
+- The page paths and heading anchors are a public contract: the binary
+  (`runner.DocsURL`, the SARIF `helpUri`, the LSP code description, the
+  `apic init` schema modeline), the VS Code extension, the schema `$id`s and
+  the Homebrew cask link to them. Renaming a page or a heading needs the same
+  care as renaming a flag. `starlight-links-validator` fails the build on a
+  broken internal link or anchor.
+- The schemas under `public/schemas/` are generated (`task schemas`);
+  `public/assets/` holds the generated screenshots (`task shots`; the
+  animated one comes with a `-poster.svg` of its last frame, which
+  `plugins/rehype-recordings.mjs` serves through a `<picture>` under
+  `prefers-reduced-motion`, as the README does by hand; the same plugin
+  makes the paragraph around every recording a focusable scroll region
+  for phones); `src/assets/logo.svg` is the logo the README and the site
+  share, and `public/apple-touch-icon.png` is it at 180px with square
+  corners for Safari's home-screen bookmarks.
+- `src/routeData.ts` adds the share tags Starlight does not write
+  (`og:image`, the Twitter title, description and image) to every page;
+  `public/og-image.png` is the 1200×630 image they point at.
+  `public/_headers` is the template for the response headers Cloudflare
+  sends (a Content-Security-Policy, frame and sniffing protection);
+  `plugins/security-headers.mjs` writes the built copy with a hash of every
+  inline script, so the policy allows Starlight's own scripts and nothing else. `robots.txt`,
+  `llms.txt` and `llms-full.txt` (every page as one Markdown document) are
+  generated under `src/pages/` from the site URL and the docs collection,
+  so none can drift from the pages; every page's `description:` is its
+  summary in `llms.txt` and its meta description, so a new page needs one. slopstopper's
+  reliability checks assert all of this against the built site; see `ci.md`.
+- `privacy.md` and the footer line in `src/components/Footer.astro` (the
+  one Starlight component override) state what the site collects (nothing
+  of its own), what Cloudflare keeps as the host (aggregate analytics only:
+  `observability` in `wrangler.jsonc` stays off, so there are no per-request
+  logs, and switching it on means changing both) and what
+  the CLI sends (only to the APIs and auth endpoints the project's `.http`
+  files and `apic.yaml` name). Keep them true: a new
+  third-party script, form or analytics snippet means updating both, and
+  the page's "last checked" date. The CSP will block such a script until
+  `_headers` allows it, which is the prompt, and `task ss:hygiene:privacy`
+  fails until the page names every origin the CSP then allows, the host,
+  Workers Logs when `wrangler.jsonc` turns them on, and a date.
+
+## Deploys
+
+Cloudflare Workers Builds watches the repository and runs `npx wrangler
+deploy` in `website/` (`wrangler.jsonc`, a static-assets Worker whose
+`build.command` runs `npm run build` first); `main` is apic.sh and every pull
+request gets a preview URL. `docs.yml` builds the site on each change to
+prove it, and keeps GitHub Pages (`hungovercoders.github.io/apic/`, where the
+docs lived before apic.sh) serving the schemas as real files and a redirect
+page per route, because the 0.1.x binaries and the `apic.yaml` files they
+wrote link there (`website/scripts/legacy.mjs`). That Pages deployment
+declares no environment `url` on purpose: the slopstopper checks that run on
+`deployment_status` would otherwise audit the redirect stubs as the site
+(see `ci.md`).
+
+## Commands
+
+- `task docs:install`, then `task docs` / `task docs:build`: install the
+  site's npm packages (Node 22+), serve apic.sh locally, or build it into
+  `website/dist`; the build fails on a broken internal link or anchor.
+- `task docs:check`: codespell, Vale and lychee, as the docs workflow runs
+  them (needs the three on PATH). Prose is British English: Vale's
+  `Apic.British` rule fails on `color` or `behavior` outside code spans. A
+  deliberate typo in an example goes in `.codespellrc`'s
+  `ignore-words-list`; a name Vale should hold to one spelling goes in
+  `docs/.vale/styles/config/vocabularies/Apic/accept.txt`.
+- `task docs:cli`: regenerate the "Commands and flags" section at the end of
+  the site's `cli.md` from the command tree (`scripts/clidocs`; a test fails
+  when it is stale); `task man` writes the man pages goreleaser ships.
+- `task docs:changelog`: regenerate the site's `changelog.md` from
+  `CHANGELOG.md` at the root, with the sections up to the published release
+  recorded in `website/released-version`, and rewrite the version pins in
+  the install commands, the cookbook, the verifying page and the course to
+  the newest stable release at or below it (`scripts/changelog`; a test
+  fails when either is stale). Editing the intro or a published section
+  needs it; a line under Unreleased and a release pull request's newly
+  dated section do not, and `release.yml` moves the published release
+  after each release. See `releasing.md`.
+- `task docs:errors`: regenerate the site's `errors.md` from
+  `runner.Catalogue` (`scripts/errdocs`; a test fails when it is stale).
+- `task skill`: regenerate `skills/apic/references/cheatsheet.md` from the
+  site's `cheatsheet.md` with absolute links (`scripts/skilldocs`; a test
+  fails when it is stale). Each `SKILL.md` under `skills/` (`apic`,
+  `api-design`, `api-security`) is a briefing an agent reads on demand:
+  keep it under 200 lines, point at its `references/` for detail, and
+  know that the same test fails on an `apic <word>` that is not a command,
+  a `references/` link that is not in the skill, or a `name:` that is not
+  the directory. Every link in the other two skills' references is
+  external (lychee checks them), since the files are copied into other
+  projects alone; the `.http` and Gherkin blocks they show should pass
+  `apic validate` and match the step vocabulary, so try a new one before
+  writing it.
+- `task agent:eval` (`scripts/agenteval`) runs the tasks in every
+  `skills/<skill>/evals/evals.json` through the Claude Code CLI against
+  fresh `apic demo` projects, with and without the skill, scoring the
+  transcript (task outcome by a `verify` command, files changed, secret
+  files read, requests sent, selector errors hit). The baseline for the
+  `apic` skill has no skill; for `api-design` and `api-security` it has
+  the `apic` skill, so the lift measured is the knowledge. Eval ids are
+  unique across the files (they name the result directories and `-only`),
+  and a test fails when a skill has no evals file. It makes real model calls (about 40
+  cents a full run), so it is a monthly workflow with a manual trigger
+  (`agent-eval.yml`, needs the `ANTHROPIC_API_KEY` secret) rather than part
+  of `task check`. Run it when the briefing or an agent-facing output
+  changes; the schedule is the backstop.
+- `task shots`: regenerate `website/public/assets/apic-ui.svg`,
+  `apic-run.svg` and `apic-demo.svg` from real output (needs port 8089 free).
+- `task tapes`: record the course's VHS tapes (`learn/tapes/` and
+  `assets/demo.tape` in this directory) into `dist/tapes` with
+  `scripts/tapes`, which serves the demo API on 8089 and gives each tape a
+  scratch directory holding the files its lesson's runnable blocks create
+  (the `setup` table in `scripts/tapes/main.go` says which); needs vhs,
+  ttyd, ffmpeg and jq, which the tapes pipe through. `task tapes:check`
+  validates the tapes' syntax with vhs alone, as CI does; VHS strings take no
+  backslash escapes, so a command that needs both quote kinds goes in
+  backticks. A test fails when a numbered lesson has neither a tape nor "No
+  tape for this lesson" in its episode script.
+- `task episodes`: build the course's YouTube episodes into
+  `dist/episodes/NN` with `scripts/episodes` from the shot lists in
+  `learn/episodes/` (in this directory, one YAML file per lesson): the cards, the terminal
+  clips as VHS tapes recorded against the demo API, the push-ins, and the
+  lines the voice says over each shot, which set the timing. Each episode
+  comes out as a captioned MP4 with a silent track, a clean MP4, the SRT,
+  the title, chapters and description from `_episode-template.md`, the
+  narration script and the thumbnail. Needs vhs, ttyd, ffmpeg and a
+  chromium. `task episodes:check` validates the shot lists and tapes with
+  vhs alone, as CI does; `go test` checks the shot lists without it.
+- The voice goes on in one of two ways. Recorded line by line (or by a
+  text-to-speech tool that writes one file a line), the clips go in a
+  directory under the episode's number, named by the SRT cue number with
+  three digits, and `task episodes VOICE=<directory>` times each shot to
+  its clips plus a beat, lays them on the audio track at their cues and
+  writes the voiced clean and captioned cuts beside the silent ones; a
+  missing clip fails with its line before anything renders, and an
+  episode with no directory builds silent as before. Recorded in one take
+  to the narration script's timestamps, `task episodes:voice EPISODE=NN
+  VOICE=<file>` muxes the take onto both cuts of an episode already
+  built. The recording notes in `_episode-template.md` say which to use.

@@ -1,0 +1,97 @@
+name: docs
+on:
+  push:
+    branches: [main]
+    paths: [website/**, docs/**, .github/workflows/docs.yml]
+  pull_request:
+    paths: [website/**, docs/**, skills/**, README.md, CONTRIBUTING.md, AGENTS.md, SECURITY.md, .vale.ini, .codespellrc, .lychee.toml, .github/workflows/docs.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  # Spelling, prose style and, on pull requests, external links, before the
+  # site is built. The same three run locally with `task docs:check`.
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install "codespell==2.4.3" && codespell
+      - name: vale
+        env:
+          VALE_VERSION: 3.9.1
+        run: |
+          curl -sSfL "https://github.com/errata-ai/vale/releases/download/v${VALE_VERSION}/vale_${VALE_VERSION}_Linux_64-bit.tar.gz" | tar -xz -C "$RUNNER_TEMP" vale
+          "$RUNNER_TEMP/vale" sync
+          "$RUNNER_TEMP/vale" website/src/content/docs docs skills README.md CONTRIBUTING.md AGENTS.md SECURITY.md
+      # External links rot on their own schedule, so they are checked when
+      # the docs change in a pull request, not on the way to deploying main.
+      - if: github.event_name == 'pull_request'
+        uses: actions/cache@v6
+        with:
+          path: .lycheecache
+          key: lychee-${{ github.sha }}
+          restore-keys: lychee-
+      - if: github.event_name == 'pull_request'
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --config .lychee.toml --no-progress 'website/src/content/docs/**/*.md' 'website/src/content/docs/**/*.mdx' 'docs/**/*.md' 'skills/**/*.md' README.md CONTRIBUTING.md SECURITY.md
+          fail: true
+
+  # apic.sh itself is deployed by Cloudflare Workers Builds from website/
+  # (main, and a preview URL per pull request), not from here. This job
+  # proves the build and every internal link on each change, and renders
+  # the legacy pages for GitHub Pages: the docs lived at
+  # hungovercoders.github.io/apic/ before apic.sh, and the 0.1.x binaries
+  # and the apic.yaml files they wrote still link there (see
+  # website/scripts/legacy.mjs).
+  build:
+    needs: check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22.23.4
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm run legacy
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: website/legacy
+
+  # The environment deliberately has no `url`. With one, the deployment's
+  # success status names hungovercoders.github.io/apic/ as its
+  # environment_url, and every URL-driven slopstopper check (they run `on:
+  # deployment_status`) audits it as if it were the site: no sitemap,
+  # robots.txt or llms.txt, redirect stubs with no metadata, and GitHub
+  # Pages' headers for DAST. Without it the status carries only the Actions
+  # log link, which ss-resolve-url never audits: it audits urls.production
+  # (apic.sh) in its place. The deployment still shows on the repo's
+  # Environments page; only its link is lost.
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

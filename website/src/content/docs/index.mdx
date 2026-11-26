@@ -1,0 +1,113 @@
+---
+title: apic is epic
+description: Run API requests from plain .http files, in the terminal, in CI, or from an AI agent, on any platform, with one static binary.
+template: splash
+hero:
+  title: apic is epic
+  tagline: Run API requests from plain <code>.http</code> files, in the terminal, in CI, or from an AI agent, on any platform, with one static binary.
+  image:
+    file: ../../assets/logo.svg
+    alt: ''
+  actions:
+    - text: Get started
+      link: /getting-started/
+      icon: right-arrow
+    - text: Learn the format
+      link: /format/
+      variant: minimal
+    - text: GitHub
+      link: https://github.com/hungovercoders/apic-rust
+      icon: github
+      variant: minimal
+---
+
+import { Tabs, TabItem, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+![apic ui --demo: send a request, run a file as a flow, read the checks, see what was captured](assets/apic-demo.svg)
+
+```sh wrap
+apic ui --demo                   # a fake API and a UI on it, no setup
+apic run login                   # POST, capture the token
+apic run get-user --env staging  # reuse the token, check assertions
+apic run smoke.http --json | jq  # a file as a flow, one JSON line each
+apic test                        # Gherkin features, same requests
+claude mcp add api -- apic mcp   # an agent calls them as tools
+```
+
+## 30 seconds to epic
+
+<Tabs>
+<TabItem label="Homebrew">
+
+```sh
+brew install hungovercoders/tap/apic
+apic ui --demo
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```sh
+go install github.com/hungovercoders/apic-rust/cmd/apic@latest
+apic ui --demo
+```
+
+</TabItem>
+<TabItem label="Linux / macOS">
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/hungovercoders/apic-rust/main/install.sh | sh
+apic ui --demo
+```
+
+</TabItem>
+<TabItem label="Windows">
+
+```powershell
+irm https://raw.githubusercontent.com/hungovercoders/apic-rust/main/install.ps1 | iex
+apic ui --demo
+```
+
+</TabItem>
+</Tabs>
+
+`--demo` serves a small fake API inside the same process and opens the
+[terminal UI](tui.md) on an example project that targets it. There is
+nothing to sign up for or clone, and nothing is left behind when you quit.
+
+:::tip[Prefer the plain CLI?]
+`apic demo` writes the same example project to `./apic-demo` and serves
+the API, so you can drive it by hand:
+`apic run login whoami -C apic-demo`.
+:::
+
+## Why it's epic
+
+<CardGrid>
+{/* Component hrefs are attributes, not Markdown links, so they are written as the site serves them. */}
+<LinkCard title="Environments that travel" href="/format/#variables" description="http-client.env.json, .env, the shell and --var, with one precedence order you can print." />
+<LinkCard title="Tokens that persist" href="/format/#directives" description="Capture a value once; the next run, in a new shell or a new agent call, already has it." />
+<LinkCard title="Assertions and flows" href="/format/#assertion-operators" description="Check status, headers and JSON paths. A file runs in order with a pass/fail summary and an exit code." />
+<LinkCard title="Auth a text file cannot do" href="/auth/" description="AWS SigV4 with no SDK, OAuth2 with caching and refresh, basic, bearer, or any CLI that prints a token." />
+<LinkCard title="Gherkin without Cucumber" href="/testing/" description="Features run against the same requests with a built-in vocabulary. JUnit and cucumber reports included." />
+<LinkCard title="Built for agents" href="/agents/" description="Stable --json per request, discoverable requests, errors that say what to do next, and an MCP server." />
+</CardGrid>
+
+The files stay ordinary `.http` files: everything apic adds is a comment, so
+VS Code, JetBrains and Neovim still send them with one click.
+
+## Where to go next
+
+- [Getting started](getting-started.md): set apic up for a project.
+- [From zero to apic](learn/index.md): the course, fourteen short lessons.
+- [Cheat sheet](cheatsheet.md): every directive, selector and operator on one page.
+- [The `.http` format](format.md): the files you are writing.
+- [Using apic from an AI agent](agents.md): the contract for Claude Code, Cursor or a shell-driven agent.
+
+The sidebar and search carry the rest.
+
+:::note[Reading this as an agent?]
+[llms.txt](https://apic.sh/llms.txt) maps every page with a summary, and
+[llms-full.txt](https://apic.sh/llms-full.txt) is the whole site as one
+Markdown document. [Using apic from an AI agent](agents.md) is the contract.
+:::

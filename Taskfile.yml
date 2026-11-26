@@ -1,0 +1,248 @@
+# https://taskfile.dev — developer tasks for apic itself.
+version: "3"
+
+# The slopstopper quality suite (task ss:*): see .slopstopper.yml.
+includes:
+  ss:
+    taskfile: ./Taskfile.ss.yml
+
+vars:
+  BIN: bin/apic
+  VERSION:
+    sh: git describe --tags --always --dirty 2>/dev/null || echo dev
+  LDFLAGS: -s -w -X github.com/hungovercoders/apic-rust/internal/cli.Version={{.VERSION}}
+
+tasks:
+  default:
+    cmds:
+      - task --list
+
+  build:
+    desc: Build the apic binary into bin/
+    cmds:
+      - go build -ldflags "{{.LDFLAGS}}" -o {{.BIN}} ./cmd/apic
+
+  install:
+    desc: Install apic into $GOPATH/bin
+    cmds:
+      - go install -ldflags "{{.LDFLAGS}}" ./cmd/apic
+
+  test:
+    desc: Run unit and integration tests
+    cmds:
+      - go test ./...
+
+  lint:
+    desc: Run gofmt check, go vet and golangci-lint
+    cmds:
+      - test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+      - go vet ./...
+      - golangci-lint run ./...
+
+  race:
+    desc: Run the tests under the race detector
+    cmds:
+      - go test -race ./...
+
+  cover:
+    desc: Write coverage.out and print the per-package summary
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -func=coverage.out
+
+  vuln:
+    desc: Check the dependency tree for known vulnerabilities
+    cmds:
+      - go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+  fmt:
+    desc: Format the tree (lint only checks)
+    cmds:
+      - gofmt -w .
+
+  validate-examples:
+    desc: Validate the example projects and check their formatting, as CI does
+    cmds:
+      - for: [httpbin, github, spotify]
+        cmd: go run ./cmd/apic validate -C examples/{{.ITEM}}
+      - for: [httpbin, github, spotify]
+        cmd: go run ./cmd/apic fmt --check -C examples/{{.ITEM}}
+
+  clean:
+    desc: Remove build, docs and coverage output
+    cmds:
+      - rm -rf bin dist man completions coverage.out THIRD_PARTY_NOTICES.md website/dist website/legacy website/.astro
+
+  check:
+    desc: Everything CI runs
+    deps: [lint, test, race, licences, validate-examples]
+
+  licences:
+    desc: Check LICENSE is present and every compiled-in module has one
+    cmds:
+      - test -f LICENSE || (echo "LICENSE is missing" >&2; exit 1)
+      - sh scripts/notices.sh /tmp/THIRD_PARTY_NOTICES.md
+
+  example:
+    desc: Run the example project against the given environment (default dev = httpbin.org)
+    dir: examples/httpbin
+    cmds:
+      - ../../{{.BIN}} run auth.http --env {{.ENV | default "dev"}}
+      - ../../{{.BIN}} run users.http --env {{.ENV | default "dev"}} --keep-going
+    deps: [build]
+
+  example:github:
+    desc: Run the GitHub example (needs your own token in examples/github/http-client.private.env.json)
+    dir: examples/github
+    cmds:
+      - ../../{{.BIN}} run repo.http --env {{.ENV | default "dev"}} --keep-going
+    deps: [build]
+
+  example:spotify:
+    desc: Run the Spotify example (needs your own client id/secret in examples/spotify/http-client.private.env.json)
+    dir: examples/spotify
+    cmds:
+      - ../../{{.BIN}} run search.http --env {{.ENV | default "dev"}} --keep-going
+    deps: [build]
+
+  example:demo:
+    desc: Run the built-in demo project (no network needed)
+    deps: [build]
+    cmds:
+      # Task's built-in shell has no job control (no real `kill`), so the
+      # background server + trap cleanup needs a real shell via `sh -c`.
+      # Statements must stay newline-separated, not `&&`-chained: `&&` binds
+      # tighter than `&`, so chaining would background the wrong commands
+      # too and leave the rest running before the server is even up.
+      - |
+        sh -c "
+        {{.BIN}} demo --out bin/apic-demo --force &
+        pid=\$!
+        trap 'kill \$pid 2>/dev/null || true' EXIT
+        i=0
+        until [ -f bin/apic-demo/apic.yaml ] && {{.BIN}} run login -C bin/apic-demo --env local >/dev/null 2>&1; do
+          i=\$((i+1))
+          [ \$i -ge 100 ] && echo demo not ready >&2 && exit 1
+          sleep 0.1
+        done
+        {{.BIN}} run login whoami basic-auth oauth2-token api-key health slow daily-report graphql jobs.http list-todos list-open-todos create-todo get-todo update-todo get-updated delete-todo get-deleted create-todo-invalid redirect-followed redirect-raw -C bin/apic-demo --env local --keep-going
+        "
+
+  shots:
+    desc: Regenerate the terminal screenshots in website/public/assets from real apic output
+    cmds:
+      - go run ./scripts/shot
+
+  tapes:
+    desc: Record the course's VHS tapes into dist/tapes against the demo API, each from a scratch directory with the files its lesson creates (needs vhs, ttyd, ffmpeg and jq, and port 8089 free)
+    cmds:
+      - go run ./scripts/tapes
+
+  tapes:check:
+    desc: Validate every VHS tape's syntax (needs vhs), as CI does
+    cmds:
+      - go run ./scripts/tapes -check
+
+  episodes:
+    desc: Build the course's YouTube episodes into dist/episodes from docs/learn/episodes, timed and voiced from the recorded lines under VOICE when set (needs vhs, ttyd, ffmpeg and a chromium, and port 8089 free)
+    cmds:
+      - go run ./scripts/episodes -version {{.VERSION}} {{if .VOICE}}-voice {{.VOICE | shellQuote}}{{end}}
+
+  episodes:check:
+    desc: Validate every episode's shot list and its tapes' syntax (needs vhs), and the recorded lines under VOICE when set, recording nothing
+    cmds:
+      - go run ./scripts/episodes -check {{if .VOICE}}-voice {{.VOICE | shellQuote}}{{end}}
+
+  episodes:voice:
+    desc: Mux a narration recorded in one take (VOICE, a file read to the narration script's timestamps) onto episode EPISODE's built cuts in dist/episodes (needs ffmpeg)
+    requires:
+      vars: [EPISODE, VOICE]
+    cmds:
+      - go run ./scripts/episodes -only {{.EPISODE | shellQuote}} -mux {{.VOICE | shellQuote}}
+
+  schemas:
+    desc: Regenerate the JSON schemas in website/public/schemas from the config types (a test fails when they are stale)
+    cmds:
+      - go run ./scripts/schemas
+
+  docs:cli:
+    desc: Regenerate the "Commands and flags" section of the site's cli.md from the command tree (a test fails when it is stale)
+    cmds:
+      - go run ./scripts/clidocs
+
+  skill:
+    desc: Regenerate skills/apic/references/cheatsheet.md from the site's cheatsheet.md (a test fails when it is stale)
+    cmds:
+      - go run ./scripts/skilldocs
+
+  docs:errors:
+    desc: Regenerate the site's errors.md from the error catalogue in internal/runner/errors.go (a test fails when it is stale)
+    cmds:
+      - go run ./scripts/errdocs
+
+  notes:
+    desc: Print a version's section of CHANGELOG.md, the notes release.yml attaches to its release (task notes -- 0.2.0; no version prints Unreleased)
+    cmds:
+      - go run ./scripts/changelog {{.CLI_ARGS}}
+
+  docs:changelog:
+    desc: Regenerate the site's changelog page from CHANGELOG.md and every version pin in the docs, for the published release in website/released-version (a test fails when they are stale)
+    cmds:
+      - go run ./scripts/changelog -write
+
+  man:
+    desc: Write the man pages into man/ (goreleaser does this before packaging)
+    cmds:
+      - go run ./scripts/clidocs -man man
+
+  agent:eval:
+    desc: Run every skill's evals (skills/*/evals) through the Claude Code CLI against fresh apic demo projects, with and without the skill (needs `claude` on PATH and credentials; makes real model calls); results in bin/agent-eval
+    cmds:
+      - go run ./scripts/agenteval
+
+  learn:check:
+    desc: Run every marked command block in the course (website/src/content/docs/learn) and the migration guides (…/migrate) against apic demo
+    cmds:
+      - go run ./scripts/learncheck
+
+  docs:install:
+    desc: Install the site's npm packages (Node 22 or newer)
+    cmds:
+      - npm --prefix website ci
+
+  docs:
+    desc: Serve apic.sh locally with live reload (task docs:install first)
+    cmds:
+      - npm --prefix website run dev
+
+  docs:build:
+    desc: Build apic.sh into website/dist; every internal link and anchor is checked and a broken one fails the build
+    cmds:
+      - npm --prefix website run build
+
+  docs:check:
+    desc: Spelling (codespell), prose style (vale) and external links (lychee), as the docs workflow runs them; needs the three tools on PATH
+    cmds:
+      - codespell
+      - vale sync
+      - vale website/src/content/docs docs skills README.md CONTRIBUTING.md AGENTS.md SECURITY.md
+      - lychee --config .lychee.toml --no-progress 'website/src/content/docs/**/*.md' 'website/src/content/docs/**/*.mdx' 'docs/**/*.md' 'skills/**/*.md' README.md CONTRIBUTING.md SECURITY.md
+
+  notices:
+    desc: Generate THIRD_PARTY_NOTICES.md from the modules compiled into apic
+    cmds:
+      - sh scripts/notices.sh THIRD_PARTY_NOTICES.md
+
+  snapshot:
+    desc: Build release archives, packages and the container image for every platform without publishing (needs Docker)
+    cmds:
+      # Signing and SBOMs are skipped: they need cosign and syft, which the
+      # release runner installs, and a snapshot signature would mean nothing.
+      # The real release does both; see .goreleaser.yaml.
+      - go run github.com/goreleaser/goreleaser/v2@latest release --snapshot --clean --skip=sign,sbom
+
+  cross:
+    desc: Cross-compile for every release target (quick sanity check)
+    cmds:
+      - for: { matrix: { OS: [linux, darwin, windows], ARCH: [amd64, arm64] } }
+        cmd: GOOS={{.ITEM.OS}} GOARCH={{.ITEM.ARCH}} go build -o /dev/null ./cmd/apic

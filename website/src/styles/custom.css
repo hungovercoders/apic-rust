@@ -1,0 +1,98 @@
+/* apic's purple-to-pink identity on Starlight's palette. */
+:root {
+	--sl-color-accent-low: #2b1f5c;
+	--sl-color-accent: #7c5cff;
+	--sl-color-accent-high: #c9bbff;
+	--apic-gradient: linear-gradient(100deg, #7c5cff, #ff5ca8);
+}
+
+:root[data-theme='light'] {
+	--sl-color-accent-low: #e6dfff;
+	--sl-color-accent: #5c3dff;
+	--sl-color-accent-high: #2b1f5c;
+}
+
+/* The landing page tagline. */
+.hero h1 {
+	background: var(--apic-gradient);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+/* The terminal recordings are SVGs with their own width; keep them whole. */
+.sl-markdown-content img[src$='.svg'] {
+	max-width: 100%;
+	border-radius: 10px;
+}
+
+/* On a phone a 911px recording shrunk to fit is a dark rectangle of 5px
+   text. Keep it at full size and let the reader swipe across it instead:
+   the paragraph around the image (`.recording`, which
+   plugins/rehype-recordings.mjs marks and makes focusable) scrolls. */
+@media (max-width: 50rem) {
+	.sl-markdown-content .recording {
+		overflow-x: auto;
+	}
+
+	.sl-markdown-content .recording img {
+		max-width: none;
+	}
+}
+
+.sl-markdown-content .recording:focus-visible {
+	outline: 2px solid var(--sl-color-accent);
+	outline-offset: 2px;
+}
+
+/* Collapsible blocks (lesson solutions and episode scripts). */
+.sl-markdown-content details {
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.5rem;
+	padding: 0.75rem 1rem;
+}
+
+.sl-markdown-content details > summary {
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.sl-markdown-content details[open] > summary {
+	margin-bottom: 0.75rem;
+}
+
+/* On a phone the 400px logo fills the first screen and pushes the tagline
+   and the buttons below the fold; the header already shows the logo, so the
+   hero leads with the words there instead. */
+@media (max-width: 50rem) {
+	.hero > img {
+		display: none;
+	}
+}
+
+/* Starlight hides the header's theme picker below 50rem and repeats it in
+   the mobile menu's footer, but a page with no sidebar (the landing page,
+   template: splash) has no mobile menu, so on a phone the home page offered
+   no way to choose dark or light mode. Keep the picker in the header at
+   every width. The GitHub icon stays out of the narrow header: the hero and
+   the mobile menu already link there. */
+@media (max-width: 49.999rem) {
+	.header .right-group {
+		display: flex;
+	}
+
+	.header .right-group .social-icons {
+		display: none;
+	}
+
+	/* Pack the search button and the picker on the right, as on a desktop. */
+	.header .title-wrapper {
+		margin-inline-end: auto;
+	}
+
+	/* Starlight sizes the picker for the longest translated label; the English
+	   ones need less, and on a 320px screen the spare width clipped the title. */
+	.header .right-group starlight-theme-select select {
+		width: calc(5em + 1rem);
+	}
+}

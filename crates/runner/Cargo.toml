@@ -1,0 +1,13 @@
+[package]
+name = "apic-runner"
+description = "apic: the runner package"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+
+[dev-dependencies]
