@@ -13,9 +13,12 @@ use crate::shared::{plural, read_text, stat, write_file};
 use crate::spec::{CommandSpec, FlagSpec};
 
 pub(crate) fn spec() -> CommandSpec {
-    CommandSpec::new("fmt [path...]", "Rewrite .http files in their canonical form")
-        .long(
-            r#"fmt rewrites request files in place: one blank line between blocks,
+    CommandSpec::new(
+        "fmt [path...]",
+        "Rewrite .http files in their canonical form",
+    )
+    .long(
+        r#"fmt rewrites request files in place: one blank line between blocks,
 directives in a fixed order (name, description, disabled, step, auth, ref,
 forceRef, sleep, retry, timeout, no-redirect, no-session, no-cookies,
 assert, capture, then the rest as written), header names in canonical case, query continuations
@@ -28,24 +31,24 @@ Without paths every .http and .rest file of the project is formatted. A
 path may be a file or a directory, or file.http#name (or file.http#3) to
 format that one request and leave the rest of the file as written. "-"
 reads stdin and writes the result to stdout, which is what editors use."#,
-        )
-        .example(
-            "  apic fmt
+    )
+    .example(
+        "  apic fmt
   apic fmt users.http auth.http
   apic fmt users.http#get-user   # one request; the rest of the file untouched
   apic fmt --check          # exit 1 and list the files that would change (CI)
   apic fmt --diff           # show what would change
   apic fmt - < users.http",
-        )
-        .flag(FlagSpec::bool(
-            "check",
-            "do not write; list the files that would change and exit 1 if any",
-        ))
-        .flag(FlagSpec::bool(
-            "diff",
-            "do not write; print a unified diff of what would change and exit 1 if any",
-        ))
-        .runs(run)
+    )
+    .flag(FlagSpec::bool(
+        "check",
+        "do not write; list the files that would change and exit 1 if any",
+    ))
+    .flag(FlagSpec::bool(
+        "diff",
+        "do not write; print a unified diff of what would change and exit 1 if any",
+    ))
+    .runs(run)
 }
 
 fn run(a: &mut App, inv: &Invocation) -> CliResult {
@@ -72,6 +75,19 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
     for target in &files {
         let file = &target.path;
         let data = read_text(file).map_err(|e| fail(Code::File, e))?;
+        if data.contains('\u{fffd}')
+            && std::fs::read(file).is_ok_and(|raw| std::str::from_utf8(&raw).is_err())
+        {
+            // Formatting works on text: rewriting this file would lose
+            // the bytes that are not.
+            return Err(fail(
+                Code::File,
+                format!(
+                    "{}: not valid UTF-8, so it is left as it is",
+                    a.fmt_rel(file)
+                ),
+            ));
+        }
         let mut shown = a.fmt_rel(file);
         let formatted = if target.request.is_empty() {
             apic_httpfile::format(&data)
@@ -127,7 +143,11 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
             diff: if diff { diffs } else { BTreeMap::new() },
         })?;
     } else if changed.is_empty() {
-        wln!(a.stdout, "{} already formatted", plural(files.len(), "file"));
+        wln!(
+            a.stdout,
+            "{} already formatted",
+            plural(files.len(), "file")
+        );
     }
     if (check || diff) && !changed.is_empty() {
         return Err(CliError::exit(apic_runner::EXIT_ASSERT));
@@ -138,7 +158,8 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
 /// Rewrites a file in place, keeping its mode.
 fn write_formatted(file: &str, formatted: &str) -> CliResult {
     let info = stat(file).map_err(|e| fail(Code::File, e))?;
-    write_file(file, formatted.as_bytes(), crate::shared::mode_of(&info)).map_err(|e| fail(Code::File, e))
+    write_file(file, formatted.as_bytes(), crate::shared::mode_of(&info))
+        .map_err(|e| fail(Code::File, e))
 }
 
 /// A file to format, and the one request in it when the argument was
@@ -156,11 +177,15 @@ impl App {
     fn fmt_targets(&self, args: &[String]) -> Result<Vec<FmtTarget>, CliError> {
         if args.is_empty() {
             let p = self.load_project()?;
-            let mut files: Vec<String> = p.files.iter().map(|f| fp::join(&p.root, &f.path)).collect();
+            let mut files: Vec<String> =
+                p.files.iter().map(|f| fp::join(&p.root, &f.path)).collect();
             files.sort();
             return Ok(files
                 .into_iter()
-                .map(|path| FmtTarget { path, request: String::new() })
+                .map(|path| FmtTarget {
+                    path,
+                    request: String::new(),
+                })
                 .collect());
         }
         let abs = |p: &str| {
@@ -196,8 +221,12 @@ impl App {
                 targets.push(FmtTarget { path, request });
                 continue;
             }
-            let found = apic_project::discover(&path).map_err(|e| fail(Code::File, e.to_string()))?;
-            targets.extend(found.into_iter().map(|path| FmtTarget { path, request: String::new() }));
+            let found =
+                apic_project::discover(&path).map_err(|e| fail(Code::File, e.to_string()))?;
+            targets.extend(found.into_iter().map(|path| FmtTarget {
+                path,
+                request: String::new(),
+            }));
         }
         Ok(targets)
     }
@@ -261,14 +290,23 @@ fn diff_ops(al: &[String], bl: &[String]) -> Vec<DiffOp> {
     let (mut i, mut j) = (0, 0);
     while i < n || j < m {
         if i < n && j < m && al[i] == bl[j] {
-            ops.push(DiffOp { kind: ' ', text: al[i].clone() });
+            ops.push(DiffOp {
+                kind: ' ',
+                text: al[i].clone(),
+            });
             i += 1;
             j += 1;
         } else if i < n && (j >= m || lcs[i + 1][j] >= lcs[i][j + 1]) {
-            ops.push(DiffOp { kind: '-', text: al[i].clone() });
+            ops.push(DiffOp {
+                kind: '-',
+                text: al[i].clone(),
+            });
             i += 1;
         } else {
-            ops.push(DiffOp { kind: '+', text: bl[j].clone() });
+            ops.push(DiffOp {
+                kind: '+',
+                text: bl[j].clone(),
+            });
             j += 1;
         }
     }
@@ -345,7 +383,8 @@ impl HunkWriter<'_> {
         let (mut a_seen, mut b_seen) = (a_start, b_start);
         for o in &self.ops[start..end] {
             self.out.push(o.kind);
-            self.out.push_str(o.text.strip_suffix(NO_NEWLINE).unwrap_or(&o.text));
+            self.out
+                .push_str(o.text.strip_suffix(NO_NEWLINE).unwrap_or(&o.text));
             self.out.push('\n');
             if o.kind != '+' {
                 a_seen += 1;
@@ -403,7 +442,10 @@ fn unknown_in_file(shown: &str, name: &str, data: &str) -> CliError {
     if closest.is_empty() {
         return fail(
             Code::UnknownRequest,
-            format!("{shown}: no request named {} (apic list shows the names)", quote(name)),
+            format!(
+                "{shown}: no request named {} (apic list shows the names)",
+                quote(name)
+            ),
         );
     }
     let mut ue = apic_runner::usage(

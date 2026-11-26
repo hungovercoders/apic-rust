@@ -43,6 +43,7 @@ pub fn signal_context() -> SignalGuard {
 
 /// Ends the process as a write to a closed pipe does when nothing
 /// handles the signal.
+#[cfg(unix)]
 pub(crate) fn die_of_broken_pipe() -> ! {
     imp::die_of_broken_pipe()
 }
@@ -61,10 +62,10 @@ mod imp {
 
     /// The handler does the one thing a handler safely can: it writes a
     /// byte for the watcher thread to read.
-    extern "C" fn on_signal(_sig: libc::c_int) {
+    extern "C" fn on_signal(sig: libc::c_int) {
         let fd = PIPE_WRITE.load(Ordering::Relaxed);
         if fd >= 0 {
-            let byte = 1u8;
+            let byte = if sig == libc::SIGTERM { b't' } else { b'i' };
             // SAFETY: write(2) is async-signal-safe and the buffer is one
             // live byte on this stack.
             unsafe {
@@ -74,7 +75,9 @@ mod imp {
     }
 
     pub fn install(token: CancelToken) {
-        let _guard = INSTALL.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let _guard = INSTALL
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         let mut fds = [0 as libc::c_int; 2];
         // SAFETY: pipe(2) fills the two descriptors of the array it is given.
         if unsafe { libc::pipe(fds.as_mut_ptr()) } != 0 {
@@ -102,7 +105,9 @@ mod imp {
             let got = loop {
                 // SAFETY: read(2) into one live byte on this stack.
                 let n = unsafe { libc::read(read_fd, std::ptr::addr_of_mut!(byte).cast(), 1) };
-                if n < 0 && std::io::Error::last_os_error().kind() == std::io::ErrorKind::Interrupted {
+                if n < 0
+                    && std::io::Error::last_os_error().kind() == std::io::ErrorKind::Interrupted
+                {
                     continue;
                 }
                 break n;
@@ -114,7 +119,11 @@ mod imp {
             if got == 1 {
                 // The first signal is taken: the next one is the system's.
                 restore();
-                token.cancel();
+                token.cancel_with(if byte == b't' {
+                    "terminated signal received"
+                } else {
+                    "interrupt signal received"
+                });
             }
         });
     }
@@ -160,7 +169,10 @@ mod imp {
 
     #[link(name = "kernel32")]
     extern "system" {
-        fn SetConsoleCtrlHandler(handler: Option<unsafe extern "system" fn(u32) -> i32>, add: i32) -> i32;
+        fn SetConsoleCtrlHandler(
+            handler: Option<unsafe extern "system" fn(u32) -> i32>,
+            add: i32,
+        ) -> i32;
     }
 
     static TOKEN: Mutex<Option<CancelToken>> = Mutex::new(None);
@@ -168,14 +180,17 @@ mod imp {
     /// Runs on a thread the console starts, so it may take locks. It
     /// claims the first event and leaves the next to the default handler.
     unsafe extern "system" fn on_ctrl(_event: u32) -> i32 {
-        let token = TOKEN.lock().unwrap_or_else(std::sync::PoisonError::into_inner).take();
+        let token = TOKEN
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .take();
         match token {
             Some(token) => {
                 // SAFETY: removes the handler this module registered.
                 unsafe {
                     SetConsoleCtrlHandler(Some(on_ctrl), 0);
                 }
-                token.cancel();
+                token.cancel_with("interrupt signal received");
                 1
             }
             None => 0,
@@ -183,7 +198,9 @@ mod imp {
     }
 
     pub fn install(token: CancelToken) {
-        let mut slot = TOKEN.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let mut slot = TOKEN
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         let fresh = slot.is_none();
         *slot = Some(token);
         if fresh {
@@ -195,17 +212,16 @@ mod imp {
     }
 
     pub fn restore() {
-        let had = TOKEN.lock().unwrap_or_else(std::sync::PoisonError::into_inner).take();
+        let had = TOKEN
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .take();
         if had.is_some() {
             // SAFETY: removes the handler this module registered.
             unsafe {
                 SetConsoleCtrlHandler(Some(on_ctrl), 0);
             }
         }
-    }
-
-    pub fn die_of_broken_pipe() -> ! {
-        std::process::exit(1)
     }
 }
 
@@ -216,10 +232,6 @@ mod imp {
     pub fn install(_token: CancelToken) {}
 
     pub fn restore() {}
-
-    pub fn die_of_broken_pipe() -> ! {
-        std::process::exit(1)
-    }
 }
 
 /// Sends this process an interrupt, for the test of the handler.

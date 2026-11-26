@@ -41,7 +41,17 @@ fn run_data() {
     let rows = join(dir, "rows.csv");
     must_write(&rows, "id,note\n1,first\n2,second\n3,third\n");
     let args = |extra: &[&str]| {
-        let mut all = vec!["run", "echo", "-C", dir, "--env", "dev", "--no-color", "--data", rows.as_str()];
+        let mut all = vec![
+            "run",
+            "echo",
+            "-C",
+            dir,
+            "--env",
+            "dev",
+            "--no-color",
+            "--data",
+            rows.as_str(),
+        ];
         all.extend_from_slice(extra);
         execute(&all)
     };
@@ -63,7 +73,10 @@ fn run_data() {
         let it = &o["iteration"];
         let body = &o["response"]["body"];
         assert!(
-            it["index"] == i + 1 && it["total"] == 3 && it["row"]["id"] == body["id"] && body["prev"] == "none",
+            it["index"] == i + 1
+                && it["total"] == 3
+                && it["row"]["id"] == body["id"]
+                && body["prev"] == "none",
             "iteration {}: {it} {body}",
             i + 1
         );
@@ -75,7 +88,10 @@ fn run_data() {
     // Shared: each iteration sees the one before.
     let (code, out, _) = args(&["--json", "--data-share-session"]);
     let objs = json_lines(&out);
-    assert!(code == 0 && objs[1]["response"]["body"]["prev"] == "1", "shared: {out}");
+    assert!(
+        code == 0 && objs[1]["response"]["body"]["prev"] == "1",
+        "shared: {out}"
+    );
     assert!(
         std::path::Path::new(&join(dir, ".apic/session.json")).exists(),
         "a shared session is written as usual"
@@ -85,7 +101,9 @@ fn run_data() {
     must_write(&rows, "id\n1\nbad\n3\n");
     let (code, out, _) = args(&[]);
     assert!(
-        code == 1 && !out.contains("iteration 3/3") && out.contains("2 of 3 iterations: 1 failed, 1 passed"),
+        code == 1
+            && !out.contains("iteration 3/3")
+            && out.contains("2 of 3 iterations: 1 failed, 1 passed"),
         "stop: code={code} {out}"
     );
     let (code, out, _) = args(&["--keep-going"]);
@@ -98,7 +116,9 @@ fn run_data() {
     let (code, stdout, stderr) = execute_with(
         &CancelToken::new(),
         Some(r#"[{"id": 42}]"#),
-        &["run", "echo", "-C", dir, "--env", "dev", "--data", "-", "--json", "--redact"],
+        &[
+            "run", "echo", "-C", dir, "--env", "dev", "--data", "-", "--json", "--redact",
+        ],
     );
     assert_eq!(code, 0, "stdin: {stdout} {stderr}");
     let it = &json_lines(&stdout)[0]["iteration"];
@@ -106,8 +126,14 @@ fn run_data() {
 
     let out_json = join(dir, "out.json");
     let (code, _, errb) = args(&["--output", &out_json]);
-    assert!(code == 2 && errb.contains("--"), "--output: code={code} {errb}");
+    assert!(
+        code == 2 && errb.contains("--"),
+        "--output: code={code} {errb}"
+    );
     let missing = join(dir, "missing.csv");
     let (code, _, errb) = execute(&["run", "echo", "-C", dir, "--data", &missing]);
-    assert!(code == 2 && errb.contains("--"), "missing: code={code} {errb}");
+    assert!(
+        code == 2 && errb.contains("--"),
+        "missing: code={code} {errb}"
+    );
 }

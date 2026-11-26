@@ -14,8 +14,15 @@ pub(crate) fn history_project(keep: usize) -> (TempDir, TestServer) {
     let n = Arc::new(AtomicI32::new(0));
     let srv = server(move |r| {
         let c = n.fetch_add(1, Ordering::SeqCst) + 1;
-        let status = if r.path == "/flaky" && c % 2 == 0 { 503 } else { 200 };
-        Response::json(status, format!(r#"{{"count":{c},"items":["a"],"stable":true}}"#))
+        let status = if r.path == "/flaky" && c % 2 == 0 {
+            503
+        } else {
+            200
+        };
+        Response::json(
+            status,
+            format!(r#"{{"count":{c},"items":["a"],"stable":true}}"#),
+        )
     });
     let dir = tmp();
     let url = srv.url();
@@ -59,7 +66,10 @@ fn history_records_lists_shows_and_diffs() {
     let (out, _, code) = apic(&["-C", dir, "history", "count"]);
     assert_eq!(code, 0);
     assert!(
-        out.contains("count · default · 2 entries") && out.contains("#1") && out.contains("#2") && !out.contains("#3"),
+        out.contains("count · default · 2 entries")
+            && out.contains("#1")
+            && out.contains("#2")
+            && !out.contains("#3"),
         "history keeps the last 2:\n{out}"
     );
 
@@ -82,7 +92,10 @@ fn history_records_lists_shows_and_diffs() {
         "--show 1 is the newest (count 3):\n{out}"
     );
     let stored = must_read(Path::new(dir).join(entries[0]["file"].as_str().unwrap()));
-    assert!(!stored.contains("secret-token"), "the Authorization header was stored unmasked");
+    assert!(
+        !stored.contains("secret-token"),
+        "the Authorization header was stored unmasked"
+    );
 
     let (out, _, _) = apic(&["-C", dir, "history", "diff", "count"]);
     assert!(
@@ -103,7 +116,10 @@ fn history_records_lists_shows_and_diffs() {
     );
 
     let (out, _, _) = apic(&["-C", dir, "history"]);
-    assert!(out.contains("count 2 entries"), "history with no request lists the requests:\n{out}");
+    assert!(
+        out.contains("count 2 entries"),
+        "history with no request lists the requests:\n{out}"
+    );
 }
 
 #[test]
@@ -171,17 +187,32 @@ fn history_errors_and_clear() {
     let dir = tmp.path().to_str().unwrap();
     apic(&["-C", dir, "run", "count"]);
     let cases: [(&[&str], &str); 7] = [
-        (&["history", "diff", "count"], "count has 1 entry in default; a diff needs two"),
-        (&["history", "count", "--show", "4"], "count has 1 history entry, no #4"),
-        (&["history", "diff", "count", "0"], r#""0" is not an entry number"#),
+        (
+            &["history", "diff", "count"],
+            "count has 1 entry in default; a diff needs two",
+        ),
+        (
+            &["history", "count", "--show", "4"],
+            "count has 1 history entry, no #4",
+        ),
+        (
+            &["history", "diff", "count", "0"],
+            r#""0" is not an entry number"#,
+        ),
         (&["history", "nope"], r#"no request named "nope""#),
         (&["history", "--show", "1"], "--show needs a request"),
-        (&["history", "clear", "count", "--all"], "give it no request"),
+        (
+            &["history", "clear", "count", "--all"],
+            "give it no request",
+        ),
         (&["history", "clear"], "pass --all"),
     ];
     for (args, want) in cases {
         let (_, err_out, code) = apic(&[&["-C", dir], args].concat());
-        assert!(code == 2 && err_out.contains(want), "{args:?}: {code} {err_out}, want {want:?}");
+        assert!(
+            code == 2 && err_out.contains(want),
+            "{args:?}: {code} {err_out}, want {want:?}"
+        );
     }
 
     apic(&["-C", dir, "run", "flaky"]);
@@ -191,10 +222,16 @@ fn history_errors_and_clear() {
         "clear count:\n{out}"
     );
     let (out, _, _) = apic(&["-C", dir, "history"]);
-    assert!(!out.contains("count") && out.contains("flaky"), "clearing count should leave flaky:\n{out}");
+    assert!(
+        !out.contains("count") && out.contains("flaky"),
+        "clearing count should leave flaky:\n{out}"
+    );
     // A request that is gone from the files keeps its history until it
     // is cleared.
-    must_write(join(dir, "api.http"), "### Other\n# @name other\nGET http://example.com\n");
+    must_write(
+        join(dir, "api.http"),
+        "### Other\n# @name other\nGET http://example.com\n",
+    );
     let (out, _, code) = apic(&["-C", dir, "history", "flaky"]);
     assert!(
         code == 0 && out.contains("flaky · default · 1 entry"),
@@ -206,20 +243,32 @@ fn history_errors_and_clear() {
         "a bare clear should refuse: {code} {err_out}"
     );
     let (out, _, _) = apic(&["-C", dir, "history", "clear", "--all"]);
-    assert!(out.contains("cleared 1 entry"), "clear the environment:\n{out}");
+    assert!(
+        out.contains("cleared 1 entry"),
+        "clear the environment:\n{out}"
+    );
 }
 
 #[test]
 fn history_clear_scopes() {
     let (tmp, _srv) = history_project(5);
     let dir = tmp.path().to_str().unwrap();
-    must_write(join(dir, "http-client.env.json"), r#"{"dev": {}, "staging": {}}"#);
+    must_write(
+        join(dir, "http-client.env.json"),
+        r#"{"dev": {}, "staging": {}}"#,
+    );
     apic(&["-C", dir, "--env", "dev", "run", "count"]);
     apic(&["-C", dir, "--env", "staging", "run", "count"]);
     let (out, _, _) = apic(&["-C", dir, "--env", "dev", "history", "clear", "--all"]);
-    assert!(out.contains("cleared 1 entry"), "--all clears the environment only:\n{out}");
+    assert!(
+        out.contains("cleared 1 entry"),
+        "--all clears the environment only:\n{out}"
+    );
     let (out, _, _) = apic(&["-C", dir, "--env", "staging", "history"]);
-    assert!(out.contains("count 1 entry"), "staging lost its history:\n{out}");
+    assert!(
+        out.contains("count 1 entry"),
+        "staging lost its history:\n{out}"
+    );
     let (out, _, _) = apic(&["-C", dir, "--json", "history", "clear", "--every-env"]);
     assert!(
         out.contains(r#""cleared": "*""#) && out.contains(r#""entries": 1"#),
@@ -255,7 +304,10 @@ fn history_keeps_requests_that_share_a_name_apart() {
     apic(&["-C", dir, "run", "other.http#count"]);
     apic(&["-C", dir, "run", "other.http#count"]);
     let (out, _, _) = apic(&["-C", dir, "history", "api.http#count"]);
-    assert!(out.contains("api.http#count · default · 1 entry"), "api.http#count:\n{out}");
+    assert!(
+        out.contains("api.http#count · default · 1 entry"),
+        "api.http#count:\n{out}"
+    );
     let (out, _, _) = apic(&["-C", dir, "history", "other.http#count"]);
     assert!(out.contains("2 entries"), "other.http#count:\n{out}");
     let (_, err_out, code) = apic(&["-C", dir, "history", "count"]);
@@ -274,7 +326,10 @@ fn history_holds_the_final_result() {
     let (_, err_out, code) = apic(&["-C", dir, "run", "count", "--output", &out]);
     assert_eq!(code, 0, "run --output: {err_out}");
     let (shown, _, _) = apic(&["-C", dir, "--json", "history", "count", "--show", "1"]);
-    assert!(shown.contains(r#""saved_to""#), "history lacks the --output path:\n{shown}");
+    assert!(
+        shown.contains(r#""saved_to""#),
+        "history lacks the --output path:\n{shown}"
+    );
 }
 
 #[test]
@@ -295,7 +350,10 @@ fn a_history_that_cannot_be_written_is_a_warning() {
         "result = {res}"
     );
     let (text, _, code) = apic(&["-C", dir, "run", "count"]);
-    assert!(code == 0 && text.contains("! history: "), "text output: {code}\n{text}");
+    assert!(
+        code == 0 && text.contains("! history: "),
+        "text output: {code}\n{text}"
+    );
 }
 
 #[test]

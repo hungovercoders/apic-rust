@@ -65,7 +65,10 @@ pub(crate) enum CliError {
 
 impl CliError {
     pub fn exit(code: i32) -> CliError {
-        CliError::Exit { code, msg: String::new() }
+        CliError::Exit {
+            code,
+            msg: String::new(),
+        }
     }
 
     /// Any other failure, as its message.
@@ -198,8 +201,17 @@ Exit codes: 0 ok · 1 assertion or capture failed · 2 usage/parse/missing varia
     ] {
         root = root.subcommand(sub);
     }
-    root.subcommands.sort_by_key(|c| c.name);
+    sort_commands(&mut root);
     root
+}
+
+/// Puts every level of the tree in name order, the order the help and the
+/// reference list commands in.
+fn sort_commands(cmd: &mut CommandSpec) {
+    cmd.subcommands.sort_by_key(|c| c.name);
+    for sub in &mut cmd.subcommands {
+        sort_commands(sub);
+    }
 }
 
 impl App {
@@ -210,7 +222,10 @@ impl App {
             stdout: Output::stdout(),
             stderr: Output::stderr(),
             stdin: Input::Stdin,
-            g: Globals { dir: ".".to_string(), ..Globals::default() },
+            g: Globals {
+                dir: ".".to_string(),
+                ..Globals::default()
+            },
         }
     }
 
@@ -286,7 +301,11 @@ impl App {
         {
             style::set_color_profile(style::Profile::Ascii);
         }
-        let inv = Invocation { cancel: cancel.clone(), args: rest, flags };
+        let inv = Invocation {
+            cancel: cancel.clone(),
+            args: rest,
+            flags,
+        };
         run(self, &inv)
     }
 
@@ -294,7 +313,11 @@ impl App {
         self.g = Globals {
             dir: f.string("dir"),
             // A command with an --env of its own (init) leaves this one unset.
-            env: if own_env { String::new() } else { f.string("env") },
+            env: if own_env {
+                String::new()
+            } else {
+                f.string("env")
+            },
             vars: f.strings("var"),
             json: f.bool("json"),
             no_color: f.bool("no-color"),
@@ -326,7 +349,11 @@ impl App {
             }
             // Hints say <command>, so nothing is escaped for HTML.
             let text = serde_json::to_string(&Wrapper { error: &info }).unwrap_or_default();
-            wln!(self.stderr, "{}", apic_gocompat::escape_line_separators(&text));
+            wln!(
+                self.stderr,
+                "{}",
+                apic_gocompat::escape_line_separators(&text)
+            );
             return;
         }
         let message = err.to_string();
@@ -466,9 +493,16 @@ fn version_spec() -> CommandSpec {
                 a.stdout,
                 "apic {} {}",
                 t.accent.render(&info.version),
-                t.dim.render(&format!("· {} · {} {}/{}", info.commit, info.go, info.os, info.arch))
+                t.dim.render(&format!(
+                    "· {} · {} {}/{}",
+                    info.commit, info.go, info.os, info.arch
+                ))
             );
-            wln!(a.stdout, "{}", t.dim.render("apic is epic · https://apic.sh/"));
+            wln!(
+                a.stdout,
+                "{}",
+                t.dim.render("apic is epic · https://apic.sh/")
+            );
             Ok(())
         })
 }

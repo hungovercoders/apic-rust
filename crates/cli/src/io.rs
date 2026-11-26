@@ -67,11 +67,17 @@ impl Output {
 
 impl Write for Output {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        self.w.lock().unwrap_or_else(PoisonError::into_inner).write(buf)
+        self.w
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .write(buf)
     }
 
     fn flush(&mut self) -> io::Result<()> {
-        self.w.lock().unwrap_or_else(PoisonError::into_inner).flush()
+        self.w
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .flush()
     }
 }
 
@@ -82,18 +88,24 @@ struct Std<W: Write>(W);
 
 impl<W: Write> Write for Std<W> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        match self.0.write(buf) {
-            Err(e) if e.kind() == io::ErrorKind::BrokenPipe => crate::signal::die_of_broken_pipe(),
-            other => other,
-        }
+        gone(self.0.write(buf))
     }
 
     fn flush(&mut self) -> io::Result<()> {
-        match self.0.flush() {
-            Err(e) if e.kind() == io::ErrorKind::BrokenPipe => crate::signal::die_of_broken_pipe(),
-            other => other,
+        gone(self.0.flush())
+    }
+}
+
+/// Ends the process when a write found the pipe closed, where the system
+/// has a signal for that; passes the result on otherwise.
+fn gone<T>(result: io::Result<T>) -> io::Result<T> {
+    #[cfg(unix)]
+    if let Err(e) = &result {
+        if e.kind() == io::ErrorKind::BrokenPipe {
+            crate::signal::die_of_broken_pipe();
         }
     }
+    result
 }
 
 /// A buffer to capture what a command prints: hand `output()` to an
@@ -113,7 +125,10 @@ impl Buffer {
 
     /// Everything written so far.
     pub fn bytes(&self) -> Vec<u8> {
-        self.0.lock().unwrap_or_else(PoisonError::into_inner).clone()
+        self.0
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .clone()
     }
 
     /// Everything written so far, as text.
@@ -124,7 +139,10 @@ impl Buffer {
 
 impl Write for Buffer {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        self.0.lock().unwrap_or_else(PoisonError::into_inner).extend_from_slice(buf);
+        self.0
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .extend_from_slice(buf);
         Ok(buf.len())
     }
 

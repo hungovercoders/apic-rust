@@ -84,9 +84,12 @@ You will need to start a new shell for this setup to take effect.
         .args(ArgRule::None)
         .flag(no_descriptions())
         .runs(|a, _| generate(a, Shell::Fish));
-    let powershell = CommandSpec::new("powershell", "Generate the autocompletion script for powershell")
-        .long(
-            "Generate the autocompletion script for powershell.
+    let powershell = CommandSpec::new(
+        "powershell",
+        "Generate the autocompletion script for powershell",
+    )
+    .long(
+        "Generate the autocompletion script for powershell.
 
 To load completions in your current shell session:
 
@@ -95,10 +98,10 @@ To load completions in your current shell session:
 To load completions for every new session, add the output of the above command
 to your powershell profile.
 ",
-        )
-        .args(ArgRule::None)
-        .flag(no_descriptions())
-        .runs(|a, _| generate(a, Shell::PowerShell));
+    )
+    .args(ArgRule::None)
+    .flag(no_descriptions())
+    .runs(|a, _| generate(a, Shell::PowerShell));
     let mut cmd = CommandSpec::new(
         "completion",
         "Generate the autocompletion script for the specified shell",
@@ -126,7 +129,6 @@ fn generate(a: &mut App, shell: Shell) -> CliResult {
         .map_err(CliError::other)
 }
 
-
 /// The tree as `clap` commands: each command with its own flags, the
 /// persistent ones global, and its arguments as one list.
 pub(crate) fn clap_tree(spec: &CommandSpec) -> Command {
@@ -151,9 +153,14 @@ pub(crate) fn clap_tree(spec: &CommandSpec) -> Command {
         );
     }
     if spec.args != ArgRule::None {
-        let mut arg = Arg::new("args").num_args(0..).action(ArgAction::Append).hide(true);
+        let mut arg = Arg::new("args")
+            .num_args(0..)
+            .action(ArgAction::Append)
+            .hide(true);
         if !spec.valid_args.is_empty() {
-            arg = arg.value_parser(clap::builder::PossibleValuesParser::new(spec.valid_args.clone()));
+            arg = arg.value_parser(clap::builder::PossibleValuesParser::new(
+                spec.valid_args.clone(),
+            ));
         }
         cmd = cmd.arg(arg);
     }

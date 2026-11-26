@@ -10,8 +10,14 @@ const PING_FEATURE: &str = "Feature: p\n  Scenario: s\n    When I run \"ping\"\n
 fn test_command_exit_codes() {
     let tmp = tmp();
     let dir = s(&tmp);
-    must_write(join(&dir, "api.http"), "### a\n# @name ping\nGET {{baseUrl}}/ping\n");
-    must_write(join(&dir, "http-client.env.json"), r#"{"dev":{"baseUrl":"http://127.0.0.1:1"}}"#);
+    must_write(
+        join(&dir, "api.http"),
+        "### a\n# @name ping\nGET {{baseUrl}}/ping\n",
+    );
+    must_write(
+        join(&dir, "http-client.env.json"),
+        r#"{"dev":{"baseUrl":"http://127.0.0.1:1"}}"#,
+    );
     must_write(join(&dir, "features/p.feature"), PING_FEATURE);
 
     let (code, _, stderr) = execute(&["test", "-C", &dir, "--env", "dev", "--no-color"]);
@@ -38,11 +44,27 @@ fn test_command_exit_codes() {
         code == 2 && stderr.contains("would overwrite"),
         "output onto a feature: code={code} stderr={stderr}"
     );
-    assert!(must_read(&feature).contains("Feature: p"), "feature file was damaged");
+    assert!(
+        must_read(&feature).contains("Feature: p"),
+        "feature file was damaged"
+    );
     // Environment files, the project config and the session are inputs
     // too.
-    for name in ["http-client.env.json", "apic.yaml", ".env", ".apic/session.json"] {
-        let (code, _, stderr) = execute(&["test", "-C", &dir, "--env", "dev", "--output", &join(&dir, name)]);
+    for name in [
+        "http-client.env.json",
+        "apic.yaml",
+        ".env",
+        ".apic/session.json",
+    ] {
+        let (code, _, stderr) = execute(&[
+            "test",
+            "-C",
+            &dir,
+            "--env",
+            "dev",
+            "--output",
+            &join(&dir, name),
+        ]);
         assert!(
             code == 2 && stderr.contains("would overwrite"),
             "output onto {name}: code={code} stderr={stderr}"
@@ -55,7 +77,13 @@ fn test_command_exit_codes() {
         "### b\n# @name post\nPOST {{baseUrl}}/p\nContent-Type: application/json\n\n< ./payload.json\n",
     );
     let (code, _, stderr) = execute(&[
-        "test", "-C", &dir, "--env", "dev", "--output", &join(&dir, "payload.json"),
+        "test",
+        "-C",
+        &dir,
+        "--env",
+        "dev",
+        "--output",
+        &join(&dir, "payload.json"),
     ]);
     assert!(
         code == 2 && stderr.contains("would overwrite"),
@@ -70,7 +98,14 @@ fn test_command_exit_codes() {
     let linked = join(&dir, "linked.xml");
     if std::fs::hard_link(join(&dir, ".hidden/h.feature"), &linked).is_ok() {
         let (code, _, stderr) = execute(&[
-            "test", "-C", &dir, "--env", "dev", "--output", &linked, ".hidden/h.feature",
+            "test",
+            "-C",
+            &dir,
+            "--env",
+            "dev",
+            "--output",
+            &linked,
+            ".hidden/h.feature",
         ]);
         assert!(
             code == 2 && stderr.contains("would overwrite"),
@@ -86,13 +121,17 @@ fn test_command_exit_codes() {
         code == 3 && !stderr.contains("would overwrite"),
         "output outside the project: code={code} stderr={stderr}"
     );
-    assert!(Path::new(&outside).exists(), "report outside the project must be written");
+    assert!(
+        Path::new(&outside).exists(),
+        "report outside the project must be written"
+    );
     // A symlink alias of a feature is refused too.
     #[cfg(unix)]
     {
         let alias = join(&dir, "report.xml");
         if std::os::unix::fs::symlink(&feature, &alias).is_ok() {
-            let (code, _, stderr) = execute(&["test", "-C", &dir, "--env", "dev", "--output", &alias]);
+            let (code, _, stderr) =
+                execute(&["test", "-C", &dir, "--env", "dev", "--output", &alias]);
             assert!(
                 code == 2 && stderr.contains("would overwrite"),
                 "symlinked output: code={code} stderr={stderr}"
@@ -101,7 +140,13 @@ fn test_command_exit_codes() {
         }
     }
     let (code, _, stderr) = execute(&[
-        "test", "-C", &dir, "--env", "dev", "--use-session", "--no-session",
+        "test",
+        "-C",
+        &dir,
+        "--env",
+        "dev",
+        "--use-session",
+        "--no-session",
     ]);
     assert!(
         code == 2 && stderr.contains("cannot be combined"),
@@ -110,9 +155,14 @@ fn test_command_exit_codes() {
     // A report written to a file never contains colour escapes, whatever
     // the flags.
     let pretty = join(&dir, "pretty.txt");
-    let _ = execute(&["test", "-C", &dir, "--env", "dev", "--format", "pretty", "--output", &pretty]);
+    let _ = execute(&[
+        "test", "-C", &dir, "--env", "dev", "--format", "pretty", "--output", &pretty,
+    ]);
     let data = must_read(&pretty);
-    assert!(!data.is_empty() && !data.contains("\x1b["), "file report must be plain text: {data:?}");
+    assert!(
+        !data.is_empty() && !data.contains("\x1b["),
+        "file report must be plain text: {data:?}"
+    );
     let report = join(&dir, "report.xml");
     let (code, _, _) = execute(&["test", "-C", &dir, "--env", "nope", "--output", &report]);
     assert_eq!(code, 2);
@@ -126,8 +176,14 @@ fn test_command_exit_codes() {
 fn lazy_file_reports_write_errors_on_close() {
     let dir = tmp();
     let mut lf = LazyFile::new(&join(dir.path(), "missing/report.xml"));
-    assert!(lf.write(b"x").is_err(), "writing into a missing directory must fail");
-    assert!(lf.close().is_err(), "close must report the earlier write failure");
+    assert!(
+        lf.write(b"x").is_err(),
+        "writing into a missing directory must fail"
+    );
+    assert!(
+        lf.close().is_err(),
+        "close must report the earlier write failure"
+    );
     let mut ok = LazyFile::new(&join(dir.path(), "report.xml"));
     ok.write_all(b"x").unwrap();
     ok.close().unwrap();
@@ -139,16 +195,28 @@ fn output_onto_request_file_outside_root_is_refused() {
     let dir = join(base.path(), "proj");
     let api = join(base.path(), "api");
     must_write(join(&dir, "apic.yaml"), "dir: ../api\n");
-    must_write(join(&dir, "http-client.env.json"), r#"{"dev":{"baseUrl":"http://127.0.0.1:1"}}"#);
-    must_write(join(&api, "x.http"), "### a\n# @name ping\nGET {{baseUrl}}/ping\n");
+    must_write(
+        join(&dir, "http-client.env.json"),
+        r#"{"dev":{"baseUrl":"http://127.0.0.1:1"}}"#,
+    );
+    must_write(
+        join(&api, "x.http"),
+        "### a\n# @name ping\nGET {{baseUrl}}/ping\n",
+    );
     must_write(join(&dir, "features/p.feature"), PING_FEATURE);
     let alias = join(&dir, "report.xml");
     if std::fs::hard_link(join(&api, "x.http"), &alias).is_err() {
         return; // hard links not supported here
     }
     let (code, _, errb) = execute(&["test", "-C", &dir, "--env", "dev", "--output", &alias]);
-    assert!(code == 2 && errb.contains("would overwrite"), "code={code} stderr={errb}");
-    assert!(must_read(join(&api, "x.http")).contains("@name ping"), "request file was damaged");
+    assert!(
+        code == 2 && errb.contains("would overwrite"),
+        "code={code} stderr={errb}"
+    );
+    assert!(
+        must_read(join(&api, "x.http")).contains("@name ping"),
+        "request file was damaged"
+    );
 }
 
 #[test]
@@ -165,8 +233,14 @@ fn output_aliasing_project_config_from_outside_is_refused() {
     let tmp = tmp();
     let dir = s(&tmp);
     must_write(join(&dir, "apic.yaml"), "env: dev\n");
-    must_write(join(&dir, "api.http"), "### a\n# @name ping\nGET {{baseUrl}}/ping\n");
-    must_write(join(&dir, "http-client.env.json"), r#"{"dev":{"baseUrl":"http://127.0.0.1:1"}}"#);
+    must_write(
+        join(&dir, "api.http"),
+        "### a\n# @name ping\nGET {{baseUrl}}/ping\n",
+    );
+    must_write(
+        join(&dir, "http-client.env.json"),
+        r#"{"dev":{"baseUrl":"http://127.0.0.1:1"}}"#,
+    );
     must_write(join(&dir, "features/p.feature"), PING_FEATURE);
     let elsewhere = super::tmp();
     let alias = join(elsewhere.path(), "report.xml");
@@ -174,6 +248,12 @@ fn output_aliasing_project_config_from_outside_is_refused() {
         return; // hard links not supported here
     }
     let (code, _, errb) = execute(&["test", "-C", &dir, "--output", &alias]);
-    assert!(code == 2 && errb.contains("would overwrite"), "code={code} stderr={errb}");
-    assert!(must_read(join(&dir, "apic.yaml")).contains("env: dev"), "apic.yaml was damaged");
+    assert!(
+        code == 2 && errb.contains("would overwrite"),
+        "code={code} stderr={errb}"
+    );
+    assert!(
+        must_read(join(&dir, "apic.yaml")).contains("env: dev"),
+        "apic.yaml was damaged"
+    );
 }

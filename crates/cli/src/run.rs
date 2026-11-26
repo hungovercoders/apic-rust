@@ -106,8 +106,12 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
         body_limit: inv.flags.string("body-limit"),
     };
     let (extra_asserts, extra_captures) = ad_hoc(&f.asserts, &f.captures)?;
-    let limit = parse_size(&f.body_limit)
-        .map_err(|e| fail(Code::Flag, format!("--body-limit {}: {e}", quote(&f.body_limit))))?;
+    let limit = parse_size(&f.body_limit).map_err(|e| {
+        fail(
+            Code::Flag,
+            format!("--body-limit {}: {e}", quote(&f.body_limit)),
+        )
+    })?;
     let p = a.load_project()?;
     // A data run records no history: a response per row would push out
     // what the history is for.
@@ -297,7 +301,12 @@ impl RunJob {
                     // The error is printed once the command ends; show
                     // what ran first and the request line for context.
                     apic_output::deps(&mut out, &res, j.f.verbose);
-                    wln!(out, "{} {}", res.request.method, res.request.display_url(res.redact));
+                    wln!(
+                        out,
+                        "{} {}",
+                        res.request.method,
+                        res.request.display_url(res.redact)
+                    );
                 } else {
                     apic_output::human(&mut out, &res, j.f.verbose);
                 }
@@ -354,7 +363,11 @@ impl RunJob {
                     break;
                 }
             };
-            let it = Iteration { index: i + 1, total: self.rows.len(), row: row.values.clone() };
+            let it = Iteration {
+                index: i + 1,
+                total: self.rows.len(),
+                row: row.values.clone(),
+            };
             {
                 let mut state = self.lock();
                 state.iteration = Some(it.clone());
@@ -394,7 +407,11 @@ impl RunJob {
             wln!(
                 self.stdout,
                 "\n{} {line}",
-                t.bold.render(&format!("{} of {} iterations:", passed + failed, self.rows.len()))
+                t.bold.render(&format!(
+                    "{} of {} iterations:",
+                    passed + failed,
+                    self.rows.len()
+                ))
             );
         }
         (all, stopped.or(first_err.map(CliError::from)))
@@ -439,7 +456,10 @@ impl RunJob {
             let outcome = describe_outcome(run_err);
             fail(
                 Code::File,
-                format!("write report {}: {e} (run result: {outcome})", self.f.report),
+                format!(
+                    "write report {}: {e} (run result: {outcome})",
+                    self.f.report
+                ),
             )
         })
     }
@@ -455,7 +475,10 @@ fn all_ok(results: &[apic_runner::Result]) -> bool {
 /// parses, the selector is one apic knows, the name is one a directive
 /// could have), so a typo is a flag error naming the flag before anything
 /// is sent, not a failure after a request that may have changed something.
-fn ad_hoc(asserts: &[String], captures: &[String]) -> Result<(Vec<Assert>, Vec<Capture>), CliError> {
+fn ad_hoc(
+    asserts: &[String],
+    captures: &[String],
+) -> Result<(Vec<Assert>, Vec<Capture>), CliError> {
     let mut extra_asserts = Vec::new();
     for raw in asserts {
         let checked = apic_assert::parse(raw)
@@ -463,7 +486,10 @@ fn ad_hoc(asserts: &[String], captures: &[String]) -> Result<(Vec<Assert>, Vec<C
         if let Err(e) = checked {
             return Err(fail(Code::Flag, format!("--assert {}: {e}", quote(raw))));
         }
-        extra_asserts.push(Assert { expr: raw.clone(), ..Assert::default() });
+        extra_asserts.push(Assert {
+            expr: raw.clone(),
+            ..Assert::default()
+        });
     }
     let mut extra_captures = Vec::new();
     for def in captures {
@@ -495,7 +521,13 @@ fn ad_hoc(asserts: &[String], captures: &[String]) -> Result<(Vec<Assert>, Vec<C
 impl App {
     /// Prints each target as it would be sent and sends nothing. Under
     /// --body-only it prints the request body, there being no response.
-    fn dry_run(&self, r: &Runner, reqs: &[Arc<Request>], verbose: bool, body_only: bool) -> CliResult {
+    fn dry_run(
+        &self,
+        r: &Runner,
+        reqs: &[Arc<Request>],
+        verbose: bool,
+        body_only: bool,
+    ) -> CliResult {
         let mut out = self.stdout.clone();
         for (i, req) in reqs.iter().enumerate() {
             let res = r.dry_run(req)?;
@@ -529,7 +561,10 @@ impl App {
         let rows = apic_datafile::read(&data, path)
             .map_err(|e| fail(Code::Data, format!("--data {path}: {e}")))?;
         if rows.is_empty() {
-            return Err(fail(Code::Data, format!("--data {path} has no rows to run")));
+            return Err(fail(
+                Code::Data,
+                format!("--data {path} has no rows to run"),
+            ));
         }
         Ok(rows)
     }

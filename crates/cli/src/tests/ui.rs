@@ -9,7 +9,10 @@ fn ui_refuses_json_and_non_tty() {
     let dir = s(&tmp);
     must_write(join(&dir, "api.http"), "GET http://example.com\n");
     let (code, _, stderr) = execute(&["ui", "--json", "-C", &dir]);
-    assert!(code == 2 && stderr.contains("--json"), "code={code} stderr={stderr}");
+    assert!(
+        code == 2 && stderr.contains("--json"),
+        "code={code} stderr={stderr}"
+    );
     let (code, _, stderr) = execute(&["ui", "-C", &dir]);
     assert!(
         code == 2 && stderr.contains("interactive terminal"),
@@ -24,14 +27,25 @@ fn start_demo_serves_the_example_project() {
     let p = apic_project::load(&root).unwrap();
     assert_eq!(p.files.len(), 4, "demo project should have 4 files");
     let env = must_read(join(&root, "http-client.env.json"));
-    let url = env.split("\"baseUrl\": \"").nth(1).and_then(|rest| rest.split('"').next()).unwrap().trim().to_string();
+    let url = env
+        .split("\"baseUrl\": \"")
+        .nth(1)
+        .and_then(|rest| rest.split('"').next())
+        .unwrap()
+        .trim()
+        .to_string();
     let resp = apic_httpc::Client::new()
         .send(&apic_httpc::Request::get(&format!("{url}/todos")))
         .unwrap();
     assert_eq!(resp.status_code, 401, "demo API should answer");
     demo.stop();
-    assert!(!Path::new(&root).exists(), "stop should remove the temp project");
-    let addr = url.trim_start_matches("http://").replace("localhost", "127.0.0.1");
+    assert!(
+        !Path::new(&root).exists(),
+        "stop should remove the temp project"
+    );
+    let addr = url
+        .trim_start_matches("http://")
+        .replace("localhost", "127.0.0.1");
     assert!(
         std::net::TcpStream::connect(&addr).is_err(),
         "stop should close the listener"
@@ -42,7 +56,14 @@ fn start_demo_serves_the_example_project() {
 fn init_scaffolds_a_valid_project() {
     let tmp = tmp();
     let dir = s(&tmp);
-    let (code, _, errb) = execute(&["init", &dir, "--base-url", "http://localhost:1", "--env", "test"]);
+    let (code, _, errb) = execute(&[
+        "init",
+        &dir,
+        "--base-url",
+        "http://localhost:1",
+        "--env",
+        "test",
+    ]);
     assert_eq!(code, 0, "stderr={errb}");
     for f in [
         "apic.yaml",
@@ -82,9 +103,18 @@ fn version_json_and_list_filter() {
         "### One\n# @name alpha\nGET http://example.com/a\n\n### Two\n# @name beta\nGET http://example.com/b\n",
     );
     let (code, out, _) = execute(&["list", "bet", "-C", &dir]);
-    assert!(code == 0 && !out.contains("alpha") && out.contains("beta"), "code={code} out={out}");
+    assert!(
+        code == 0 && !out.contains("alpha") && out.contains("beta"),
+        "code={code} out={out}"
+    );
     let (code, out, _) = execute(&["list", "zzz", "-C", &dir, "--json"]);
-    assert!(code == 0 && out.contains(r#""requests": []"#), "code={code} out={out}");
+    assert!(
+        code == 0 && out.contains(r#""requests": []"#),
+        "code={code} out={out}"
+    );
     let (code, out, _) = execute(&["curl", "alpha", "-C", &dir, "--json"]);
-    assert!(code == 0 && out.contains(r#""command": "curl"#), "code={code} out={out}");
+    assert!(
+        code == 0 && out.contains(r#""command": "curl"#),
+        "code={code} out={out}"
+    );
 }

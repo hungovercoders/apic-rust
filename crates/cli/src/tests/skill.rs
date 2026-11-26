@@ -6,21 +6,31 @@ use super::{execute, join, must_read, must_write, s, tmp, ProcessGuard};
 use crate::skill_dirs;
 
 fn repo_skill(name: &str) -> String {
-    let path = format!("{}/../../skills/{name}/SKILL.md", env!("CARGO_MANIFEST_DIR"));
+    let path = format!(
+        "{}/../../skills/{name}/SKILL.md",
+        env!("CARGO_MANIFEST_DIR")
+    );
     must_read(path).replace("\r\n", "\n")
 }
 
 fn strings(v: &Value, key: &str) -> Vec<String> {
     v[key]
         .as_array()
-        .map(|a| a.iter().map(|s| s.as_str().unwrap_or("").to_string()).collect())
+        .map(|a| {
+            a.iter()
+                .map(|s| s.as_str().unwrap_or("").to_string())
+                .collect()
+        })
         .unwrap_or_default()
 }
 
 /// How many files the whole pack holds; an install writes them into each
 /// of the skill directories.
 fn pack_files() -> usize {
-    apic_skills::names().iter().map(|n| apic_skills::paths(n).len()).sum()
+    apic_skills::names()
+        .iter()
+        .map(|n| apic_skills::paths(n).len())
+        .sum()
 }
 
 /// The skill the binary carries is the one in skills/apic, so an agent
@@ -32,14 +42,25 @@ fn skill_prints_the_embedded_skill() {
         code == 0 && out.starts_with("---\nname: apic\n") && out.contains("## Running requests"),
         "code={code} err={errb}"
     );
-    assert_eq!(out, repo_skill("apic"), "apic skill differs from skills/apic/SKILL.md");
+    assert_eq!(
+        out,
+        repo_skill("apic"),
+        "apic skill differs from skills/apic/SKILL.md"
+    );
     let (code, out, _) = execute(&["--json", "skill"]);
-    let got: Value = serde_json::from_str(&out).unwrap_or_else(|e| panic!("code={code} {e}: {out}"));
+    let got: Value =
+        serde_json::from_str(&out).unwrap_or_else(|e| panic!("code={code} {e}: {out}"));
     assert_eq!(code, 0);
     assert!(
         got["name"] == "apic"
-            && got["files"]["SKILL.md"].as_str().unwrap_or("").starts_with("---")
-            && got["files"]["references/cheatsheet.md"].as_str().unwrap_or("").contains("# apic cheat sheet"),
+            && got["files"]["SKILL.md"]
+                .as_str()
+                .unwrap_or("")
+                .starts_with("---")
+            && got["files"]["references/cheatsheet.md"]
+                .as_str()
+                .unwrap_or("")
+                .contains("# apic cheat sheet"),
         "json: {got}"
     );
     assert_eq!(strings(&got, "skills"), apic_skills::names());
@@ -55,14 +76,22 @@ fn skill_prints_the_named_skill() {
             code == 0 && out.starts_with(&format!("---\nname: {name}\n")),
             "{name}: code={code} err={errb}"
         );
-        assert_eq!(out, repo_skill(name), "apic skill {name} differs from skills/{name}/SKILL.md");
+        assert_eq!(
+            out,
+            repo_skill(name),
+            "apic skill {name} differs from skills/{name}/SKILL.md"
+        );
     }
     let (code, out, errb) = execute(&["--json", "skill", "api-security"]);
-    let got: Value = serde_json::from_str(&out).unwrap_or_else(|e| panic!("code={code} {e} err={errb}: {out}"));
+    let got: Value =
+        serde_json::from_str(&out).unwrap_or_else(|e| panic!("code={code} {e} err={errb}: {out}"));
     assert!(
         code == 0
             && got["name"] == "api-security"
-            && got["files"]["references/checks.md"].as_str().unwrap_or("").contains("## Release checklist"),
+            && got["files"]["references/checks.md"]
+                .as_str()
+                .unwrap_or("")
+                .contains("## Release checklist"),
         "json: name={}",
         got["name"]
     );
@@ -92,13 +121,17 @@ fn skill_install_writes_once_and_reports_unchanged() {
     ] {
         let path = join(&dir, rel);
         assert!(Path::new(&path).exists(), "{rel} not written");
-        assert!(out.contains(&format!("wrote {path}")), "output lacks wrote {path}:\n{out}");
+        assert!(
+            out.contains(&format!("wrote {path}")),
+            "output lacks wrote {path}:\n{out}"
+        );
     }
     // A second install finds the same text and changes nothing; an edited
     // copy is put back, since the text is apic's.
     must_write(join(&dir, ".agents/skills/apic/SKILL.md"), "edited");
     let (code, out, _) = execute(&["--json", "skill", "install", &dir, "--all"]);
-    let got: Value = serde_json::from_str(&out).unwrap_or_else(|e| panic!("code={code} {e}: {out}"));
+    let got: Value =
+        serde_json::from_str(&out).unwrap_or_else(|e| panic!("code={code} {e}: {out}"));
     assert_eq!(code, 0);
     let (written, unchanged) = (strings(&got, "written"), strings(&got, "unchanged"));
     assert!(
@@ -124,16 +157,29 @@ fn skill_install_writes_once_and_reports_unchanged() {
     let got: Value = serde_json::from_str(&out).unwrap();
     let written = strings(&got, "written");
     assert!(
-        written.len() == apic_skills::paths("apic").len() * dirs && !written.iter().any(|p| p.contains("api-")),
+        written.len() == apic_skills::paths("apic").len() * dirs
+            && !written.iter().any(|p| p.contains("api-")),
         "default install wrote {written:?}"
     );
     let (code, _, errb) = execute(&["skill", "install", &s(&plain), "--all", "--skill", "apic"]);
-    assert!(code == 2 && errb.contains("E203"), "--all --skill: code={code} err={errb}");
+    assert!(
+        code == 2 && errb.contains("E203"),
+        "--all --skill: code={code} err={errb}"
+    );
     // --skill picks part of the pack, a name given twice counts once, and
     // an unknown name is refused before anything is written.
     let some = super::tmp();
     let (code, out, errb) = execute(&[
-        "--json", "skill", "install", &s(&some), "--skill", "apic", "--skill", "api-security", "--skill", "apic",
+        "--json",
+        "skill",
+        "install",
+        &s(&some),
+        "--skill",
+        "apic",
+        "--skill",
+        "api-security",
+        "--skill",
+        "apic",
     ]);
     assert_eq!(code, 0, "--skill: err={errb}");
     let got: Value = serde_json::from_str(&out).unwrap();
@@ -172,7 +218,11 @@ fn skill_install_user_writes_under_home() {
             && written[0] == join(home.path(), ".claude/skills/apic/SKILL.md"),
         "written: {written:?}"
     );
-    assert!(Path::new(&join(home.path(), ".agents/skills/apic/references/cheatsheet.md")).exists());
+    assert!(Path::new(&join(
+        home.path(),
+        ".agents/skills/apic/references/cheatsheet.md"
+    ))
+    .exists());
     assert_eq!(
         std::fs::read_dir(project.path()).unwrap().count(),
         0,
@@ -188,7 +238,10 @@ fn skill_install_user_writes_under_home() {
     ];
     for args in refused {
         let (code, _, errb) = execute(args);
-        assert!(code == 2 && errb.contains("E203"), "{args:?}: code={code} err={errb}");
+        assert!(
+            code == 2 && errb.contains("E203"),
+            "{args:?}: code={code} err={errb}"
+        );
     }
     // A linked ~/.claude is followed to wherever the dotfiles live.
     #[cfg(unix)]
@@ -226,8 +279,14 @@ fn skill_help_names_the_pack() {
     let (_, long, _) = execute(&["skill", "--help"]);
     let (_, install, _) = execute(&["skill", "install", "--help"]);
     for name in apic_skills::names() {
-        assert!(long.contains(&format!("\n  {name}")), "apic skill --help does not list {name}");
-        assert!(install.contains(&name), "apic skill install --help does not name {name}");
+        assert!(
+            long.contains(&format!("\n  {name}")),
+            "apic skill --help does not list {name}"
+        );
+        assert!(
+            install.contains(&name),
+            "apic skill install --help does not name {name}"
+        );
     }
     let (code, _, errb) = execute(&["skill", "instal"]);
     assert!(
@@ -260,7 +319,8 @@ fn init_writes_the_skill_unless_asked_not_to() {
     let edited = join(&dir, ".claude/skills/apic/SKILL.md");
     must_write(&edited, "tailored");
     let (code, out, _) = execute(&["--json", "init", &dir]);
-    let got: Value = serde_json::from_str(&out).unwrap_or_else(|e| panic!("second init: code={code} {e}: {out}"));
+    let got: Value = serde_json::from_str(&out)
+        .unwrap_or_else(|e| panic!("second init: code={code} {e}: {out}"));
     assert_eq!(code, 0);
     assert!(
         strings(&got, "written").is_empty() && strings(&got, "skipped").contains(&edited),
@@ -273,7 +333,11 @@ fn init_writes_the_skill_unless_asked_not_to() {
     );
     let (code, _, errb) = execute(&["init", &dir, "--force"]);
     assert_eq!(code, 0, "--force: err={errb}");
-    assert_ne!(must_read(&edited), "tailored", "--force should replace the edited skill file");
+    assert_ne!(
+        must_read(&edited),
+        "tailored",
+        "--force should replace the edited skill file"
+    );
     let bare = super::tmp();
     let (code, _, errb) = execute(&["init", &s(&bare), "--no-skill"]);
     assert_eq!(code, 0, "err={errb}");
@@ -287,7 +351,10 @@ fn init_writes_the_skill_unless_asked_not_to() {
 #[test]
 fn root_help_points_agents_at_the_skill() {
     let (_, out, _) = execute(&["--help"]);
-    assert!(out.contains("apic skill prints the briefing"), "root help:\n{out}");
+    assert!(
+        out.contains("apic skill prints the briefing"),
+        "root help:\n{out}"
+    );
 }
 
 /// The install stays under the project: a --to that climbs out, or a
@@ -320,7 +387,10 @@ fn skill_install_stays_under_the_project() {
         code == 2 && errb.contains("not a directory"),
         "missing project: code={code} err={errb}"
     );
-    assert!(!Path::new(&typo).exists(), "a missing project directory was created");
+    assert!(
+        !Path::new(&typo).exists(),
+        "a missing project directory was created"
+    );
     #[cfg(unix)]
     {
         let elsewhere = super::tmp();

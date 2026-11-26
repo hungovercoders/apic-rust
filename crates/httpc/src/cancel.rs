@@ -15,6 +15,8 @@ pub struct CancelToken {
 #[derive(Debug, Default)]
 struct Inner {
     cancelled: Mutex<bool>,
+    /// Why the token was cancelled, when the canceller said.
+    cause: Mutex<Option<String>>,
     cond: Condvar,
     notify: Notify,
 }
@@ -35,6 +37,27 @@ impl CancelToken {
             .unwrap_or_else(|e| e.into_inner()) = true;
         self.inner.cond.notify_all();
         self.inner.notify.notify_waiters();
+    }
+
+    /// Cancels with a reason, which a request the token aborts reports in
+    /// place of `context canceled`: `interrupt signal received` for
+    /// Ctrl-C. The first reason given is kept.
+    pub fn cancel_with(&self, cause: &str) {
+        self.inner
+            .cause
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .get_or_insert_with(|| cause.to_string());
+        self.cancel();
+    }
+
+    /// The reason given to [`CancelToken::cancel_with`], if any.
+    pub fn cause(&self) -> Option<String> {
+        self.inner
+            .cause
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone()
     }
 
     /// Reports whether the token has been cancelled.

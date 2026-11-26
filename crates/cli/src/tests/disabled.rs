@@ -24,7 +24,10 @@ fn run_skips_disabled_in_a_flow() {
         "code={code} out={out} err={errb}"
     );
     let (code, out, _) = execute(&[&["run", "api.http", "--json"], &args[..]].concat());
-    assert!(code == 0 && out.contains(r#""skipped":"disabled""#), "json: code={code} out={out}");
+    assert!(
+        code == 0 && out.contains(r#""skipped":"disabled""#),
+        "json: code={code} out={out}"
+    );
     let (code, out, _) = execute(&[&["run", "off"], &args[..]].concat());
     assert!(
         code == 0 && out.contains("200 OK") && !out.contains("skipped"),

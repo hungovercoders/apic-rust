@@ -86,7 +86,10 @@ fn args_minus_first(args: &[String], x: &str, flags: &[&FlagSpec]) -> Vec<String
 /// Finds the command the arguments name: at each level the first
 /// argument that is not a flag picks a subcommand, if it is one. Returns
 /// the commands from the root down and the arguments without their names.
-pub(crate) fn find<'a>(root: &'a CommandSpec, args: &[String]) -> (Vec<&'a CommandSpec>, Vec<String>) {
+pub(crate) fn find<'a>(
+    root: &'a CommandSpec,
+    args: &[String],
+) -> (Vec<&'a CommandSpec>, Vec<String>) {
     let mut chain = vec![root];
     let mut rest = args.to_vec();
     loop {
@@ -109,7 +112,12 @@ pub(crate) fn find<'a>(root: &'a CommandSpec, args: &[String]) -> (Vec<&'a Comma
 /// starting with it.
 pub(crate) fn suggestions_for(cmd: &CommandSpec, typed: &str) -> Vec<String> {
     let typed = typed.to_lowercase();
-    let mut names: Vec<&str> = cmd.subcommands.iter().filter(|c| !c.hidden).map(|c| c.name).collect();
+    let mut names: Vec<&str> = cmd
+        .subcommands
+        .iter()
+        .filter(|c| !c.hidden)
+        .map(|c| c.name)
+        .collect();
     names.sort_unstable();
     names
         .into_iter()
@@ -219,7 +227,9 @@ fn parse_int(s: &str) -> Option<i64> {
 
 fn parse_signed_duration(s: &str) -> Option<Duration> {
     match s.strip_prefix('-') {
-        Some(rest) => apic_gocompat::parse_duration(rest).ok().map(|_| Duration::ZERO),
+        Some(rest) => apic_gocompat::parse_duration(rest)
+            .ok()
+            .map(|_| Duration::ZERO),
         None => apic_gocompat::parse_duration(s).ok(),
     }
 }
@@ -296,7 +306,9 @@ pub(crate) fn parse_flags(chain: &[&CommandSpec], args: &[String]) -> Parsed {
             .get_many::<String>(f.name)
             .map(|v| v.cloned().collect())
             .unwrap_or_default();
-        let bad = values.iter().find_map(|v| check_value(f, v).err().map(|why| (v, why)));
+        let bad = values
+            .iter()
+            .find_map(|v| check_value(f, v).err().map(|why| (v, why)));
         if let Some((value, why)) = bad {
             let shown = match f.short {
                 Some(c) => format!("-{c}, --{}", f.name),
@@ -344,7 +356,9 @@ fn flag_position(args: &[String], f: &FlagSpec) -> usize {
         .position(|a| {
             *a == long
                 || a.starts_with(&format!("{long}="))
-                || short.as_ref().is_some_and(|s| !a.starts_with("--") && a.starts_with(s.as_str()))
+                || short
+                    .as_ref()
+                    .is_some_and(|s| !a.starts_with("--") && a.starts_with(s.as_str()))
         })
         .unwrap_or(args.len())
 }
@@ -370,7 +384,9 @@ fn json_before(args: &[String], end: usize) -> bool {
 /// Words a parse failure the way the reference does.
 fn parse_error(err: &clap::Error, args: &[String], flags: &[&FlagSpec]) -> Parsed {
     match err.kind() {
-        ErrorKind::DisplayHelp | ErrorKind::DisplayHelpOnMissingArgumentOrSubcommand => Parsed::Help,
+        ErrorKind::DisplayHelp | ErrorKind::DisplayHelpOnMissingArgumentOrSubcommand => {
+            Parsed::Help
+        }
         ErrorKind::UnknownArgument => {
             let named = match err.get(ContextKind::InvalidArg) {
                 Some(ContextValue::String(s)) => s.clone(),
@@ -380,7 +396,10 @@ fn parse_error(err: &clap::Error, args: &[String], flags: &[&FlagSpec]) -> Parse
                 let long = long.split('=').next().unwrap_or(long);
                 let pos = args
                     .iter()
-                    .position(|a| a.strip_prefix("--").is_some_and(|a| a.split('=').next() == Some(long)))
+                    .position(|a| {
+                        a.strip_prefix("--")
+                            .is_some_and(|a| a.split('=').next() == Some(long))
+                    })
                     .unwrap_or(args.len());
                 return Parsed::Err(format!("unknown flag: --{long}"), json_before(args, pos));
             }
@@ -420,7 +439,11 @@ fn parse_error(err: &clap::Error, args: &[String], flags: &[&FlagSpec]) -> Parse
         }
         _ => {
             let text = err.to_string();
-            let first = text.lines().next().unwrap_or("").trim_start_matches("error: ");
+            let first = text
+                .lines()
+                .next()
+                .unwrap_or("")
+                .trim_start_matches("error: ");
             Parsed::Err(first.to_string(), json_before(args, args.len()))
         }
     }

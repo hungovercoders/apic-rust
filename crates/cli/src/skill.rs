@@ -110,7 +110,11 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
     let names = apic_skills::names();
     let name = inv.args.first().map_or(apic_skills::NAME, String::as_str);
     let Some(files) = apic_skills::files(name) else {
-        let mut msg = format!("unknown skill {}; the pack has {}", quote(name), names.join(", "));
+        let mut msg = format!(
+            "unknown skill {}; the pack has {}",
+            quote(name),
+            names.join(", ")
+        );
         let sub = App::spec()
             .find("skill")
             .map(|cmd| crate::parse::suggestions_for(cmd, name))
@@ -127,7 +131,11 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
             files: &'a BTreeMap<String, String>,
             skills: &'a [String],
         }
-        return a.write_json(&Out { name, files: &files, skills: &names });
+        return a.write_json(&Out {
+            name,
+            files: &files,
+            skills: &names,
+        });
     }
     let text = files.get("SKILL.md").map_or("", String::as_str);
     a.stdout.write_text(text).map_err(CliError::other)
@@ -138,7 +146,11 @@ fn install(a: &mut App, inv: &Invocation) -> CliResult {
     let (into, only) = (f.strings("to"), f.strings("skill"));
     let (user, all) = (f.bool("user"), f.bool("all"));
     let mut dir = inv.args.first().cloned().unwrap_or_else(|| a.g.dir.clone());
-    let dirs = if into.is_empty() { skill_dirs() } else { into.clone() };
+    let dirs = if into.is_empty() {
+        skill_dirs()
+    } else {
+        into.clone()
+    };
     if user {
         if inv.args.len() == 1 || !into.is_empty() || f.changed("dir") {
             return Err(fail(
@@ -147,7 +159,10 @@ fn install(a: &mut App, inv: &Invocation) -> CliResult {
             ));
         }
         dir = home_dir().map_err(|e| {
-            fail(Code::File, format!("--user: cannot find your home directory: {e}"))
+            fail(
+                Code::File,
+                format!("--user: cannot find your home directory: {e}"),
+            )
         })?;
     }
     let mut names = vec![apic_skills::NAME.to_string()];
@@ -181,7 +196,16 @@ fn install(a: &mut App, inv: &Invocation) -> CliResult {
         }
         names = picked;
     }
-    let done = write_skill(&dir, &dirs, &names, SkillWrite { create: false, overwrite: true, user })?;
+    let done = write_skill(
+        &dir,
+        &dirs,
+        &names,
+        SkillWrite {
+            create: false,
+            overwrite: true,
+            user,
+        },
+    )?;
     a.print_written(&done)
 }
 
@@ -194,7 +218,10 @@ impl App {
                 written: &'a [String],
                 unchanged: &'a [String],
             }
-            return self.write_json(&Out { written: &done.written, unchanged: &done.unchanged });
+            return self.write_json(&Out {
+                written: &done.written,
+                unchanged: &done.unchanged,
+            });
         }
         let t = theme();
         for f in &done.written {
@@ -286,7 +313,8 @@ pub(crate) fn write_skill(
                         continue;
                     }
                 }
-                apic_gocompat::mkdir_all(Path::new(&fp::dir(&target))).map_err(|e| fail(Code::File, e))?;
+                apic_gocompat::mkdir_all(Path::new(&fp::dir(&target)))
+                    .map_err(|e| fail(Code::File, e))?;
                 write_file(&target, content, 0o644).map_err(|e| fail(Code::File, e))?;
                 out.written.push(shown);
             }
@@ -307,7 +335,10 @@ pub(crate) fn write_root(root: &str, create: bool, missing: &str) -> Result<Stri
     if create {
         apic_gocompat::mkdir_all(Path::new(root)).map_err(|e| fail(Code::File, e))?;
     } else if !std::fs::metadata(root).is_ok_and(|info| info.is_dir()) {
-        return Err(fail(Code::File, format!("{root} is not a directory; {missing}")));
+        return Err(fail(
+            Code::File,
+            format!("{root} is not a directory; {missing}"),
+        ));
     }
     fp::abs(root).map_err(|e| fail(Code::File, apic_gocompat::io_error_text(&e)))
 }
@@ -324,7 +355,11 @@ pub(crate) fn confined_path(
     rel: &str,
     what: &str,
 ) -> Result<(String, String), CliError> {
-    let shown = if fp::is_abs(rel) { rel.to_string() } else { fp::join(root, rel) };
+    let shown = if fp::is_abs(rel) {
+        rel.to_string()
+    } else {
+        fp::join(root, rel)
+    };
     match apic_project::confine(abs_root, abs_root, rel) {
         Ok(target) => Ok((shown, target)),
         Err(e) if e.is_outside_root() => Err(fail(

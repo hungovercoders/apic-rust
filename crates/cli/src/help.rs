@@ -18,7 +18,12 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
     let (chain, rest) = crate::parse::find(root, &inv.args);
     if chain.len() == 1 && !rest.is_empty() {
         let topics: Vec<String> = inv.args.iter().map(|t| format!("`{t}`")).collect();
-        w!(a.stdout, "Unknown help topic [{}]\n{}", topics.join(" "), usage_with(&chain, false));
+        w!(
+            a.stdout,
+            "Unknown help topic [{}]\n{}",
+            topics.join(" "),
+            usage_with(&chain, false)
+        );
         return Ok(());
     }
     a.stdout.print(&help(&chain));
@@ -29,7 +34,11 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
 /// its usage.
 pub(crate) fn help(chain: &[&CommandSpec]) -> String {
     let leaf = chain[chain.len() - 1];
-    let about = if leaf.long.is_empty() { leaf.short } else { &leaf.long };
+    let about = if leaf.long.is_empty() {
+        leaf.short
+    } else {
+        &leaf.long
+    };
     let mut out = String::new();
     if !about.is_empty() {
         out.push_str(about.trim_end());
@@ -76,9 +85,15 @@ fn usage_with(chain: &[&CommandSpec], with_help: bool) -> String {
     }
     local.sort_by_key(|f| f.name);
     out.push_str(&format!("\n\nFlags:\n{}", flag_usages(&local).trim_end()));
-    let inherited: Vec<&FlagSpec> = inherited_flags(chain).into_iter().filter(|f| !f.hidden).collect();
+    let inherited: Vec<&FlagSpec> = inherited_flags(chain)
+        .into_iter()
+        .filter(|f| !f.hidden)
+        .collect();
     if !inherited.is_empty() {
-        out.push_str(&format!("\n\nGlobal Flags:\n{}", flag_usages(&inherited).trim_end()));
+        out.push_str(&format!(
+            "\n\nGlobal Flags:\n{}",
+            flag_usages(&inherited).trim_end()
+        ));
     }
     if !subs.is_empty() {
         out.push_str(&format!(
@@ -110,7 +125,9 @@ fn flag_usages(flags: &[&FlagSpec]) -> String {
                 FlagKind::String if !f.default.is_empty() => {
                     right.push_str(&format!(" (default {})", apic_gocompat::quote(&f.default)));
                 }
-                FlagKind::Int if f.default != "0" => right.push_str(&format!(" (default {})", f.default)),
+                FlagKind::Int if f.default != "0" => {
+                    right.push_str(&format!(" (default {})", f.default))
+                }
                 _ => {}
             }
             (left, right)

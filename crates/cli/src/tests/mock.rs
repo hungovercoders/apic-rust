@@ -38,7 +38,10 @@ fn mock_rejects_zero_port() {
     let (_dir, spec) = write_mock_spec();
     let (code, _, stderr) = execute(&["mock", &spec, "--port", "0"]);
     assert_eq!(code, 2, "stderr={stderr}");
-    assert!(stderr.contains("--port must be between 1 and 65535"), "unexpected stderr: {stderr}");
+    assert!(
+        stderr.contains("--port must be between 1 and 65535"),
+        "unexpected stderr: {stderr}"
+    );
 }
 
 #[test]
@@ -58,12 +61,16 @@ fn mock_serves_until_cancelled() {
     let (stdout, stderr) = (Buffer::new(), Buffer::new());
     let cancel = CancelToken::new();
     let done = {
-        let (stdout, stderr, cancel, spec) = (stdout.clone(), stderr.clone(), cancel.clone(), spec.clone());
+        let (stdout, stderr, cancel, spec) =
+            (stdout.clone(), stderr.clone(), cancel.clone(), spec.clone());
         std::thread::spawn(move || {
             let mut app = App::new();
             app.stdout = stdout.output();
             app.stderr = stderr.output();
-            app.execute(&cancel, &["mock", &spec, "--port", &port.to_string(), "--json"])
+            app.execute(
+                &cancel,
+                &["mock", &spec, "--port", &port.to_string(), "--json"],
+            )
         })
     };
 
@@ -90,8 +97,8 @@ fn mock_serves_until_cancelled() {
     let code = done.join().expect("the command thread");
     assert_eq!(code, 0, "stderr {}", stderr.string());
 
-    let startup: Value =
-        serde_json::from_str(&stdout.string()).unwrap_or_else(|e| panic!("stdout {:?}: {e}", stdout.string()));
+    let startup: Value = serde_json::from_str(&stdout.string())
+        .unwrap_or_else(|e| panic!("stdout {:?}: {e}", stdout.string()));
     let routes = startup["routes"].as_array().unwrap();
     assert!(
         startup["spec"] == spec.as_str()

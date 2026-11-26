@@ -170,6 +170,8 @@ pub struct CancelToken;                  // clones share one state
 impl CancelToken {
     pub fn new() -> CancelToken;
     pub fn cancel(&self);
+    pub fn cancel_with(&self, cause: &str);           // the message of the requests it aborts
+    pub fn cause(&self) -> Option<String>;
     pub fn is_cancelled(&self) -> bool;
     pub fn wait_timeout(&self, d: Duration) -> bool;  // interruptible sleep; true = cancelled
     pub fn wait(&self);                               // block until cancelled

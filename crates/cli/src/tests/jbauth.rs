@@ -31,7 +31,9 @@ fn env_and_validate_show_security_auth() {
     );
     let (code, out, _) = execute(&["env", "-C", dir, "--env", "dev", "--no-color"]);
     assert!(
-        code == 0 && !out.contains("s3cret") && out.contains("api oauth2 clientId=cli clientSecret=***"),
+        code == 0
+            && !out.contains("s3cret")
+            && out.contains("api oauth2 clientId=cli clientSecret=***"),
         "env: code={code} out={out}"
     );
     let (code, out, _) = execute(&["validate", "-C", dir, "--no-color"]);

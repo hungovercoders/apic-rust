@@ -19,9 +19,15 @@ query Todos($done: Boolean) {
 {\"done\": true}
 ",
     );
-    must_write(join(dir, "http-client.env.json"), r#"{"dev":{"baseUrl":"http://api.test"}}"#);
+    must_write(
+        join(dir, "http-client.env.json"),
+        r#"{"dev":{"baseUrl":"http://api.test"}}"#,
+    );
     let (code, out, errb) = execute(&["list", "-C", dir, "--env", "dev", "--no-color"]);
-    assert!(code == 0 && out.contains("GRAPHQL"), "list: code={code} out={out} err={errb}");
+    assert!(
+        code == 0 && out.contains("GRAPHQL"),
+        "list: code={code} out={out} err={errb}"
+    );
     let (code, out, errb) = execute(&["curl", "todos", "-C", dir, "--env", "dev"]);
     assert_eq!(code, 0, "curl: out={out} err={errb}");
     // curl infers POST from the body, so no -X is needed.
@@ -38,7 +44,9 @@ query Todos($done: Boolean) {
     );
     let (code, out, errb) = execute(&["describe", "todos", "-C", dir, "--env", "dev", "--json"]);
     assert!(
-        code == 0 && out.contains(r#""method": "POST""#) && out.contains(r#""body": "{\"query\": \"query Todos"#),
+        code == 0
+            && out.contains(r#""method": "POST""#)
+            && out.contains(r#""body": "{\"query\": \"query Todos"#),
         "describe: code={code} out={out} err={errb}"
     );
 }

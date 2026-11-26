@@ -54,7 +54,10 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
         Ok(()) | Err(apic_lsp::Error::Cancelled) => Ok(()),
         // Not a usage error: the protocol asks for exit 1 when the client
         // goes without a shutdown request.
-        Err(err @ apic_lsp::Error::NoShutdown) => Err(CliError::Exit { code: 1, msg: err.to_string() }),
+        Err(err @ apic_lsp::Error::NoShutdown) => Err(CliError::Exit {
+            code: 1,
+            msg: err.to_string(),
+        }),
         Err(err) => Err(fail(Code::Server, err.to_string())),
     }
 }

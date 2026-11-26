@@ -22,33 +22,43 @@ pub(crate) fn spec() -> CommandSpec {
         )
         .runs(show)
         .subcommand(
-            CommandSpec::new("cookies", "List the cookies stored per environment (values masked)")
-                .example(
-                    "  apic session cookies
+            CommandSpec::new(
+                "cookies",
+                "List the cookies stored per environment (values masked)",
+            )
+            .example(
+                "  apic session cookies
   apic session cookies --env staging",
-                )
-                .runs(cookies),
+            )
+            .runs(cookies),
         )
         .subcommand(
-            CommandSpec::new("clear", "Forget captured values for the current environment (or --all)")
-                .example(
-                    "  apic session clear
+            CommandSpec::new(
+                "clear",
+                "Forget captured values for the current environment (or --all)",
+            )
+            .example(
+                "  apic session clear
   apic session clear --env staging
   apic session clear --all",
-                )
-                .flag(FlagSpec::bool("all", "clear every environment"))
-                .runs(clear),
+            )
+            .flag(FlagSpec::bool("all", "clear every environment"))
+            .runs(clear),
         )
 }
 
 fn open_jar(root: &str) -> Result<apic_session::Jar, CliError> {
-    apic_session::open_jar(Path::new(root)).map_err(|e| fail(Code::Session, format!("cookies: {e}")))
+    apic_session::open_jar(Path::new(root))
+        .map_err(|e| fail(Code::Session, format!("cookies: {e}")))
 }
 
 fn cookie_line(c: &Cookie, now: Time) -> String {
-    theme()
-        .dim
-        .render(&format!("({}{} · {})", c.domain, c.path, c.expiry_text(now)))
+    theme().dim.render(&format!(
+        "({}{} · {})",
+        c.domain,
+        c.path,
+        c.expiry_text(now)
+    ))
 }
 
 fn show(a: &mut App, _: &Invocation) -> CliResult {
@@ -83,7 +93,11 @@ fn show(a: &mut App, _: &Invocation) -> CliResult {
         wln!(a.stdout, "{}", t.bold.render(e));
         for (k, v) in &session.vars(e) {
             if is_auth_cache_key(k) {
-                wln!(a.stdout, "  {arrow} {k} = {}", apic_auth::describe_cached(v, Time::now()));
+                wln!(
+                    a.stdout,
+                    "  {arrow} {k} = {}",
+                    apic_auth::describe_cached(v, Time::now())
+                );
                 continue;
             }
             wln!(a.stdout, "  {arrow} {k} = {}", apic_output::truncate(v, 60));
@@ -144,7 +158,11 @@ fn clear(a: &mut App, inv: &Invocation) -> CliResult {
     let Some(session) = &r.session else {
         return Err(fail(Code::Session, "session disabled by --no-session"));
     };
-    let target = if inv.flags.bool("all") { "*".to_string() } else { r.opts.env.clone() };
+    let target = if inv.flags.bool("all") {
+        "*".to_string()
+    } else {
+        r.opts.env.clone()
+    };
     {
         let mut session = session.lock().unwrap_or_else(PoisonError::into_inner);
         session.clear(&target);
@@ -185,7 +203,11 @@ fn mask_session_envs(
             let masked = vars
                 .iter()
                 .map(|(k, v)| {
-                    let v = if is_auth_cache_key(k) { apic_auth::describe_cached(v, now) } else { v.clone() };
+                    let v = if is_auth_cache_key(k) {
+                        apic_auth::describe_cached(v, now)
+                    } else {
+                        v.clone()
+                    };
                     (k.clone(), v)
                 })
                 .collect();

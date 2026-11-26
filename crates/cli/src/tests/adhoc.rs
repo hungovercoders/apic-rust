@@ -13,7 +13,10 @@ fn ad_hoc_project() -> (TempDir, Arc<AtomicI32>, TestServer) {
     let count = hits.clone();
     let srv = server(move |_| {
         count.fetch_add(1, Ordering::SeqCst);
-        Response::json(200, r#"{"id": 7, "items": [{"done": true}, {"done": false}]}"#)
+        Response::json(
+            200,
+            r#"{"id": 7, "items": [{"done": true}, {"done": false}]}"#,
+        )
     });
     let dir = tmp();
     must_write(
@@ -71,7 +74,16 @@ fn asserts(obj: &Value) -> &[Value] {
 fn run_assert_and_capture_flags() {
     let (tmp, _, _srv) = ad_hoc_project();
     let dir = tmp.path().to_str().unwrap();
-    let base = ["-C", dir, "--env", "dev", "--no-session", "--json", "run", "thing"];
+    let base = [
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "--json",
+        "run",
+        "thing",
+    ];
     let run = |extra: &[&str]| execute(&[&base[..], extra].concat());
     let (code, out, errb) = run(&[
         "--assert",
@@ -88,7 +100,11 @@ fn run_assert_and_capture_flags() {
         a.len() == 3 && a[1]["pass"] == true && a[1]["actual"] == "1" && a[2]["pass"] == true,
         "asserts: {a:?}"
     );
-    assert_eq!(obj["captures"]["count"], "2", "captures: {}", obj["captures"]);
+    assert_eq!(
+        obj["captures"]["count"], "2",
+        "captures: {}",
+        obj["captures"]
+    );
     // A failing flag assertion fails the run like a directive would.
     let (code, out, _) = run(&["--assert", "body.$.id == 8"]);
     let obj = decode_run(&out);
@@ -99,7 +115,11 @@ fn run_assert_and_capture_flags() {
     );
     // A bad expression is a flag error that names the flag, before
     // anything is sent.
-    for bad in [["--assert", "body.$.id ==="], ["--capture", "nosel"], ["--capture", "=body"]] {
+    for bad in [
+        ["--assert", "body.$.id ==="],
+        ["--capture", "nosel"],
+        ["--capture", "=body"],
+    ] {
         let (code, _, errb) = run(&bad);
         assert!(
             code == 2 && errb.contains(&format!("{} ", bad[0])),
@@ -120,7 +140,17 @@ fn run_dry_run() {
     let (tmp, hits, _srv) = ad_hoc_project();
     let dir = tmp.path().to_str().unwrap();
     let (code, out, errb) = execute(&[
-        "-C", dir, "--env", "dev", "--no-session", "--json", "run", "other", "--var", "id=3", "--dry-run",
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "--json",
+        "run",
+        "other",
+        "--var",
+        "id=3",
+        "--dry-run",
     ]);
     assert_eq!(code, 0, "err={errb}");
     let obj = decode_run(&out);
@@ -129,13 +159,26 @@ fn run_dry_run() {
             && obj["ok"] == true
             && obj.get("response").is_none_or(Value::is_null)
             && obj["request"]["method"] == "POST"
-            && obj["request"]["url"].as_str().unwrap_or("").ends_with("/other"),
+            && obj["request"]["url"]
+                .as_str()
+                .unwrap_or("")
+                .ends_with("/other"),
         "dry run object: {out}"
     );
     assert_eq!(hits.load(Ordering::SeqCst), 0, "a dry run sent a request");
     // The text form shows the resolved body and says it was not sent.
     let (code, out, _) = execute(&[
-        "-C", dir, "--env", "dev", "--no-session", "--no-color", "run", "other", "thing", "--var", "id=3",
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "--no-color",
+        "run",
+        "other",
+        "thing",
+        "--var",
+        "id=3",
         "--dry-run",
     ]);
     assert!(
@@ -147,18 +190,53 @@ fn run_dry_run() {
     );
     // A missing variable is the same error a real run gives, and nothing
     // runs to supply it.
-    let (code, _, errb) = execute(&["-C", dir, "--env", "dev", "--no-session", "run", "other", "--dry-run"]);
+    let (code, _, errb) = execute(&[
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "run",
+        "other",
+        "--dry-run",
+    ]);
     assert!(
         code == 2 && errb.contains("{{id}}") && hits.load(Ordering::SeqCst) == 0,
         "missing: code={code} err={errb}"
     );
-    let (code, _, errb) = execute(&["-C", dir, "--env", "dev", "run", "thing", "--dry-run", "--data", "-"]);
-    assert!(code == 2 && errb.contains("--dry-run"), "with --data: code={code} err={errb}");
+    let (code, _, errb) = execute(&[
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "run",
+        "thing",
+        "--dry-run",
+        "--data",
+        "-",
+    ]);
+    assert!(
+        code == 2 && errb.contains("--dry-run"),
+        "with --data: code={code} err={errb}"
+    );
     // --body-only prints the request body, there being no response.
     let (code, out, _) = execute(&[
-        "-C", dir, "--env", "dev", "--no-session", "run", "other", "--var", "id=3", "--dry-run", "--body-only",
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "run",
+        "other",
+        "--var",
+        "id=3",
+        "--dry-run",
+        "--body-only",
     ]);
-    assert!(code == 0 && out == "{\"id\": 3}\n", "body-only: code={code} out={out:?}");
+    assert!(
+        code == 0 && out == "{\"id\": 3}\n",
+        "body-only: code={code} out={out:?}"
+    );
     assert_eq!(hits.load(Ordering::SeqCst), 0, "a dry run sent a request");
 }
 
@@ -170,7 +248,15 @@ fn run_dry_run_leaves_ref_supplied_placeholders() {
     let (tmp, hits, _srv) = ad_hoc_project();
     let dir = tmp.path().to_str().unwrap();
     let (code, out, errb) = execute(&[
-        "-C", dir, "--env", "dev", "--no-session", "--json", "run", "secured", "--dry-run",
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "--json",
+        "run",
+        "secured",
+        "--dry-run",
     ]);
     assert_eq!(code, 0, "err={errb}");
     let obj = decode_run(&out);
@@ -180,12 +266,23 @@ fn run_dry_run_leaves_ref_supplied_placeholders() {
             && obj["ok"] == true
             && obj["request"]["headers"]["X-Auth"] == "Bearer {{session}}"
             && warnings.len() == 1
-            && warnings[0].as_str().unwrap_or("").contains("send login first"),
+            && warnings[0]
+                .as_str()
+                .unwrap_or("")
+                .contains("send login first"),
         "object: {out}"
     );
     assert_eq!(hits.load(Ordering::SeqCst), 0, "the dependency was sent");
     let (code, out, _) = execute(&[
-        "-C", dir, "--env", "dev", "--no-session", "--no-color", "run", "secured", "--dry-run",
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "--no-color",
+        "run",
+        "secured",
+        "--dry-run",
     ]);
     assert!(
         code == 0
@@ -203,21 +300,43 @@ fn run_ad_hoc_flags_keep_disabled_targets() {
     let (tmp, hits, _srv) = ad_hoc_project();
     let dir = tmp.path().to_str().unwrap();
     let (code, out, errb) = execute(&[
-        "-C", dir, "--env", "dev", "--no-session", "--json", "run", "cleanup", "--assert", "body.$.id == 7",
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "--json",
+        "run",
+        "cleanup",
+        "--assert",
+        "body.$.id == 7",
     ]);
     assert_eq!(code, 0, "err={errb} out={out}");
     let obj = decode_run(&out);
     let a = asserts(&obj);
     assert!(
-        hits.load(Ordering::SeqCst) == 1 && obj["response"].is_object() && a.len() == 2 && a[1]["pass"] == true,
+        hits.load(Ordering::SeqCst) == 1
+            && obj["response"].is_object()
+            && a.len() == 2
+            && a[1]["pass"] == true,
         "hits={} {out}",
         hits.load(Ordering::SeqCst)
     );
     // And they do not reach a dependency: login, pulled in by secured's
     // `# @ref`, keeps its own checks.
     let (code, out, _) = execute(&[
-        "-C", dir, "--env", "dev", "--no-session", "--json", "run", "secured", "--assert", "status == 200",
-        "--capture", "n=body.$.id",
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "--json",
+        "run",
+        "secured",
+        "--assert",
+        "status == 200",
+        "--capture",
+        "n=body.$.id",
     ]);
     let lines: Vec<&str> = out.trim().split('\n').collect();
     assert!(code == 0 && lines.len() == 2, "code={code} out={out}");
@@ -240,13 +359,19 @@ fn fmt_one_request() {
     let src = "###   first\n# @assert status == 200\n# @name first\nGET   https://x/a\n\n\n### second\n# @capture id = body.$.id\n# @name second\nPOST https://x/b\ncontent-type: application/json\n\n{\"a\":1}\n";
     must_write(join(dir, "api.http"), src);
     let (code, out, errb) = execute(&["-C", dir, "fmt", "api.http#second", "--no-color"]);
-    assert!(code == 0 && out.contains("formatted api.http"), "code={code} out={out} err={errb}");
+    assert!(
+        code == 0 && out.contains("formatted api.http"),
+        "code={code} out={out} err={errb}"
+    );
     let got = must_read(join(dir, "api.http"));
     let want = "###   first\n# @assert status == 200\n# @name first\nGET   https://x/a\n\n\n### second\n# @name second\n# @capture id = body.$.id\nPOST https://x/b\nContent-Type: application/json\n\n{\n  \"a\": 1\n}\n";
     assert_eq!(got, want);
     // The number form, --check reporting, and an unknown name.
     let (code, out, _) = execute(&["-C", dir, "fmt", "api.http#1", "--check"]);
-    assert!(code == 1 && out.trim() == "api.http", "check: code={code} out={out:?}");
+    assert!(
+        code == 1 && out.trim() == "api.http",
+        "check: code={code} out={out:?}"
+    );
     let (code, out, _) = execute(&["-C", dir, "fmt", "api.http#2", "--check"]);
     assert!(
         code == 0 && out.contains("already formatted"),
@@ -293,15 +418,28 @@ fn fmt_one_request_counts_like_run() {
     // file listed once.
     must_write(join(dir, "api.http"), src);
     let (code, out, _) = execute(&[
-        "-C", dir, "--json", "fmt", "api.http#first", "api.http#second", "--diff",
+        "-C",
+        dir,
+        "--json",
+        "fmt",
+        "api.http#first",
+        "api.http#second",
+        "--diff",
     ]);
-    let got: Value = serde_json::from_str(&out).unwrap_or_else(|e| panic!("code={code} {e}: {out}"));
+    let got: Value =
+        serde_json::from_str(&out).unwrap_or_else(|e| panic!("code={code} {e}: {out}"));
     assert_eq!(code, 1);
     assert!(
         got["changed"].as_array().is_some_and(|c| c.len() == 1)
             && got["diff"].as_object().is_some_and(|d| d.len() == 2)
-            && got["diff"]["api.http#first"].as_str().unwrap_or("").contains("+# @name first")
-            && got["diff"]["api.http#second"].as_str().unwrap_or("").contains("+# @name second"),
+            && got["diff"]["api.http#first"]
+                .as_str()
+                .unwrap_or("")
+                .contains("+# @name first")
+            && got["diff"]["api.http#second"]
+                .as_str()
+                .unwrap_or("")
+                .contains("+# @name second"),
         "json: {got}"
     );
 }
@@ -321,12 +459,26 @@ fn run_ad_hoc_flags_are_checked_before_sending() {
         ["--capture", "two words=body.$.id"],
     ] {
         let (code, _, errb) = execute(&[
-            "-C", dir, "--env", "dev", "--no-session", "run", "other", "--var", "id=1", bad[0], bad[1],
+            "-C",
+            dir,
+            "--env",
+            "dev",
+            "--no-session",
+            "run",
+            "other",
+            "--var",
+            "id=1",
+            bad[0],
+            bad[1],
         ]);
         assert!(
             code == 2 && errb.contains(&format!("{} ", bad[0])),
             "{bad:?}: code={code} err={errb}"
         );
     }
-    assert_eq!(hits.load(Ordering::SeqCst), 0, "requests were sent before the flag check");
+    assert_eq!(
+        hits.load(Ordering::SeqCst),
+        0,
+        "requests were sent before the flag check"
+    );
 }

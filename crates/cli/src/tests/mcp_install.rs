@@ -16,7 +16,12 @@ fn server_args(doc: &Value) -> String {
     assert_eq!(entry["command"], "apic", "no apic entry: {doc}");
     entry["args"]
         .as_array()
-        .map(|args| args.iter().map(|a| a.as_str().unwrap_or("")).collect::<Vec<_>>().join(" "))
+        .map(|args| {
+            args.iter()
+                .map(|a| a.as_str().unwrap_or(""))
+                .collect::<Vec<_>>()
+                .join(" ")
+        })
         .unwrap_or_default()
 }
 
@@ -31,7 +36,10 @@ fn mcp_install_writes_the_project_entry() {
     let (code, out, errb) = execute(&["-C", &dir, "mcp", "install", &dir, "--no-color"]);
     assert_eq!(code, 0, "err={errb}");
     let path = join(&dir, ".mcp.json");
-    assert!(out.contains(&format!("wrote {path}")), "output lacks wrote {path}:\n{out}");
+    assert!(
+        out.contains(&format!("wrote {path}")),
+        "output lacks wrote {path}:\n{out}"
+    );
     assert_eq!(
         server_args(&read_mcp_config(&path)),
         "mcp",
@@ -43,10 +51,17 @@ fn mcp_install_writes_the_project_entry() {
     let api = join(&dir, "api");
     std::fs::create_dir(&api).unwrap();
     let (code, out, _) = execute(&["--json", "-C", &api, "--env", "dev", "mcp", "install", &dir]);
-    let got: Value = serde_json::from_str(&out).unwrap_or_else(|e| panic!("code={code} {e}: {out}"));
+    let got: Value =
+        serde_json::from_str(&out).unwrap_or_else(|e| panic!("code={code} {e}: {out}"));
     assert_eq!(code, 0);
-    assert!(count(&got, "written") == 1 && count(&got, "unchanged") == 0, "second install: {got}");
-    assert_eq!(server_args(&read_mcp_config(&path)), "mcp --dir api --env dev");
+    assert!(
+        count(&got, "written") == 1 && count(&got, "unchanged") == 0,
+        "second install: {got}"
+    );
+    assert_eq!(
+        server_args(&read_mcp_config(&path)),
+        "mcp --dir api --env dev"
+    );
     // The same entry again is unchanged.
     let (code, out, _) = execute(&["--json", "-C", &api, "--env", "dev", "mcp", "install", &dir]);
     let got: Value = serde_json::from_str(&out).unwrap();
@@ -61,7 +76,10 @@ fn mcp_install_merges_and_refuses_what_it_cannot_read() {
     let tmp = tmp();
     let dir = s(&tmp);
     let path = join(&dir, ".mcp.json");
-    must_write(&path, r#"{"mcpServers": {"other": {"command": "x"}}, "note": "<kept>"}"#);
+    must_write(
+        &path,
+        r#"{"mcpServers": {"other": {"command": "x"}}, "note": "<kept>"}"#,
+    );
     let (code, _, errb) = execute(&["-C", &dir, "mcp", "install", &dir]);
     assert_eq!(code, 0, "err={errb}");
     let doc = read_mcp_config(&path);
@@ -69,22 +87,54 @@ fn mcp_install_merges_and_refuses_what_it_cannot_read() {
         doc["mcpServers"]["other"].is_object() && doc["note"] == "<kept>",
         "merge lost what the file held: {doc}"
     );
-    assert!(!must_read(&path).contains(r"\u003c"), "HTML escaped: {}", must_read(&path));
+    assert!(
+        !must_read(&path).contains(r"\u003c"),
+        "HTML escaped: {}",
+        must_read(&path)
+    );
     server_args(&doc);
 
     // --to picks the file, under the directory; a subdirectory is made,
     // and an absolute path is reported as given.
-    let (code, _, errb) = execute(&["-C", &dir, "mcp", "install", &dir, "--to", ".cursor/mcp.json"]);
+    let (code, _, errb) = execute(&[
+        "-C",
+        &dir,
+        "mcp",
+        "install",
+        &dir,
+        "--to",
+        ".cursor/mcp.json",
+    ]);
     assert_eq!(code, 0, "err={errb}");
     server_args(&read_mcp_config(&join(&dir, ".cursor/mcp.json")));
     let abs = join(&dir, "tools/mcp.json");
-    let (code, out, errb) = execute(&["-C", &dir, "mcp", "install", &dir, "--to", &abs, "--no-color"]);
+    let (code, out, errb) = execute(&[
+        "-C",
+        &dir,
+        "mcp",
+        "install",
+        &dir,
+        "--to",
+        &abs,
+        "--no-color",
+    ]);
     assert!(
         code == 0 && out.contains(&format!("wrote {abs}\n")),
         "absolute --to: code={code} err={errb} out={out}"
     );
-    let (code, _, errb) = execute(&["-C", &dir, "mcp", "install", &dir, "--to", "../outside.json"]);
-    assert!(code == 2 && errb.contains("E210"), "outside the directory: code={code} err={errb}");
+    let (code, _, errb) = execute(&[
+        "-C",
+        &dir,
+        "mcp",
+        "install",
+        &dir,
+        "--to",
+        "../outside.json",
+    ]);
+    assert!(
+        code == 2 && errb.contains("E210"),
+        "outside the directory: code={code} err={errb}"
+    );
 
     // An empty file is an empty document; one that is not JSON, or whose
     // mcpServers is not an object, is reported and left as it is.
@@ -103,7 +153,10 @@ fn mcp_install_merges_and_refuses_what_it_cannot_read() {
     }
     // A directory that does not exist is a mistyped project.
     let (code, _, errb) = execute(&["mcp", "install", &join(&dir, "missing")]);
-    assert!(code == 2 && errb.contains("E210"), "missing dir: code={code} err={errb}");
+    assert!(
+        code == 2 && errb.contains("E210"),
+        "missing dir: code={code} err={errb}"
+    );
 }
 
 #[test]
@@ -121,19 +174,40 @@ fn init_registers_the_server_unless_told_not_to() {
     // "kept". An entry the team has changed is kept unless --force, like
     // every other file.
     let (code, out, _) = execute(&["--json", "init", &dir]);
-    assert!(code == 0 && !out.contains(".mcp.json"), "code={code} out={out}");
-    let (code, _, errb) = execute(&["-C", &join(&dir, "api"), "--env", "dev", "mcp", "install", &dir]);
+    assert!(
+        code == 0 && !out.contains(".mcp.json"),
+        "code={code} out={out}"
+    );
+    let (code, _, errb) = execute(&[
+        "-C",
+        &join(&dir, "api"),
+        "--env",
+        "dev",
+        "mcp",
+        "install",
+        &dir,
+    ]);
     assert_eq!(code, 0, "err={errb}");
     let (code, out, _) = execute(&["init", &dir, "--no-color"]);
-    assert!(code == 0 && out.contains(&format!("kept  {path}")), "code={code} out={out}");
+    assert!(
+        code == 0 && out.contains(&format!("kept  {path}")),
+        "code={code} out={out}"
+    );
     assert_eq!(
         server_args(&read_mcp_config(&path)),
         "mcp --dir api --env dev",
         "init replaced the entry without --force"
     );
     let (code, out, _) = execute(&["init", &dir, "--force", "--no-color"]);
-    assert!(code == 0 && out.contains(&format!("wrote {path}")), "code={code} out={out}");
-    assert_eq!(server_args(&read_mcp_config(&path)), "mcp", "--force should replace the entry");
+    assert!(
+        code == 0 && out.contains(&format!("wrote {path}")),
+        "code={code} out={out}"
+    );
+    assert_eq!(
+        server_args(&read_mcp_config(&path)),
+        "mcp",
+        "--force should replace the entry"
+    );
     let bare = super::tmp();
     let (code, _, errb) = execute(&["init", &s(&bare), "--no-mcp"]);
     assert_eq!(code, 0, "err={errb}");

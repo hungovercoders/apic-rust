@@ -9,10 +9,12 @@ fn frame(body: &str) -> String {
 #[test]
 fn lsp_command_serves_over_stdio() {
     let dir = tmp();
-    let input = frame(r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"rootUri":null,"capabilities":{}}}"#)
-        + &frame(r#"{"jsonrpc":"2.0","id":2,"method":"shutdown"}"#)
+    let input = frame(
+        r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"rootUri":null,"capabilities":{}}}"#,
+    ) + &frame(r#"{"jsonrpc":"2.0","id":2,"method":"shutdown"}"#)
         + &frame(r#"{"jsonrpc":"2.0","method":"exit"}"#);
-    let (code, out, stderr) = execute_with(&CancelToken::new(), Some(&input), &["-C", &s(&dir), "lsp"]);
+    let (code, out, stderr) =
+        execute_with(&CancelToken::new(), Some(&input), &["-C", &s(&dir), "lsp"]);
     assert_eq!(code, 0, "exit {code}: {stderr}");
     assert!(
         out.contains(r#""name":"apic""#)
@@ -26,5 +28,8 @@ fn lsp_command_serves_over_stdio() {
 fn lsp_command_fails_without_shutdown() {
     let input = frame(r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}"#);
     let (code, _, stderr) = execute_with(&CancelToken::new(), Some(&input), &["lsp"]);
-    assert!(code == 1 && stderr.contains("without a shutdown"), "exit {code}: {stderr}");
+    assert!(
+        code == 1 && stderr.contains("without a shutdown"),
+        "exit {code}: {stderr}"
+    );
 }

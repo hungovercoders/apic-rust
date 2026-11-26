@@ -40,14 +40,25 @@ files are left alone unless --force is given, an apic entry already in
   apic init --json",
     )
     .args(ArgRule::Max(1))
-    .flag(FlagSpec::string("base-url", "https://api.example.com", "baseUrl for the environment"))
-    .flag(FlagSpec::string("env", "dev", "name of the first environment"))
+    .flag(FlagSpec::string(
+        "base-url",
+        "https://api.example.com",
+        "baseUrl for the environment",
+    ))
+    .flag(FlagSpec::string(
+        "env",
+        "dev",
+        "name of the first environment",
+    ))
     .flag(FlagSpec::bool("force", "overwrite existing files"))
     .flag(FlagSpec::bool(
         "no-skill",
         "do not write the Agent Skill into .claude/skills and .agents/skills",
     ))
-    .flag(FlagSpec::bool("no-mcp", "do not register apic mcp in .mcp.json"))
+    .flag(FlagSpec::bool(
+        "no-mcp",
+        "do not register apic mcp in .mcp.json",
+    ))
     .runs(run)
 }
 
@@ -67,7 +78,11 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
             dir,
             &skill_dirs(),
             &[apic_skills::NAME.to_string()],
-            SkillWrite { create: true, overwrite: force, user: false },
+            SkillWrite {
+                create: true,
+                overwrite: force,
+                user: false,
+            },
         )?;
         written.extend(done.written);
         skipped.extend(done.skipped);
@@ -77,7 +92,12 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
         // --dir. The rest of an existing file is kept, and so is a
         // different apic entry unless --force: a team may have pointed it
         // at another directory or environment.
-        let done = write_mcp_config(dir, &[MCP_CONFIG_FILE.to_string()], &["mcp".to_string()], force)?;
+        let done = write_mcp_config(
+            dir,
+            &[MCP_CONFIG_FILE.to_string()],
+            &["mcp".to_string()],
+            force,
+        )?;
         written.extend(done.written);
         skipped.extend(done.skipped);
     }
@@ -91,7 +111,12 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
             #[serde(skip_serializing_if = "<[String]>::is_empty")]
             skipped: &'a [String],
         }
-        return a.write_json(&Out { out: dir, env: &env_name, written: &written, skipped: &skipped });
+        return a.write_json(&Out {
+            out: dir,
+            env: &env_name,
+            written: &written,
+            skipped: &skipped,
+        });
     }
     let t = theme();
     for f in &written {
@@ -120,7 +145,8 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
 /// The first line of a scaffolded apic.yaml: the YAML language server
 /// (and so VS Code, JetBrains and Neovim with it) picks up the published
 /// schema for completion and validation.
-const SCHEMA_MODELINE: &str = "# yaml-language-server: $schema=https://apic.sh/schemas/apic.schema.json";
+const SCHEMA_MODELINE: &str =
+    "# yaml-language-server: $schema=https://apic.sh/schemas/apic.schema.json";
 
 /// Switches the response history on in a scaffolded apic.yaml: apic
 /// history, apic history diff and apic select read it, and an agent uses
@@ -196,7 +222,11 @@ fn ensure_gitignore(dir: &str, written: &mut Vec<String>) -> CliResult {
             )))
         }
     };
-    let add: Vec<&str> = lines.iter().copied().filter(|l| !existing.contains(l)).collect();
+    let add: Vec<&str> = lines
+        .iter()
+        .copied()
+        .filter(|l| !existing.contains(l))
+        .collect();
     if add.is_empty() {
         return Ok(());
     }

@@ -44,8 +44,8 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
     // written or "listening" is printed.
     let listener = listen_local(port)?;
     let port = u16::try_from(port).unwrap_or(0);
-    let (written, skipped) =
-        apic_demoapi::write_project(&out, port, inv.flags.bool("force")).map_err(CliError::other)?;
+    let (written, skipped) = apic_demoapi::write_project(&out, port, inv.flags.bool("force"))
+        .map_err(CliError::other)?;
     let url = format!("http://localhost:{port}");
     if a.g.json {
         #[derive(Serialize)]
@@ -58,7 +58,13 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
             skipped: &'a [String],
             listening: bool,
         }
-        a.write_json(&Out { out: &out, url: &url, written: &written, skipped: &skipped, listening: true })?;
+        a.write_json(&Out {
+            out: &out,
+            url: &url,
+            written: &written,
+            skipped: &skipped,
+            listening: true,
+        })?;
     } else {
         for f in &written {
             wln!(a.stdout, "wrote {f}");

@@ -12,7 +12,10 @@ fn session_json_masks_cached_tokens() {
     let tmp = tmp();
     let dir = tmp.path().to_str().unwrap();
     must_write(join(dir, "api.http"), "GET http://example.com\n");
-    let expires = Time::now().add_nanos(3_600_000_000_000).utc().format_rfc3339_nano();
+    let expires = Time::now()
+        .add_nanos(3_600_000_000_000)
+        .utc()
+        .format_rfc3339_nano();
     must_write(
         join(dir, ".apic/session.json"),
         &format!("{{\n  \"envs\": {{\n    \"dev\": {{\n      \"$oauth2:test\": \"{{\\\"access_token\\\":\\\"secret-token\\\",\\\"refresh_token\\\":\\\"secret-refresh\\\",\\\"expires_at\\\":\\\"{expires}\\\"}}\",\n      \"$meta\": \"value-with-dollar-prefix\",\n      \"plain\": \"value\"\n    }}\n  }}\n}}\n"),
@@ -30,7 +33,10 @@ fn session_json_masks_cached_tokens() {
         !cached.contains("secret-token") && !cached.contains("secret-refresh"),
         "cached token leaked: {cached:?}"
     );
-    assert!(cached.contains("token"), "cached token metadata missing: {cached:?}");
+    assert!(
+        cached.contains("token"),
+        "cached token metadata missing: {cached:?}"
+    );
 }
 
 #[test]
@@ -38,8 +44,14 @@ fn session_lists_and_clears_cookies() {
     let tmp = tmp();
     let dir = tmp.path().to_str().unwrap();
     must_write(join(dir, "api.http"), "GET http://example.com\n");
-    must_write(join(dir, ".apic/session.json"), r#"{"envs": {"dev": {"token": "t-1"}}}"#);
-    must_write(join(dir, "http-client.env.json"), r#"{"dev": {}, "staging": {}}"#);
+    must_write(
+        join(dir, ".apic/session.json"),
+        r#"{"envs": {"dev": {"token": "t-1"}}}"#,
+    );
+    must_write(
+        join(dir, "http-client.env.json"),
+        r#"{"dev": {}, "staging": {}}"#,
+    );
     let jar = apic_session::open_jar(Path::new(dir)).unwrap();
     let u = RequestUrl::parse("https://api.example.com/auth/login").unwrap();
     jar.http("dev").set_cookies(
@@ -54,7 +66,12 @@ fn session_lists_and_clears_cookies() {
     );
     jar.http("staging").set_cookies(
         &u,
-        &[SetCookie { name: "sid".into(), value: "other".into(), path: "/".into(), ..SetCookie::default() }],
+        &[SetCookie {
+            name: "sid".into(),
+            value: "other".into(),
+            path: "/".into(),
+            ..SetCookie::default()
+        }],
     );
     jar.save().unwrap();
     let exec = |args: &[&str]| {
@@ -73,8 +90,12 @@ fn session_lists_and_clears_cookies() {
     );
     assert!(!out.contains("secret-cookie"), "cookie value printed");
     let (out, code) = exec(&["session", "cookies", "--json"]);
-    let listed: Value = serde_json::from_str(&out).unwrap_or_else(|e| panic!("session cookies --json: {e}\n{out}"));
-    assert!(code == 0 && !out.contains("secret-cookie"), "session cookies --json:\n{out}");
+    let listed: Value =
+        serde_json::from_str(&out).unwrap_or_else(|e| panic!("session cookies --json: {e}\n{out}"));
+    assert!(
+        code == 0 && !out.contains("secret-cookie"),
+        "session cookies --json:\n{out}"
+    );
     let c = listed["dev"].as_array().unwrap();
     assert!(
         c.len() == 1
@@ -89,9 +110,15 @@ fn session_lists_and_clears_cookies() {
     let (out, code) = exec(&["session", "clear", "--env", "dev"]);
     assert_eq!(code, 0, "clear: {out}");
     let (out, _) = exec(&["session"]);
-    assert!(!out.contains("token") && out.contains("staging"), "after clear dev:\n{out}");
+    assert!(
+        !out.contains("token") && out.contains("staging"),
+        "after clear dev:\n{out}"
+    );
     let (out, code) = exec(&["session", "clear", "--all"]);
     assert_eq!(code, 0, "clear --all: {out}");
     let (out, _) = exec(&["session", "cookies"]);
-    assert!(out.contains("no cookies stored"), "after clear --all:\n{out}");
+    assert!(
+        out.contains("no cookies stored"),
+        "after clear --all:\n{out}"
+    );
 }

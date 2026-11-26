@@ -59,7 +59,13 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
             skipped: &'a [String],
             listening: bool,
         }
-        a.write_json(&Out { spec, url: &url, routes: &m.routes, skipped: &m.skipped, listening: true })?;
+        a.write_json(&Out {
+            spec,
+            url: &url,
+            routes: &m.routes,
+            skipped: &m.skipped,
+            listening: true,
+        })?;
     } else {
         wln!(
             a.stdout,
@@ -67,12 +73,28 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
             plural(m.routes.len(), "route")
         );
         // The routes in columns, two spaces apart.
-        let method_width = m.routes.iter().map(|r| r.method.chars().count()).max().unwrap_or(0);
-        let path_width = m.routes.iter().map(|r| r.path.chars().count()).max().unwrap_or(0);
+        let method_width = m
+            .routes
+            .iter()
+            .map(|r| r.method.chars().count())
+            .max()
+            .unwrap_or(0);
+        let path_width = m
+            .routes
+            .iter()
+            .map(|r| r.path.chars().count())
+            .max()
+            .unwrap_or(0);
         for r in &m.routes {
             let method_pad = " ".repeat(method_width - r.method.chars().count() + 2);
             let path_pad = " ".repeat(path_width - r.path.chars().count() + 2);
-            wln!(a.stdout, "  {}{method_pad}{}{path_pad}{}", r.method, r.path, r.status);
+            wln!(
+                a.stdout,
+                "  {}{method_pad}{}{path_pad}{}",
+                r.method,
+                r.path,
+                r.status
+            );
         }
         for s in &m.skipped {
             wln!(a.stdout, "skipped {s}");

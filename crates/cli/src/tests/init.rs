@@ -13,7 +13,10 @@ fn init_gitignores_every_credential_file() {
     assert_eq!(code, 0, "stderr={stderr}");
     let got = must_read(join(&dir, ".gitignore"));
     for want in ["http-client.private.env.json", ".env", ".apic/"] {
-        assert!(got.contains(want), "generated .gitignore is missing {want:?}:\n{got}");
+        assert!(
+            got.contains(want),
+            "generated .gitignore is missing {want:?}:\n{got}"
+        );
     }
 }
 
@@ -27,7 +30,9 @@ fn init_points_at_the_schema() {
     assert_eq!(code, 0, "stderr={stderr}");
     let data = must_read(join(&dir, "apic.yaml"));
     assert!(
-        data.starts_with("# yaml-language-server: $schema=https://apic.sh/schemas/apic.schema.json\n"),
+        data.starts_with(
+            "# yaml-language-server: $schema=https://apic.sh/schemas/apic.schema.json\n"
+        ),
         "apic.yaml should start with the schema modeline:\n{data}"
     );
     let p = apic_project::load(&dir).unwrap();
@@ -74,7 +79,10 @@ fn import_detects_postman_collections() {
         "an environment file alone: {code} {out}"
     );
     let spec = join(&dir, "openapi.yaml");
-    must_write(&spec, "openapi: 3.0.0\ninfo: {title: t, version: '1'}\npaths: {}\n");
+    must_write(
+        &spec,
+        "openapi: 3.0.0\ninfo: {title: t, version: '1'}\npaths: {}\n",
+    );
     let (out, code) = exec(&["import", &spec, "--postman-env", &env, "-o", &dir]);
     assert!(
         code == 2 && out.contains("--postman-env goes with"),
@@ -102,7 +110,9 @@ fn import_curl_appends_a_request() {
     let cmd = r#"curl -X POST https://api.example.com/todos -H "Content-Type: application/json" -d '{"title":"x"}' --bogus"#;
     let (out, err_out, code) = exec("", &["import", "--curl", cmd, "--into", "todos.http"]);
     assert!(
-        code == 0 && out == "added post-todos-2 to todos.http\n" && err_out.contains("note: unknown flag --bogus"),
+        code == 0
+            && out == "added post-todos-2 to todos.http\n"
+            && err_out.contains("note: unknown flag --bogus"),
         "code={code} out={out:?} err={err_out:?}"
     );
     let got = must_read(join(&dir, "todos.http"));
@@ -121,7 +131,10 @@ fn import_curl_appends_a_request() {
         "stdin + json: code={code} out={out}"
     );
     let (out, _, code) = exec("", &["import", "--curl", "curl -H 'a: b'"]);
-    assert!(code == 2 && out.is_empty(), "no URL: code={code} out={out:?}");
+    assert!(
+        code == 2 && out.is_empty(),
+        "no URL: code={code} out={out:?}"
+    );
     let (_, err_out, code) = exec("", &["import", "openapi.yaml", "--into", "x.http"]);
     assert!(
         code == 2 && err_out.contains("--into and --name go with --curl"),
@@ -148,7 +161,10 @@ fn import_curl_body_that_splits_the_block_goes_to_a_side_file() {
         got.contains("\n< ./post-notes.body.txt\n") && !got.contains("### heading"),
         "file:\n{got}"
     );
-    assert_eq!(must_read(join(&dir, "post-notes.body.txt")), "### heading\ntext");
+    assert_eq!(
+        must_read(join(&dir, "post-notes.body.txt")),
+        "### heading\ntext"
+    );
     let p = apic_project::load(&dir).unwrap();
     assert!(
         p.requests().len() == 1 && p.validate().is_empty(),
@@ -156,6 +172,15 @@ fn import_curl_body_that_splits_the_block_goes_to_a_side_file() {
         p.requests().len(),
         p.validate()
     );
-    let (code, _, stderr) = execute(&["-C", &dir, "import", "--curl", "curl -d '< 5 items' https://x/notes"]);
-    assert!(code == 0 && stderr.contains("use --into"), "without --into: code={code} err={stderr}");
+    let (code, _, stderr) = execute(&[
+        "-C",
+        &dir,
+        "import",
+        "--curl",
+        "curl -d '< 5 items' https://x/notes",
+    ]);
+    assert!(
+        code == 0 && stderr.contains("use --into"),
+        "without --into: code={code} err={stderr}"
+    );
 }

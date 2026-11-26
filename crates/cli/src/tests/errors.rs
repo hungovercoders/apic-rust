@@ -36,11 +36,19 @@ struct ErrorCase {
 }
 
 fn case(files: &[(&'static str, &'static str)], args: &[&'static str]) -> ErrorCase {
-    ErrorCase { files: files.to_vec(), args: args.to_vec(), setup: Setup::None, cancel: None }
+    ErrorCase {
+        files: files.to_vec(),
+        args: args.to_vec(),
+        setup: Setup::None,
+        cancel: None,
+    }
 }
 
 fn get(args: &[&'static str], setup: Setup) -> ErrorCase {
-    ErrorCase { setup, ..case(&[("a.http", "GET {{url}}/\n")], args) }
+    ErrorCase {
+        setup,
+        ..case(&[("a.http", "GET {{url}}/\n")], args)
+    }
 }
 
 fn error_cases() -> BTreeMap<&'static str, ErrorCase> {
@@ -48,66 +56,169 @@ fn error_cases() -> BTreeMap<&'static str, ErrorCase> {
     let mut add = |code: Code, c: ErrorCase| {
         cases.insert(code.as_str(), c);
     };
-    add(Code::MissingVariable, case(&[("a.http", "GET http://localhost/{{token}}\n")], &["run", "a.http"]));
-    add(Code::Build, case(&[("a.http", "GET http://localhost/{{$randomInt 5 1}}\n")], &["run", "a.http"]));
-    add(Code::InvalidFile, case(&[("a.http", "# @capture nonsense\nGET http://localhost/\n")], &["run", "a.http"]));
-    add(Code::Directive, case(&[("a.http", "# @timeout soon\nGET http://localhost/\n")], &["run", "a.http"]));
-    add(Code::Auth, case(&[("a.http", "# @auth nonsense\nGET http://localhost/\n")], &["run", "a.http"]));
-    add(Code::BodyFile, case(&[("a.http", "POST http://localhost/\n\n< missing.json\n")], &["run", "a.http"]));
-    add(Code::Ref, case(&[("a.http", "# @ref nope\nGET http://localhost/{{token}}\n")], &["run", "a.http"]));
+    add(
+        Code::MissingVariable,
+        case(
+            &[("a.http", "GET http://localhost/{{token}}\n")],
+            &["run", "a.http"],
+        ),
+    );
+    add(
+        Code::Build,
+        case(
+            &[("a.http", "GET http://localhost/{{$randomInt 5 1}}\n")],
+            &["run", "a.http"],
+        ),
+    );
+    add(
+        Code::InvalidFile,
+        case(
+            &[("a.http", "# @capture nonsense\nGET http://localhost/\n")],
+            &["run", "a.http"],
+        ),
+    );
+    add(
+        Code::Directive,
+        case(
+            &[("a.http", "# @timeout soon\nGET http://localhost/\n")],
+            &["run", "a.http"],
+        ),
+    );
+    add(
+        Code::Auth,
+        case(
+            &[("a.http", "# @auth nonsense\nGET http://localhost/\n")],
+            &["run", "a.http"],
+        ),
+    );
+    add(
+        Code::BodyFile,
+        case(
+            &[("a.http", "POST http://localhost/\n\n< missing.json\n")],
+            &["run", "a.http"],
+        ),
+    );
+    add(
+        Code::Ref,
+        case(
+            &[("a.http", "# @ref nope\nGET http://localhost/{{token}}\n")],
+            &["run", "a.http"],
+        ),
+    );
     add(Code::UnknownRequest, get(&["run", "nope"], Setup::None));
     add(
         Code::Ambiguous,
-        case(&[("a.http", "GET http://localhost/1\n\n###\nGET http://localhost/2\n")], &["describe", "a.http"]),
+        case(
+            &[(
+                "a.http",
+                "GET http://localhost/1\n\n###\nGET http://localhost/2\n",
+            )],
+            &["describe", "a.http"],
+        ),
     );
     add(Code::Flag, get(&["run", "--bogus"], Setup::None));
-    add(Code::Environment, get(&["run", "a.http", "--env", "nope"], Setup::None));
+    add(
+        Code::Environment,
+        get(&["run", "a.http", "--env", "nope"], Setup::None),
+    );
     add(
         Code::Project,
-        case(&[("apic.yaml", "timeout: [\n"), ("a.http", "GET http://localhost/\n")], &["run", "a.http"]),
+        case(
+            &[
+                ("apic.yaml", "timeout: [\n"),
+                ("a.http", "GET http://localhost/\n"),
+            ],
+            &["run", "a.http"],
+        ),
     );
     add(
         Code::TlsConfig,
         case(
-            &[("ca.pem", "not a certificate\n"), ("a.http", "GET https://localhost/\n")],
+            &[
+                ("ca.pem", "not a certificate\n"),
+                ("a.http", "GET https://localhost/\n"),
+            ],
             &["run", "a.http", "--cacert", "{{dir}}/ca.pem"],
         ),
     );
     add(
         Code::Proxy,
-        get(&["run", "a.http", "--var", "url=http://localhost", "--proxy", "ftp://proxy"], Setup::None),
+        get(
+            &[
+                "run",
+                "a.http",
+                "--var",
+                "url=http://localhost",
+                "--proxy",
+                "ftp://proxy",
+            ],
+            Setup::None,
+        ),
     );
-    add(Code::Session, get(&["session", "--no-session"], Setup::None));
+    add(
+        Code::Session,
+        get(&["session", "--no-session"], Setup::None),
+    );
     add(
         Code::Data,
         case(
-            &[("a.http", "GET http://localhost/{{id}}\n"), ("rows.csv", "")],
+            &[
+                ("a.http", "GET http://localhost/{{id}}\n"),
+                ("rows.csv", ""),
+            ],
             &["run", "a.http", "--data", "{{dir}}/rows.csv"],
         ),
     );
-    add(Code::File, get(&["fmt", "{{dir}}/missing.http"], Setup::None));
+    add(
+        Code::File,
+        get(&["fmt", "{{dir}}/missing.http"], Setup::None),
+    );
     add(
         Code::Import,
-        case(&[("spec.json", "{\"not\": \"a spec\"}")], &["import", "{{dir}}/spec.json", "--out", "{{dir}}/out"]),
+        case(
+            &[("spec.json", "{\"not\": \"a spec\"}")],
+            &["import", "{{dir}}/spec.json", "--out", "{{dir}}/out"],
+        ),
     );
     add(Code::Features, get(&["test"], Setup::None));
     add(Code::Terminal, get(&["ui"], Setup::None));
-    add(Code::Server, get(&["mcp", "--http", "256.0.0.1:1"], Setup::None));
-    add(Code::Mock, case(&[("spec.json", "{\"not\": \"a spec\"}")], &["mock", "{{dir}}/spec.json"]));
+    add(
+        Code::Server,
+        get(&["mcp", "--http", "256.0.0.1:1"], Setup::None),
+    );
+    add(
+        Code::Mock,
+        case(
+            &[("spec.json", "{\"not\": \"a spec\"}")],
+            &["mock", "{{dir}}/spec.json"],
+        ),
+    );
     add(Code::Transport, get(&["run", "a.http"], Setup::HangUp));
     add(Code::Connect, get(&["run", "a.http"], Setup::Closed));
-    add(Code::Timeout, get(&["run", "a.http", "--timeout", "50ms"], Setup::Hang));
+    add(
+        Code::Timeout,
+        get(&["run", "a.http", "--timeout", "50ms"], Setup::Hang),
+    );
     add(Code::Tls, get(&["run", "a.http"], Setup::Tls));
     add(
         Code::Protocol,
         ErrorCase {
             setup: Setup::Ok,
-            ..case(&[("apic.yaml", "maxBodyBytes: 10\n"), ("a.http", "GET {{url}}/\n")], &["run", "a.http"])
+            ..case(
+                &[
+                    ("apic.yaml", "maxBodyBytes: 10\n"),
+                    ("a.http", "GET {{url}}/\n"),
+                ],
+                &["run", "a.http"],
+            )
         },
     );
     add(
         Code::Cancelled,
-        ErrorCase { cancel: Some(Duration::from_millis(100)), ..get(&["run", "a.http"], Setup::Hang) },
+        ErrorCase {
+            cancel: Some(Duration::from_millis(100)),
+            ..get(&["run", "a.http"], Setup::Hang)
+        },
     );
     cases
 }
@@ -152,7 +263,10 @@ fn every_code_is_produced() {
             continue;
         }
         let Some(c) = cases.get(e.code.as_str()) else {
-            panic!("{} ({}): no test produces it; add a case to error_cases", e.code, e.title);
+            panic!(
+                "{} ({}): no test produces it; add a case to error_cases",
+                e.code, e.title
+            );
         };
         let tmp = tmp();
         let dir = s(&tmp);
@@ -179,7 +293,10 @@ fn every_code_is_produced() {
             got.message
         );
         assert!(
-            got.title == e.title && got.hint == e.hint && got.url == e.code.url() && !got.message.is_empty(),
+            got.title == e.title
+                && got.hint == e.hint
+                && got.url == e.code.url()
+                && !got.message.is_empty(),
             "incomplete error object: {got:?}"
         );
     }

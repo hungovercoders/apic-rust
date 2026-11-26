@@ -31,7 +31,14 @@ AWS SigV4 signing, is said in a comment at the top.",
   apic snippet login --lang go > login.go",
     )
     .args(ArgRule::Exact(1))
-    .flag(FlagSpec::string("lang", "curl", &format!("language: {}", LANGUAGES.join(", "))).short('l'))
+    .flag(
+        FlagSpec::string(
+            "lang",
+            "curl",
+            &format!("language: {}", LANGUAGES.join(", ")),
+        )
+        .short('l'),
+    )
     .runs(run)
 }
 
@@ -59,7 +66,11 @@ impl App {
         if !LANGUAGES.contains(&lang) {
             return Err(fail(
                 Code::Flag,
-                format!("unknown language {}: one of {}", quote(lang), LANGUAGES.join(", ")),
+                format!(
+                    "unknown language {}: one of {}",
+                    quote(lang),
+                    LANGUAGES.join(", ")
+                ),
             ));
         }
         let (r, req) = self.single(target)?;

@@ -52,7 +52,15 @@ fn run_prints_attempts_as_they_happen() {
     let (tmp, _srv) = retry_project();
     let dir = tmp.path().to_str().unwrap();
     let (code, out, errb) = execute(&[
-        "run", "submit", "wait", "-C", dir, "--env", "dev", "--no-session", "--no-color",
+        "run",
+        "submit",
+        "wait",
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "--no-color",
     ]);
     assert_eq!(code, 0, "out={out} err={errb}");
     // submit's report, then wait's attempt lines, then wait's report with
@@ -63,7 +71,12 @@ fn run_prints_attempts_as_they_happen() {
     let report = out.find("200 OK · ").unwrap_or(0);
     let report = out[report + 1..].find("200 OK · ").map(|i| i + report + 1);
     assert!(
-        submit.is_some() && first.is_some() && second.is_some() && submit < first && first < second && second < report,
+        submit.is_some()
+            && first.is_some()
+            && second.is_some()
+            && submit < first
+            && first < second
+            && second < report,
         "order wrong:\n{out}"
     );
     assert!(
@@ -76,7 +89,16 @@ fn run_prints_attempts_as_they_happen() {
 fn run_json_carries_attempts_and_no_progress() {
     let (tmp, _srv) = retry_project();
     let dir = tmp.path().to_str().unwrap();
-    let (code, out, errb) = execute(&["run", "wait", "-C", dir, "--env", "dev", "--no-session", "--json"]);
+    let (code, out, errb) = execute(&[
+        "run",
+        "wait",
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "--json",
+    ]);
     assert!(
         code == 0 && out.contains(r#""attempts":3"#) && !out.contains("attempt 1/5"),
         "code={code} out={out} err={errb}"
@@ -89,14 +111,34 @@ fn retry_flags() {
     let dir = tmp.path().to_str().unwrap();
     // --retry applies to a request without its own policy.
     let (code, out, _) = execute(&[
-        "run", "plain", "-C", dir, "--env", "dev", "--no-session", "--json", "--retry", "4 1ms",
+        "run",
+        "plain",
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "--json",
+        "--retry",
+        "4 1ms",
     ]);
-    assert!(code == 0 && out.contains(r#""attempts":3"#), "--retry: code={code} out={out}");
+    assert!(
+        code == 0 && out.contains(r#""attempts":3"#),
+        "--retry: code={code} out={out}"
+    );
     // --no-retry sends once, and the assertion fails.
     let (tmp, _srv) = retry_project();
     let dir = tmp.path().to_str().unwrap();
     let (code, out, _) = execute(&[
-        "run", "wait", "-C", dir, "--env", "dev", "--no-session", "--json", "--no-retry",
+        "run",
+        "wait",
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "--json",
+        "--no-retry",
     ]);
     assert!(
         code == 1 && !out.contains(r#""attempts""#) && out.contains(r#""ok":false"#),
@@ -104,16 +146,30 @@ fn retry_flags() {
     );
     // A bad --retry is a usage error.
     let (code, _, errb) = execute(&[
-        "run", "plain", "-C", dir, "--env", "dev", "--no-session", "--retry", "soon",
+        "run",
+        "plain",
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "--no-session",
+        "--retry",
+        "soon",
     ]);
-    assert!(code == 2 && errb.contains(r#"--retry "soon""#), "bad --retry: code={code} err={errb}");
+    assert!(
+        code == 2 && errb.contains(r#"--retry "soon""#),
+        "bad --retry: code={code} err={errb}"
+    );
 }
 
 #[test]
 fn validate_reports_bad_retry() {
     let tmp = tmp();
     let dir = tmp.path().to_str().unwrap();
-    must_write(join(dir, "api.http"), "### a\n# @name a\n# @retry 0\nGET http://x\n");
+    must_write(
+        join(dir, "api.http"),
+        "### a\n# @name a\n# @retry 0\nGET http://x\n",
+    );
     must_write(join(dir, "apic.yaml"), "retry: 3 soon\n");
     let (code, out, _) = execute(&["validate", "-C", dir, "--no-color"]);
     assert_ne!(code, 0, "validate should fail:\n{out}");

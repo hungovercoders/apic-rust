@@ -5,7 +5,11 @@
 use std::process::Command;
 
 fn output(cmd: &str, args: &[&str]) -> Option<String> {
-    let out = Command::new(cmd).args(args).env("TZ", "UTC").output().ok()?;
+    let out = Command::new(cmd)
+        .args(args)
+        .env("TZ", "UTC")
+        .output()
+        .ok()?;
     if !out.status.success() {
         return None;
     }
@@ -43,7 +47,15 @@ fn main() {
         .or_else(|| {
             output(
                 "git",
-                &["-c", "log.showSignature=false", "show", "-s", "--format=%cd", "--date=format-local:%Y-%m-%dT%H:%M:%SZ", "HEAD"],
+                &[
+                    "-c",
+                    "log.showSignature=false",
+                    "show",
+                    "-s",
+                    "--format=%cd",
+                    "--date=format-local:%Y-%m-%dT%H:%M:%SZ",
+                    "HEAD",
+                ],
             )
         })
         .unwrap_or_default();

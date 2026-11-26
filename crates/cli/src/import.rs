@@ -85,13 +85,23 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
     if apic_postman::looks_like_collection(&data) {
         let res = apic_postman::import(
             &args[0],
-            apic_postman::Options { out_dir: out, env_files: postman_envs, force },
+            apic_postman::Options {
+                out_dir: out,
+                env_files: postman_envs,
+                force,
+            },
         )
         .map_err(|e| fail(Code::Import, e.to_string()))?;
         if a.g.json {
             return a.write_json(&res);
         }
-        a.print_import(&res.files, &res.skipped, &res.env_file, &res.base_url, res.requests);
+        a.print_import(
+            &res.files,
+            &res.skipped,
+            &res.env_file,
+            &res.base_url,
+            res.requests,
+        );
         for u in &res.unsupported {
             wln!(a.stdout, "note  {}: {}: {}", u.request, u.what, u.reason);
         }
@@ -112,12 +122,25 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
             "--postman-env goes with a Postman collection, not an OpenAPI document",
         ));
     }
-    let res = apic_openapi::import(&args[0], apic_openapi::Options { out_dir: out, env_name, force })
-        .map_err(|e| fail(Code::Import, e.to_string()))?;
+    let res = apic_openapi::import(
+        &args[0],
+        apic_openapi::Options {
+            out_dir: out,
+            env_name,
+            force,
+        },
+    )
+    .map_err(|e| fail(Code::Import, e.to_string()))?;
     if a.g.json {
         return a.write_json(&res);
     }
-    a.print_import(&res.files, &res.skipped, &res.env_file, &res.base_url, res.requests);
+    a.print_import(
+        &res.files,
+        &res.skipped,
+        &res.env_file,
+        &res.base_url,
+        res.requests,
+    );
     Ok(())
 }
 
@@ -136,8 +159,8 @@ impl App {
             })?;
             command = String::from_utf8_lossy(&data).into_owned();
         }
-        let mut req =
-            apic_curlimport::parse(&command).map_err(|e| fail(Code::Import, format!("curl: {e}")))?;
+        let mut req = apic_curlimport::parse(&command)
+            .map_err(|e| fail(Code::Import, format!("curl: {e}")))?;
         // The project's baseUrl, when there is one, replaces the host.
         let mut base_url = String::new();
         if let Ok(r) = self.new_runner() {
@@ -153,7 +176,11 @@ impl App {
         let mut target = String::new();
         let mut existing = String::new();
         if !into.is_empty() {
-            target = if fp::is_abs(into) { into.to_string() } else { fp::join(&self.g.dir, into) };
+            target = if fp::is_abs(into) {
+                into.to_string()
+            } else {
+                fp::join(&self.g.dir, into)
+            };
             match std::fs::read(&target) {
                 Ok(data) => existing = String::from_utf8_lossy(&data).into_owned(),
                 Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
@@ -183,7 +210,8 @@ impl App {
             } else {
                 let side = format!("{name}.body.txt");
                 let side_path = fp::join(&fp::dir(&target), &side);
-                write_file(&side_path, req.body.as_bytes(), 0o644).map_err(|e| fail(Code::Import, e))?;
+                write_file(&side_path, req.body.as_bytes(), 0o644)
+                    .map_err(|e| fail(Code::Import, e))?;
                 req.body = String::new();
                 req.body_file = format!("./{side}");
                 wln!(self.stdout, "wrote {}", fp::join(&fp::dir(into), &side));
@@ -207,7 +235,12 @@ impl App {
                 request: &'a str,
                 warnings: &'a [String],
             }
-            return self.write_json(&Out { file: into, name: &name, request: &block, warnings: &req.warnings });
+            return self.write_json(&Out {
+                file: into,
+                name: &name,
+                request: &block,
+                warnings: &req.warnings,
+            });
         }
         if target.is_empty() {
             w!(self.stdout, "{block}");
@@ -220,7 +253,14 @@ impl App {
         Ok(())
     }
 
-    fn print_import(&self, files: &[String], skipped: &[String], env_file: &str, base_url: &str, requests: usize) {
+    fn print_import(
+        &self,
+        files: &[String],
+        skipped: &[String],
+        env_file: &str,
+        base_url: &str,
+        requests: usize,
+    ) {
         for f in files {
             if f == env_file {
                 continue;
@@ -237,6 +277,9 @@ impl App {
                 wln!(self.stdout, "wrote {env_file} (baseUrl = {base_url})");
             }
         }
-        wln!(self.stdout, "{requests} request(s) generated; run `apic list` to see them");
+        wln!(
+            self.stdout,
+            "{requests} request(s) generated; run `apic list` to see them"
+        );
     }
 }

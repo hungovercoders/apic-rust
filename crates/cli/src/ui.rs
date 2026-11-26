@@ -11,9 +11,12 @@ use crate::shared::theme;
 use crate::spec::{ArgRule, CommandSpec, FlagSpec};
 
 pub(crate) fn spec() -> CommandSpec {
-    CommandSpec::new("ui", "Browse and run the project's requests in a terminal UI")
-        .long(
-            "ui opens an interactive terminal UI: the requests on the left, and a
+    CommandSpec::new(
+        "ui",
+        "Browse and run the project's requests in a terminal UI",
+    )
+    .long(
+        "ui opens an interactive terminal UI: the requests on the left, and a
 preview, the response, the checks, the session and the history on the
 right. Run a request with enter, a whole file with f, switch environment with e, and
 press ? for every key.
@@ -27,18 +30,18 @@ project written elsewhere unless you cd into it or pass -C.
 
 --demo needs nothing set up: it serves the built-in fake API in-process and
 opens the UI on the example project that targets it.",
-        )
-        .example(
-            "  apic ui
+    )
+    .example(
+        "  apic ui
   apic ui -C api --env staging
   apic ui --demo",
-        )
-        .args(ArgRule::None)
-        .flag(FlagSpec::bool(
-            "demo",
-            "serve the built-in demo API in-process and open the UI on its example project",
-        ))
-        .runs(run)
+    )
+    .args(ArgRule::None)
+    .flag(FlagSpec::bool(
+        "demo",
+        "serve the built-in demo API in-process and open the UI on its example project",
+    ))
+    .runs(run)
 }
 
 fn run(a: &mut App, inv: &Invocation) -> CliResult {
@@ -86,10 +89,17 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
     cfg.demo = demo;
     cfg.theme = theme();
     if !a.stdin.is_stdin() {
-        return Err(fail(Code::Terminal, "apic ui needs an interactive terminal"));
+        return Err(fail(
+            Code::Terminal,
+            "apic ui needs an interactive terminal",
+        ));
     }
-    let stdin = apic_ui::stdin_file()
-        .map_err(|e| fail(Code::Terminal, format!("ui: {}", apic_gocompat::io_error_text(&e))))?;
+    let stdin = apic_ui::stdin_file().map_err(|e| {
+        fail(
+            Code::Terminal,
+            format!("ui: {}", apic_gocompat::io_error_text(&e)),
+        )
+    })?;
     let mut model = apic_ui::Model::new(cfg);
     apic_ui::run(&inv.cancel, &mut model, stdin, &mut a.stdout.clone())
         .map_err(|e| fail(Code::Terminal, format!("ui: {e}")))
@@ -163,7 +173,10 @@ pub(crate) fn start_demo() -> Result<Demo, CliError> {
         return Err(CliError::other(e));
     }
     let server = Server::start(listener, apic_demoapi::new());
-    Ok(Demo { root: dir, server: Some(server) })
+    Ok(Demo {
+        root: dir,
+        server: Some(server),
+    })
 }
 
 /// Makes a new directory of its own under the system's temporary one.
@@ -184,10 +197,15 @@ fn temp_dir(prefix: &str) -> Result<String, String> {
         match builder.create(&path) {
             Ok(()) => return Ok(path.to_string_lossy().into_owned()),
             Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
-                seed = seed.wrapping_mul(6_364_136_223_846_793_005).wrapping_add(1_442_695_040_888_963_407);
+                seed = seed
+                    .wrapping_mul(6_364_136_223_846_793_005)
+                    .wrapping_add(1_442_695_040_888_963_407);
             }
             Err(e) => return Err(apic_gocompat::path_error("mkdir", &path, &e)),
         }
     }
-    Err(format!("mkdir {}: file exists", base.join(prefix).display()))
+    Err(format!(
+        "mkdir {}: file exists",
+        base.join(prefix).display()
+    ))
 }

@@ -29,7 +29,10 @@ fn validate_text_shows_columns_and_codes() {
         assert!(out.contains(want), "missing {want:?} in:\n{out}");
     }
     // Stdout is a buffer, not a terminal, so no caret lines.
-    assert!(!out.contains('^'), "caret line printed without a terminal:\n{out}");
+    assert!(
+        !out.contains('^'),
+        "caret line printed without a terminal:\n{out}"
+    );
 }
 
 #[test]
@@ -77,7 +80,9 @@ fn validate_sarif_format() {
     let run = &runs[0];
     let rules = run["tool"]["driver"]["rules"].as_array().unwrap();
     assert!(
-        rules.len() == 2 && rules[0]["id"] == "unknown-directive" && rules[1]["id"] == "unknown-selector",
+        rules.len() == 2
+            && rules[0]["id"] == "unknown-directive"
+            && rules[1]["id"] == "unknown-selector",
         "rules: {rules:?}"
     );
     let results = run["results"].as_array().unwrap();
@@ -119,19 +124,28 @@ fn diag_for(path: &str, msg: &str) -> Diagnostic {
 #[test]
 fn github_annotation_escapes() {
     let got = github_annotation(&diag_for("a,b:c.http", "50% done\nnext"));
-    assert_eq!(got, "::error file=a%2Cb%3Ac.http,line=1,title=apic%3A t::50%25 done%0Anext");
+    assert_eq!(
+        got,
+        "::error file=a%2Cb%3Ac.http,line=1,title=apic%3A t::50%25 done%0Anext"
+    );
 }
 
 #[test]
 fn caret_line_underlines_the_span() {
     let tmp = tmp();
     let dir = s(&tmp);
-    must_write(join(&dir, "api.http"), "# @assert bogus == 1\nGET https://x\n");
+    must_write(
+        join(&dir, "api.http"),
+        "# @assert bogus == 1\nGET https://x\n",
+    );
     let mut d = diag_for("api.http", "m");
     (d.column, d.end_line, d.end_column) = (11, 1, 16);
-    let got = apic_output::style::with_color_profile(apic_output::style::Profile::Ascii, || caret_line(&dir, &d));
+    let got = apic_output::style::with_color_profile(apic_output::style::Profile::Ascii, || {
+        caret_line(&dir, &d)
+    });
     assert!(
-        got.contains("# @assert bogus == 1") && got.ends_with(&format!("{}^^^^^\n", " ".repeat(10))),
+        got.contains("# @assert bogus == 1")
+            && got.ends_with(&format!("{}^^^^^\n", " ".repeat(10))),
         "got {got:?}"
     );
     assert_eq!(
@@ -156,8 +170,15 @@ fn fmt_command() {
     };
     // --check lists what would change and exits 1 without writing.
     let (out, code) = exec("", &["fmt", "--check"]);
-    assert!(code == 1 && out == "api.http\n", "check: code={code} out={out:?}");
-    assert_eq!(must_read(join(&dir, "api.http")), messy, "--check must not write");
+    assert!(
+        code == 1 && out == "api.http\n",
+        "check: code={code} out={out:?}"
+    );
+    assert_eq!(
+        must_read(join(&dir, "api.http")),
+        messy,
+        "--check must not write"
+    );
     // --diff shows the change as a unified diff.
     let (out, code) = exec("", &["fmt", "--diff"]);
     assert!(
@@ -170,19 +191,26 @@ fn fmt_command() {
     );
     // stdin to stdout.
     let (out, code) = exec(messy, &["fmt", "-"]);
-    assert!(code == 0 && out == canonical, "stdin: code={code} out={out:?}");
+    assert!(
+        code == 0 && out == canonical,
+        "stdin: code={code} out={out:?}"
+    );
     // A missing final newline is a change the diff shows, with diff -u's
     // marker.
     must_write(join(&dir, "sub/other.http"), "GET http://y");
     let (out, code) = exec("", &["fmt", "--diff", "sub"]);
     assert!(
-        code == 1 && out.contains("@@ -1,1 +1,1 @@\n-GET http://y\n\\ No newline at end of file\n+GET http://y\n"),
+        code == 1
+            && out.contains(
+                "@@ -1,1 +1,1 @@\n-GET http://y\n\\ No newline at end of file\n+GET http://y\n"
+            ),
         "no-newline diff: code={code} out={out}"
     );
     must_write(join(&dir, "sub/other.http"), "GET http://y\n");
     // In place, with the JSON summary as the only thing on stdout.
     let (out, code) = exec("", &["--json", "fmt"]);
-    let summary: Value = serde_json::from_str(&out).unwrap_or_else(|e| panic!("json: not one object: {e}\n{out}"));
+    let summary: Value =
+        serde_json::from_str(&out).unwrap_or_else(|e| panic!("json: not one object: {e}\n{out}"));
     let changed = summary["changed"].as_array().unwrap();
     assert!(
         code == 0
@@ -194,11 +222,17 @@ fn fmt_command() {
     );
     assert_eq!(must_read(join(&dir, "api.http")), canonical, "written");
     let (out, code) = exec("", &["fmt"]);
-    assert!(code == 0 && out == "2 files already formatted\n", "second run: code={code} out={out:?}");
+    assert!(
+        code == 0 && out == "2 files already formatted\n",
+        "second run: code={code} out={out:?}"
+    );
     // Named paths, files and directories.
     must_write(join(&dir, "sub/other.http"), "GET http://y  \n");
     let (out, code) = exec("", &["fmt", "sub", "api.http"]);
-    assert!(code == 0 && out == "formatted sub/other.http\n", "paths: code={code} out={out:?}");
+    assert!(
+        code == 0 && out == "formatted sub/other.http\n",
+        "paths: code={code} out={out:?}"
+    );
     let (_, code) = exec("", &["fmt", "nope.http"]);
     assert_eq!(code, 2, "missing path");
 }

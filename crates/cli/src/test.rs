@@ -52,7 +52,10 @@ phrase) · 3 a server could not be reached."##,
     )
     .flag(FlagSpec::string("output", "", "write the report to a file instead of stdout").short('o'))
     .flag(FlagSpec::string("tags", "", r##"tag expression, e.g. "@smoke && ~@slow""##).short('t'))
-    .flag(FlagSpec::bool("stop-on-failure", "stop after the first failed scenario"))
+    .flag(FlagSpec::bool(
+        "stop-on-failure",
+        "stop after the first failed scenario",
+    ))
     .flag(FlagSpec::bool(
         "use-session",
         "read and write .apic/session.json instead of an isolated session per scenario",
@@ -256,7 +259,10 @@ pub(crate) fn output_overlaps_sources(output: &str, p: &Project, features: &[Str
         if !under_root(path) {
             return false;
         }
-        if matches!(fp::ext(path).to_lowercase().as_str(), ".feature" | ".http" | ".rest") {
+        if matches!(
+            fp::ext(path).to_lowercase().as_str(),
+            ".feature" | ".http" | ".rest"
+        ) {
             return true;
         }
         let base = fp::base(path);
@@ -346,11 +352,19 @@ pub(crate) struct LazyFile {
 
 impl LazyFile {
     pub(crate) fn new(path: &str) -> LazyFile {
-        LazyFile { path: path.to_string(), f: None, err: None }
+        LazyFile {
+            path: path.to_string(),
+            f: None,
+            err: None,
+        }
     }
 
     fn fail(&mut self, e: std::io::Error, what: &str) -> std::io::Error {
-        self.err = Some(apic_gocompat::path_error(what, std::path::Path::new(&self.path), &e));
+        self.err = Some(apic_gocompat::path_error(
+            what,
+            std::path::Path::new(&self.path),
+            &e,
+        ));
         e
     }
 
@@ -413,7 +427,11 @@ impl App {
             if let Ok(p) = self.load_project() {
                 for r in p.requests() {
                     for st in r.steps() {
-                        out.push(Entry { pattern: st, purpose: format!("runs {}", r.id()), request: r.id() });
+                        out.push(Entry {
+                            pattern: st,
+                            purpose: format!("runs {}", r.id()),
+                            request: r.id(),
+                        });
                     }
                 }
             }
@@ -422,7 +440,12 @@ impl App {
         let t = theme();
         wln!(self.stdout, "{}", t.bold.render("built-in steps"));
         for v in apic_bdd::VOCABULARY {
-            w!(self.stdout, "  {}\n      {}\n", v.pattern, t.dim.render(v.purpose));
+            w!(
+                self.stdout,
+                "  {}\n      {}\n",
+                v.pattern,
+                t.dim.render(v.purpose)
+            );
         }
         let Ok(p) = self.load_project() else {
             return Ok(()); // vocabulary alone is still useful outside a project
@@ -431,7 +454,11 @@ impl App {
         for r in p.requests() {
             for st in r.steps() {
                 if !printed {
-                    wln!(self.stdout, "{}", t.bold.render("\nphrases declared in this project"));
+                    wln!(
+                        self.stdout,
+                        "{}",
+                        t.bold.render("\nphrases declared in this project")
+                    );
                     printed = true;
                 }
                 w!(

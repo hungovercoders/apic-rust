@@ -16,9 +16,12 @@ use crate::shared::{plural, theme};
 use crate::spec::{CommandSpec, FlagSpec};
 
 pub(crate) fn spec() -> CommandSpec {
-    CommandSpec::new("validate", "Parse every .http file and report problems (for CI)")
-        .long(
-            r#"validate parses every .http file, checks selectors, assertions, auth specs,
+    CommandSpec::new(
+        "validate",
+        "Parse every .http file and report problems (for CI)",
+    )
+    .long(
+        r#"validate parses every .http file, checks selectors, assertions, auth specs,
 step phrases, body files and request names, and reports what it finds.
 Errors exit 2, so it works as a pull-request gate.
 
@@ -29,15 +32,22 @@ Errors exit 2, so it works as a pull-request gate.
   github  GitHub Actions workflow commands, so a failing check annotates
           the pull request at the right line
   sarif   SARIF 2.1.0, for code scanning uploads"#,
-        )
-        .example(
-            r#"  apic validate
+    )
+    .example(
+        r#"  apic validate
   apic validate --format github     # in a GitHub Actions step
   apic validate --format sarif > apic.sarif
   apic validate --json | jq '.diagnostics[] | select(.severity == "error")'"#,
+    )
+    .flag(
+        FlagSpec::string(
+            "format",
+            "text",
+            "output format: text, json, github or sarif",
         )
-        .flag(FlagSpec::string("format", "text", "output format: text, json, github or sarif").short('f'))
-        .runs(run)
+        .short('f'),
+    )
+    .runs(run)
 }
 
 fn run(a: &mut App, inv: &Invocation) -> CliResult {
@@ -99,7 +109,10 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
         _ => {
             return Err(fail(
                 Code::Flag,
-                format!("--format must be text, json, github or sarif, got {}", quote(&format)),
+                format!(
+                    "--format must be text, json, github or sarif, got {}",
+                    quote(&format)
+                ),
             ))
         }
     }
@@ -120,7 +133,12 @@ impl App {
         if diags.is_empty() {
             wln!(self.stdout, "{} {counts}, no problems", t.ok.render("✓"));
         } else if errs == 0 {
-            wln!(self.stdout, "{} {counts}, {}", t.warn.render("!"), plural(diags.len(), "warning"));
+            wln!(
+                self.stdout,
+                "{} {counts}, {}",
+                t.warn.render("!"),
+                plural(diags.len(), "warning")
+            );
         } else {
             wln!(
                 self.stdout,
@@ -155,13 +173,21 @@ pub(crate) fn caret_line(root: &str, d: &Diagnostic) -> String {
     }
     let t = theme();
     let pad = " ".repeat(d.column - 1);
-    format!("  {}\n  {pad}{}\n", t.dim.render(src), t.accent.render(&"^".repeat(width)))
+    format!(
+        "  {}\n  {pad}{}\n",
+        t.dim.render(src),
+        t.accent.render(&"^".repeat(width))
+    )
 }
 
 /// Renders a diagnostic as a GitHub Actions workflow command, which the
 /// runner turns into an annotation on the pull request.
 pub(crate) fn github_annotation(d: &Diagnostic) -> String {
-    let kind = if d.severity == "error" { "error" } else { "warning" };
+    let kind = if d.severity == "error" {
+        "error"
+    } else {
+        "warning"
+    };
     let mut props = vec![format!("file={}", gh_escape_prop(&d.path))];
     if d.line > 0 {
         props.push(format!("line={}", d.line));
@@ -174,15 +200,24 @@ pub(crate) fn github_annotation(d: &Diagnostic) -> String {
         }
     }
     if !d.code.is_empty() {
-        props.push(format!("title={}", gh_escape_prop(&format!("apic: {}", d.code))));
+        props.push(format!(
+            "title={}",
+            gh_escape_prop(&format!("apic: {}", d.code))
+        ));
     }
-    format!("::{kind} {}::{}", props.join(","), gh_escape_data(&d.message))
+    format!(
+        "::{kind} {}::{}",
+        props.join(","),
+        gh_escape_data(&d.message)
+    )
 }
 
 // The escaping rules for workflow commands: data escapes %, \r and \n;
 // properties additionally escape : and ,.
 fn gh_escape_data(s: &str) -> String {
-    s.replace('%', "%25").replace('\r', "%0D").replace('\n', "%0A")
+    s.replace('%', "%25")
+        .replace('\r', "%0D")
+        .replace('\n', "%0A")
 }
 
 fn gh_escape_prop(s: &str) -> String {
@@ -192,7 +227,11 @@ fn gh_escape_prop(s: &str) -> String {
 /// Renders diagnostics as a SARIF 2.1.0 log with one rule per code, the
 /// shape GitHub code scanning and most IDEs accept.
 pub(crate) fn sarif_report(diags: &[Diagnostic]) -> Value {
-    let codes: BTreeSet<&str> = diags.iter().map(|d| d.code.as_str()).filter(|c| !c.is_empty()).collect();
+    let codes: BTreeSet<&str> = diags
+        .iter()
+        .map(|d| d.code.as_str())
+        .filter(|c| !c.is_empty())
+        .collect();
     let rules: Vec<Value> = codes
         .iter()
         .map(|c| {
@@ -206,7 +245,11 @@ pub(crate) fn sarif_report(diags: &[Diagnostic]) -> Value {
     let results: Vec<Value> = diags
         .iter()
         .map(|d| {
-            let level = if d.severity == "error" { "error" } else { "warning" };
+            let level = if d.severity == "error" {
+                "error"
+            } else {
+                "warning"
+            };
             let mut region = serde_json::Map::new();
             if d.line > 0 {
                 region.insert("startLine".into(), json!(d.line));

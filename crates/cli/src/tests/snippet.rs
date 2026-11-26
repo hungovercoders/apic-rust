@@ -18,12 +18,17 @@ fn snippet() {
     let run = |first: &[&str]| execute(&[first, &args[..]].concat());
     let (code, out, errb) = run(&["snippet", "get-user", "--lang", "python"]);
     assert!(
-        code == 0 && out.contains(r#""Authorization": "Bearer t-1""#) && out.contains("requests.request("),
+        code == 0
+            && out.contains(r#""Authorization": "Bearer t-1""#)
+            && out.contains("requests.request("),
         "python: code={code} out={out} err={errb}"
     );
     let (code, out, _) = run(&["snippet", "get-user", "-l", "js", "--redact", "--json"]);
     assert!(
-        code == 0 && out.contains(r#""lang": "js""#) && out.contains("process.env.TOKEN") && !out.contains("t-1"),
+        code == 0
+            && out.contains(r#""lang": "js""#)
+            && out.contains("process.env.TOKEN")
+            && !out.contains("t-1"),
         "js --json --redact: code={code} out={out}"
     );
     let (code, curl_out, _) = run(&["curl", "get-user"]);
@@ -43,5 +48,8 @@ fn snippet() {
         "unknown language: code={code} err={errb}"
     );
     let (code, _, errb) = run(&["snippet", "gap", "--lang", "go"]);
-    assert!(code == 2 && errb.contains("nope"), "missing variable: code={code} err={errb}");
+    assert!(
+        code == 2 && errb.contains("nope"),
+        "missing variable: code={code} err={errb}"
+    );
 }

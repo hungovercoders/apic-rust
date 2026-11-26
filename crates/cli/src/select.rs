@@ -39,7 +39,11 @@ masked, so header.set-cookie and cookie.<name> read as ***."##,
   apic select login body --entry 2 --json",
     )
     .args(ArgRule::Exact(2))
-    .flag(FlagSpec::int("entry", 1, "which recorded response, 1 being the newest"))
+    .flag(FlagSpec::int(
+        "entry",
+        1,
+        "which recorded response, 1 being the newest",
+    ))
     .runs(run)
 }
 
@@ -77,12 +81,19 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
             return Err(history_err(err));
         }
     };
-    let res = apic_runner::parse_result(e.result.as_deref().unwrap_or("null"))
-        .map_err(|err| fail(Code::Session, format!("history entry {entry} of {}: {err}", t.name)))?;
+    let res = apic_runner::parse_result(e.result.as_deref().unwrap_or("null")).map_err(|err| {
+        fail(
+            Code::Session,
+            format!("history entry {entry} of {}: {err}", t.name),
+        )
+    })?;
     let Some(resp) = res.raw() else {
         return Err(fail(
             Code::Session,
-            format!("history entry {entry} of {}: the request got no response", t.name),
+            format!(
+                "history entry {entry} of {}: the request got no response",
+                t.name
+            ),
         ));
     };
     if resp.body == MASKED.as_bytes() {
@@ -100,10 +111,12 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
         let v = match &value {
             None => "null".to_string(),
             // A number, boolean, null, array or object as itself.
-            Some(v) if v.kind != Kind::String => match serde_json::from_str::<serde_json::Value>(&v.text) {
-                Ok(parsed) => crate::shared::plain_json(&parsed),
-                Err(_) => apic_gocompat::json_string(&v.text, false),
-            },
+            Some(v) if v.kind != Kind::String => {
+                match serde_json::from_str::<serde_json::Value>(&v.text) {
+                    Ok(parsed) => crate::shared::plain_json(&parsed),
+                    Err(_) => apic_gocompat::json_string(&v.text, false),
+                }
+            }
             Some(v) => apic_gocompat::json_string(&v.text, false),
         };
         #[derive(Serialize)]
@@ -142,7 +155,9 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
         });
     };
     let mut text = value.text;
-    if (value.kind == Kind::Object || value.kind == Kind::Array) && apic_gocompat::check_json(text.as_bytes()).is_ok() {
+    if (value.kind == Kind::Object || value.kind == Kind::Array)
+        && apic_gocompat::check_json(text.as_bytes()).is_ok()
+    {
         text = apic_gocompat::indent_json(&text, "", "  ");
     }
     wln!(a.stdout, "{text}");

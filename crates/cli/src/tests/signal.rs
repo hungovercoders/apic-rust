@@ -40,7 +40,11 @@ fn demo_stops_when_cancelled() {
             cancel.cancel();
         });
     }
-    let (code, out, errb) = execute_with(&cancel, None, &["demo", "--out", &s(&dir), "--port", &port.to_string()]);
+    let (code, out, errb) = execute_with(
+        &cancel,
+        None,
+        &["demo", "--out", &s(&dir), "--port", &port.to_string()],
+    );
     assert!(
         code == 0 && out.contains("demo api listening on") && errb.is_empty(),
         "code={code}\nstdout:\n{out}\nstderr:\n{errb}"
@@ -59,14 +63,25 @@ fn demo_port_in_use_is_a_server_error() {
     let dir = join(tmp.path(), "apic-demo");
     let (code, out, errb) = execute(&["--json", "demo", "--out", &dir, "--port", &port]);
     let got = json_error(&errb);
-    assert!(code == 2 && got.code == Code::Server, "code={code} {}: {}", got.code, got.message);
-    assert!(out.is_empty(), "stdout should be empty when the port is taken:\n{out}");
+    assert!(
+        code == 2 && got.code == Code::Server,
+        "code={code} {}: {}",
+        got.code,
+        got.message
+    );
+    assert!(
+        out.is_empty(),
+        "stdout should be empty when the port is taken:\n{out}"
+    );
     assert!(
         !Path::new(&dir).exists(),
         "the project should not be written when the port is taken"
     );
     let (code, out, _) = execute(&["demo", "--out", &dir, "--port", &port]);
-    assert!(code == 2 && !out.contains("listening"), "text mode: code={code} stdout:\n{out}");
+    assert!(
+        code == 2 && !out.contains("listening"),
+        "text mode: code={code} stdout:\n{out}"
+    );
 }
 
 /// --keep-going carries a flow past a failed request, not past Ctrl-C:

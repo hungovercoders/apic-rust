@@ -25,7 +25,8 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
     if a.g.json {
         return a.write_json(&mask_description(&d));
     }
-    a.stdout.print(&apic_output::describe(&theme(), &d, &req.headers));
+    a.stdout
+        .print(&apic_output::describe(&theme(), &d, &req.headers));
     Ok(())
 }
 

@@ -97,8 +97,16 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
             #[serde(skip_serializing_if = "str::is_empty")]
             hint: &'a str,
         }
-        let hint = if p.files.is_empty() { NEW_HERE_HINT } else { "" };
-        return a.write_json(&Listing { root: &p.root, requests: &entries, hint });
+        let hint = if p.files.is_empty() {
+            NEW_HERE_HINT
+        } else {
+            ""
+        };
+        return a.write_json(&Listing {
+            root: &p.root,
+            requests: &entries,
+            hint,
+        });
     }
     if entries.is_empty() {
         if args.len() == 1 {
@@ -140,18 +148,28 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
         let (id, desc) = if e.disabled {
             (
                 t.dim.render(&e.id),
-                format!("{} {}", t.dim.render("(disabled)"), e.description).trim().to_string(),
+                format!("{} {}", t.dim.render("(disabled)"), e.description)
+                    .trim()
+                    .to_string(),
             )
         } else {
             (t.bold.render(&e.id), e.description.clone())
         };
-        let mut row = vec![id, t.method(&e.method), t.url.render(&e.url), t.dim.render(&place), desc];
+        let mut row = vec![
+            id,
+            t.method(&e.method),
+            t.url.render(&e.url),
+            t.dim.render(&place),
+            desc,
+        ];
         if has_steps {
             row.push(t.dim.render(&e.steps.join(" | ")));
         }
         rows.push(row);
     }
-    a.stdout.write_text(&table(&rows)).map_err(CliError::other)?;
+    a.stdout
+        .write_text(&table(&rows))
+        .map_err(CliError::other)?;
     w!(
         a.stdout,
         "\n{}\n",
@@ -175,7 +193,8 @@ pub(crate) const NEW_HERE_HINT: &str =
     "new here? apic init scaffolds a project, and apic ui --demo shows a working one";
 
 /// A colour or style sequence the theme writes.
-static ANSI_SEQ: LazyLock<Regex> = LazyLock::new(|| Regex::new("\x1b\\[[0-9;]*m").expect("valid pattern"));
+static ANSI_SEQ: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new("\x1b\\[[0-9;]*m").expect("valid pattern"));
 
 /// Lays rows out in columns two spaces apart, sized by what shows on the
 /// terminal rather than by the bytes, so a bold header lines up with the

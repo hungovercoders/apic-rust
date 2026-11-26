@@ -94,7 +94,11 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
             token = std::env::var("APIC_MCP_TOKEN").unwrap_or_default();
         }
         let stderr = a.stderr.clone();
-        let guard = if token.is_empty() { "no token: loopback only" } else { "bearer token required" };
+        let guard = if token.is_empty() {
+            "no token: loopback only"
+        } else {
+            "bearer token required"
+        };
         let ready = move |bound: &str| {
             wln!(stderr, "apic mcp listening on http://{bound} ({guard})");
         };
@@ -123,7 +127,11 @@ const MCP_SERVER_NAME: &str = "api";
 fn install(a: &mut App, inv: &Invocation) -> CliResult {
     let dir = inv.args.first().map_or(".", String::as_str);
     let into = inv.flags.strings("to");
-    let files = if into.is_empty() { vec![MCP_CONFIG_FILE.to_string()] } else { into };
+    let files = if into.is_empty() {
+        vec![MCP_CONFIG_FILE.to_string()]
+    } else {
+        into
+    };
     let server_args = mcp_server_args(dir, &a.g.dir, &a.g.env)?;
     let done = write_mcp_config(dir, &files, &server_args, true)?;
     a.print_written(&done)
@@ -134,7 +142,11 @@ fn install(a: &mut App, inv: &Invocation) -> CliResult {
 /// configuration lives in (where the agent starts) when the two differ,
 /// in forward slashes so the committed file works on every platform, then
 /// --env when one is set.
-pub(crate) fn mcp_server_args(config_dir: &str, project_dir: &str, env: &str) -> Result<Vec<String>, CliError> {
+pub(crate) fn mcp_server_args(
+    config_dir: &str,
+    project_dir: &str,
+    env: &str,
+) -> Result<Vec<String>, CliError> {
     let mut args = vec!["mcp".to_string()];
     let abs = |p: &str| fp::abs(p).map_err(|e| fail(Code::File, apic_gocompat::io_error_text(&e)));
     let abs_config = abs(config_dir)?;
@@ -179,8 +191,9 @@ pub(crate) fn write_mcp_config(
         let mut doc: Map<String, Value> = Map::new();
         match std::fs::read(&target) {
             Ok(existing) if !existing.trim_ascii().is_empty() => {
-                doc = read_object(&existing)
-                    .map_err(|why| fail(Code::File, format!("{shown} is not a JSON object: {why}")))?;
+                doc = read_object(&existing).map_err(|why| {
+                    fail(Code::File, format!("{shown} is not a JSON object: {why}"))
+                })?;
             }
             Ok(_) => {}
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
@@ -199,7 +212,10 @@ pub(crate) fn write_mcp_config(
                 ))
             }
         };
-        if servers.get(MCP_SERVER_NAME).is_some_and(|have| plain_json(have) == plain_json(&entry)) {
+        if servers
+            .get(MCP_SERVER_NAME)
+            .is_some_and(|have| plain_json(have) == plain_json(&entry))
+        {
             out.unchanged.push(shown);
             continue;
         }

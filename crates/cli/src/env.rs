@@ -72,10 +72,20 @@ fn run(a: &mut App, _: &Invocation) -> CliResult {
                 }
             })
             .collect();
-        wln!(a.stdout, "{} {}", t.bold.render("environments:"), marked.join(" "));
+        wln!(
+            a.stdout,
+            "{} {}",
+            t.bold.render("environments:"),
+            marked.join(" ")
+        );
     }
     if !r.envs.found.is_empty() {
-        wln!(a.stdout, "{} {}", t.dim.render("files:"), r.envs.found.join(", "));
+        wln!(
+            a.stdout,
+            "{} {}",
+            t.dim.render("files:"),
+            r.envs.found.join(", ")
+        );
     }
     if let Some(p) = r.proxy_info("") {
         wln!(a.stdout, "{} {p}", t.dim.render("proxy:"));
@@ -88,7 +98,11 @@ fn run(a: &mut App, _: &Invocation) -> CliResult {
         // JetBrains Security.Auth: what {{$auth.token("name")}} runs.
         a.stdout.print(&apic_output::section(&t, "auth"));
         for c in &auths {
-            let what = if c.error.is_empty() { c.spec.clone() } else { t.fail.render(&c.error) };
+            let what = if c.error.is_empty() {
+                c.spec.clone()
+            } else {
+                t.fail.render(&c.error)
+            };
             wln!(
                 a.stdout,
                 "  {} {what} {}",

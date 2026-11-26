@@ -59,7 +59,12 @@ impl App {
                     ));
                 }
                 let name = apic_runner::history_key(&p, &reqs[0]);
-                return Ok(HistoryTarget { store, project: p, env, name });
+                return Ok(HistoryTarget {
+                    store,
+                    project: p,
+                    env,
+                    name,
+                });
             }
             Ok(reqs) => {
                 return Err(fail(
@@ -76,8 +81,16 @@ impl App {
         if shared > 1 {
             return Err(fail(Code::Ambiguous, rerr.to_string()));
         }
-        if store.list(&env, target).is_ok_and(|entries| !entries.is_empty()) {
-            return Ok(HistoryTarget { store, project: p, env, name: target.to_string() });
+        if store
+            .list(&env, target)
+            .is_ok_and(|entries| !entries.is_empty())
+        {
+            return Ok(HistoryTarget {
+                store,
+                project: p,
+                env,
+                name: target.to_string(),
+            });
         }
         Err(unknown_request(rerr))
     }
@@ -140,8 +153,18 @@ and everything when the run used --redact.",
   apic history clear login",
     )
     .args(ArgRule::Max(1))
-    .flag(FlagSpec::int("show", 0, "print entry N (1 is the newest) as apic run printed it"))
-    .flag(FlagSpec::bool("verbose", "with --show, include the request and response headers").short('v'))
+    .flag(FlagSpec::int(
+        "show",
+        0,
+        "print entry N (1 is the newest) as apic run printed it",
+    ))
+    .flag(
+        FlagSpec::bool(
+            "verbose",
+            "with --show, include the request and response headers",
+        )
+        .short('v'),
+    )
     .runs(run)
     .subcommand(
         CommandSpec::new(
@@ -177,7 +200,10 @@ newest; the default compares 2 with 1.",
 add --every-env to forget it in every environment.",
         )
         .args(ArgRule::Max(1))
-        .flag(FlagSpec::bool("all", "clear every request's history in the environment"))
+        .flag(FlagSpec::bool(
+            "all",
+            "clear every request's history in the environment",
+        ))
         .flag(FlagSpec::bool(
             "every-env",
             "clear every request's history in every environment (implies --all)",
@@ -217,7 +243,10 @@ fn clear(a: &mut App, inv: &Invocation) -> CliResult {
     let every_env = inv.flags.bool("every-env");
     let all = inv.flags.bool("all") || every_env;
     if all && !inv.args.is_empty() {
-        return Err(fail(Code::Flag, "--all clears every request; give it no request"));
+        return Err(fail(
+            Code::Flag,
+            "--all clears every request; give it no request",
+        ));
     }
     if !all && inv.args.is_empty() {
         return Err(a.history_clear_needs_scope());
@@ -241,7 +270,11 @@ fn clear(a: &mut App, inv: &Invocation) -> CliResult {
             request: String,
             entries: usize,
         }
-        return a.write_json(&Out { cleared: env, request: name, entries: n });
+        return a.write_json(&Out {
+            cleared: env,
+            request: name,
+            entries: n,
+        });
     }
     wln!(a.stdout, "cleared {}", entry_count(n));
     Ok(())
@@ -274,7 +307,11 @@ impl App {
                 keep: i64,
                 requests: &'a [Recorded],
             }
-            return self.write_json(&Out { env: &env, keep: store.keep(), requests: &reqs });
+            return self.write_json(&Out {
+                env: &env,
+                keep: store.keep(),
+                requests: &reqs,
+            });
         }
         let t = theme();
         if reqs.is_empty() {
@@ -287,13 +324,21 @@ impl App {
         }
         wln!(self.stdout, "{}", t.bold.render(&env));
         for r in &reqs {
-            wln!(self.stdout, "  {} {}", r.request, t.dim.render(&entry_count(r.entries)));
+            wln!(
+                self.stdout,
+                "  {} {}",
+                r.request,
+                t.dim.render(&entry_count(r.entries))
+            );
         }
         Ok(())
     }
 
     fn history_list(&self, target: &HistoryTarget) -> CliResult {
-        let entries = target.store.list(&target.env, &target.name).map_err(history_err)?;
+        let entries = target
+            .store
+            .list(&target.env, &target.name)
+            .map_err(history_err)?;
         if self.g.json {
             #[derive(Serialize)]
             struct Out<'a> {
@@ -312,7 +357,12 @@ impl App {
         }
         let t = theme();
         if entries.is_empty() {
-            wln!(self.stdout, "no history for {} in {}", target.name, target.env);
+            wln!(
+                self.stdout,
+                "no history for {} in {}",
+                target.name,
+                target.env
+            );
             let hint = history_off(&target.project);
             if !hint.is_empty() {
                 wln!(self.stdout, "{}", t.dim.render(hint));
@@ -323,14 +373,22 @@ impl App {
             self.stdout,
             "{} {}",
             t.bold.render(&target.name),
-            t.dim.render(&format!("· {} · {}", target.env, entry_count(entries.len())))
+            t.dim.render(&format!(
+                "· {} · {}",
+                target.env,
+                entry_count(entries.len())
+            ))
         );
-        self.stdout.print(&apic_output::history_entries(&t, &entries));
+        self.stdout
+            .print(&apic_output::history_entries(&t, &entries));
         Ok(())
     }
 
     fn history_show(&self, target: &HistoryTarget, index: i64, verbose: bool) -> CliResult {
-        let e = target.store.get(&target.env, &target.name, index).map_err(history_err)?;
+        let e = target
+            .store
+            .get(&target.env, &target.name, index)
+            .map_err(history_err)?;
         let result = e.result.clone().unwrap_or_else(|| "null".to_string());
         if self.g.json {
             // The entry's own fields, then the result as it was stored.
@@ -370,7 +428,10 @@ impl App {
             }
             other => other.map_err(history_err)?,
         };
-        let te = target.store.get(&target.env, &target.name, to).map_err(history_err)?;
+        let te = target
+            .store
+            .get(&target.env, &target.name, to)
+            .map_err(history_err)?;
         let changes = apic_history::compare(
             fe.result.as_deref().unwrap_or("null"),
             te.result.as_deref().unwrap_or("null"),
@@ -409,7 +470,11 @@ impl App {
             return Ok(());
         }
         self.stdout.print(&apic_output::changes(&t, &changes, 80));
-        wln!(self.stdout, "{}", t.dim.render(&plural(changes.len(), "change")));
+        wln!(
+            self.stdout,
+            "{}",
+            t.dim.render(&plural(changes.len(), "change"))
+        );
         Ok(())
     }
 }

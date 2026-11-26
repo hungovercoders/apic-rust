@@ -42,7 +42,11 @@ pub(crate) fn execute(args: &[&str]) -> (i32, String, String) {
 
 /// Runs a command line under a token the test may cancel, with stdin
 /// when the command reads it.
-pub(crate) fn execute_with(cancel: &CancelToken, stdin: Option<&str>, args: &[&str]) -> (i32, String, String) {
+pub(crate) fn execute_with(
+    cancel: &CancelToken,
+    stdin: Option<&str>,
+    args: &[&str],
+) -> (i32, String, String) {
     let mut a = App::new();
     let (out, err) = (Buffer::new(), Buffer::new());
     a.stdout = out.output();
@@ -65,7 +69,11 @@ pub(crate) fn s(dir: &TempDir) -> String {
 
 /// `dir/name` as text.
 pub(crate) fn join(dir: impl AsRef<Path>, name: &str) -> String {
-    dir.as_ref().join(name).to_str().expect("a UTF-8 path").to_string()
+    dir.as_ref()
+        .join(name)
+        .to_str()
+        .expect("a UTF-8 path")
+        .to_string()
 }
 
 pub(crate) fn must_write(path: impl AsRef<Path>, content: &str) {
@@ -142,7 +150,9 @@ static PROCESS: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
 impl ProcessGuard {
     pub(crate) fn new() -> ProcessGuard {
-        let lock = PROCESS.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let lock = PROCESS
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         ProcessGuard {
             cwd: std::env::current_dir().expect("a working directory"),
             env: Vec::new(),

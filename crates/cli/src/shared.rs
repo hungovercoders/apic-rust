@@ -51,7 +51,8 @@ impl App {
 /// been meant for.
 pub(crate) fn unknown_request(err: apic_project::Error) -> CliError {
     let msg = err.to_string();
-    apic_runner::UsageError::wrapping(Code::UnknownRequest, msg, &apic_runner::Error::Project(err)).into()
+    apic_runner::UsageError::wrapping(Code::UnknownRequest, msg, &apic_runner::Error::Project(err))
+        .into()
 }
 
 /// The same for a lookup the runner made.
@@ -88,7 +89,11 @@ pub(crate) fn read_text(path: impl AsRef<std::path::Path>) -> Result<String, Str
 
 /// Writes a file, created with `mode` when it does not exist yet; the
 /// error is worded `open PATH: reason`.
-pub(crate) fn write_file(path: impl AsRef<std::path::Path>, data: &[u8], mode: u32) -> Result<(), String> {
+pub(crate) fn write_file(
+    path: impl AsRef<std::path::Path>,
+    data: &[u8],
+    mode: u32,
+) -> Result<(), String> {
     use std::io::Write;
     let path = path.as_ref();
     let mut opts = std::fs::OpenOptions::new();
@@ -115,7 +120,10 @@ pub(crate) fn stat(path: impl AsRef<std::path::Path>) -> Result<std::fs::Metadat
 
 /// Serialises an empty list as `null`, which is what a list that was
 /// never filled has always been printed as.
-pub(crate) fn null_when_empty<S: serde::Serializer, T: Serialize>(v: &&[T], s: S) -> Result<S::Ok, S::Error> {
+pub(crate) fn null_when_empty<S: serde::Serializer, T: Serialize>(
+    v: &&[T],
+    s: S,
+) -> Result<S::Ok, S::Error> {
     if v.is_empty() {
         s.serialize_none()
     } else {

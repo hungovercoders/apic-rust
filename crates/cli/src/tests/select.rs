@@ -25,8 +25,14 @@ fn select_project(history: &str) -> (TempDir, Arc<AtomicI32>, TestServer) {
         .with_header("Set-Cookie", "sid=secret")
     });
     let dir = tmp();
-    must_write(join(dir.path(), "apic.yaml"), &format!("env: dev\n{history}"));
-    must_write(join(dir.path(), "api.http"), "### thing\n# @name thing\nGET {{baseUrl}}/thing\n");
+    must_write(
+        join(dir.path(), "apic.yaml"),
+        &format!("env: dev\n{history}"),
+    );
+    must_write(
+        join(dir.path(), "api.http"),
+        "### thing\n# @name thing\nGET {{baseUrl}}/thing\n",
+    );
     must_write(
         join(dir.path(), "http-client.env.json"),
         &format!(r#"{{"dev":{{"baseUrl":"{}"}}}}"#, srv.url()),
@@ -44,22 +50,45 @@ fn select_reads_the_last_response_without_sending() {
         assert_eq!(code, 0, "run: err={errb}");
     }
     let (code, out, errb) = execute(&["-C", dir, "select", "thing", "body.$.items[1].id"]);
-    assert!(code == 0 && out == "b\n", "code={code} out={out:?} err={errb}");
+    assert!(
+        code == 0 && out == "b\n",
+        "code={code} out={out:?} err={errb}"
+    );
     let (code, out, _) = execute(&["-C", dir, "select", "thing", "body.$.items", "--no-color"]);
     assert!(
         code == 0 && out.starts_with("[\n  {\n"),
         "an array pretty-printed: code={code} out={out:?}"
     );
-    let (code, out, _) = execute(&["-C", dir, "--json", "select", "thing", "body.$.call", "--entry", "2"]);
-    let got: Value = serde_json::from_str(&out).unwrap_or_else(|e| panic!("entry 2 as json: {e} {out}"));
+    let (code, out, _) = execute(&[
+        "-C",
+        dir,
+        "--json",
+        "select",
+        "thing",
+        "body.$.call",
+        "--entry",
+        "2",
+    ]);
+    let got: Value =
+        serde_json::from_str(&out).unwrap_or_else(|e| panic!("entry 2 as json: {e} {out}"));
     assert!(
-        code == 0 && got["entry"] == 2 && got["found"] == true && got["value"] == 1 && got["selector"] == "body.$.call",
+        code == 0
+            && got["entry"] == 2
+            && got["found"] == true
+            && got["value"] == 1
+            && got["selector"] == "body.$.call",
         "entry 2 as json: code={code} {out}"
     );
     let (code, out, _) = execute(&["-C", dir, "select", "thing", "status"]);
-    assert!(code == 0 && out == "200\n", "status: code={code} out={out:?}");
+    assert!(
+        code == 0 && out == "200\n",
+        "status: code={code} out={out:?}"
+    );
     let (code, out, _) = execute(&["-C", dir, "select", "thing", "header.content-type"]);
-    assert!(code == 0 && out == "application/json\n", "header: code={code} out={out:?}");
+    assert!(
+        code == 0 && out == "application/json\n",
+        "header: code={code} out={out:?}"
+    );
     // Nothing at the path is exit 1, like a failed capture; a bad
     // selector or entry is a flag error.
     let (code, out, errb) = execute(&["-C", dir, "--json", "select", "thing", "body.$.nope"]);
@@ -68,11 +97,17 @@ fn select_reads_the_last_response_without_sending() {
         "missing path: code={code} out={out} err={errb}"
     );
     let (code, _, errb) = execute(&["-C", dir, "select", "thing", "nope"]);
-    assert!(code == 2 && errb.contains("selector"), "bad selector: code={code} err={errb}");
+    assert!(
+        code == 2 && errb.contains("selector"),
+        "bad selector: code={code} err={errb}"
+    );
     let (code, _, errb) = execute(&["-C", dir, "select", "thing", "status", "--entry", "3"]);
     assert_eq!(code, 2, "entry past the history: err={errb}");
     let (code, _, errb) = execute(&["-C", dir, "select", "nothing", "status"]);
-    assert!(code == 2 && errb.contains("nothing"), "unknown request: code={code} err={errb}");
+    assert!(
+        code == 2 && errb.contains("nothing"),
+        "unknown request: code={code} err={errb}"
+    );
     assert_eq!(hits.load(Ordering::SeqCst), 2, "select sent a request");
 }
 
@@ -108,22 +143,52 @@ fn run_body_limit() {
         "truncated: {}",
         &out[..200]
     );
-    let (code, out, _) = execute(&["-C", dir, "run", "thing", "--body-limit", "100", "--body-only"]);
-    assert!(code == 0 && out.len() == 101, "body-only: code={code} len={}", out.len());
-    let (code, out, _) = execute(&["-C", dir, "run", "thing", "--body-limit", "100", "--no-color"]);
+    let (code, out, _) = execute(&[
+        "-C",
+        dir,
+        "run",
+        "thing",
+        "--body-limit",
+        "100",
+        "--body-only",
+    ]);
+    assert!(
+        code == 0 && out.len() == 101,
+        "body-only: code={code} len={}",
+        out.len()
+    );
+    let (code, out, _) = execute(&[
+        "-C",
+        dir,
+        "run",
+        "thing",
+        "--body-limit",
+        "100",
+        "--no-color",
+    ]);
     assert!(
         code == 0 && out.contains("100 B of 3.") && out.contains("apic select thing body.$.<path>"),
         "human: code={code}\n{out}"
     );
     // The whole body is in the history.
     let (code, out, _) = execute(&["-C", dir, "select", "thing", "body.$.big"]);
-    assert!(code == 0 && out.len() == 3001, "select after a limited run: code={code} len={}", out.len());
+    assert!(
+        code == 0 && out.len() == 3001,
+        "select after a limited run: code={code} len={}",
+        out.len()
+    );
     // A body within the limit is untouched, and a bad size is a flag
     // error.
     let (code, out, _) = execute(&["-C", dir, "--json", "run", "thing", "--body-limit", "1m"]);
-    assert!(code == 0 && !out.contains("body_truncated"), "within limit: code={code}");
+    assert!(
+        code == 0 && !out.contains("body_truncated"),
+        "within limit: code={code}"
+    );
     let (code, _, errb) = execute(&["-C", dir, "run", "thing", "--body-limit", "lots"]);
-    assert!(code == 2 && errb.contains("--body-limit"), "bad size: code={code} err={errb}");
+    assert!(
+        code == 2 && errb.contains("--body-limit"),
+        "bad size: code={code} err={errb}"
+    );
 }
 
 #[test]
@@ -139,7 +204,15 @@ fn parse_size_reads_suffixes() {
     ] {
         assert_eq!(parse_size(input), Ok(want), "{input:?}");
     }
-    for bad in ["0", "-1", "k", "4g", "lots", "9223372036854775807k", "99999999999999999999"] {
+    for bad in [
+        "0",
+        "-1",
+        "k",
+        "4g",
+        "lots",
+        "9223372036854775807k",
+        "99999999999999999999",
+    ] {
         assert!(parse_size(bad).is_err(), "{bad:?} should be refused");
     }
 }
@@ -152,7 +225,11 @@ fn select_refuses_multi_value_header_selectors() {
     let dir = tmp.path().to_str().unwrap();
     let (code, _, errb) = execute(&["-C", dir, "run", "thing"]);
     assert_eq!(code, 0, "run: err={errb}");
-    for sel in ["header.content-type.#", "header.content-type[0]", "headers.x[-1]"] {
+    for sel in [
+        "header.content-type.#",
+        "header.content-type[0]",
+        "headers.x[-1]",
+    ] {
         let (code, _, errb) = execute(&["-C", dir, "select", "thing", sel]);
         assert!(
             code == 2 && errb.contains("one value per header"),
@@ -187,21 +264,50 @@ fn body_limit_note_and_binary_prefix() {
     );
     // No history: the note says what to set.
     let (code, out, _) = execute(&[
-        "-C", dir, "--env", "dev", "run", "thing", "--body-limit", "100", "--no-color",
+        "-C",
+        dir,
+        "--env",
+        "dev",
+        "run",
+        "thing",
+        "--body-limit",
+        "100",
+        "--no-color",
     ]);
     assert!(
-        code == 0 && out.contains("the rest is not kept: set history: N") && !out.contains("reads the rest"),
+        code == 0
+            && out.contains("the rest is not kept: set history: N")
+            && !out.contains("reads the rest"),
         "without history: code={code}\n{out}"
     );
     must_write(join(dir, "apic.yaml"), "env: dev\nhistory: 2\n");
-    let (code, out, _) = execute(&["-C", dir, "run", "thing", "--body-limit", "100", "--no-color"]);
+    let (code, out, _) = execute(&[
+        "-C",
+        dir,
+        "run",
+        "thing",
+        "--body-limit",
+        "100",
+        "--no-color",
+    ]);
     assert!(
         code == 0 && out.contains("apic select thing body.$.<path> reads the rest"),
         "with history: code={code}\n{out}"
     );
     // An unnamed request is never recorded.
-    let (code, out, _) = execute(&["-C", dir, "run", "api.http#3", "--body-limit", "100", "--no-color"]);
-    assert!(code == 0 && !out.contains("reads the rest"), "unnamed: code={code}\n{out}");
+    let (code, out, _) = execute(&[
+        "-C",
+        dir,
+        "run",
+        "api.http#3",
+        "--body-limit",
+        "100",
+        "--no-color",
+    ]);
+    assert!(
+        code == 0 && !out.contains("reads the rest"),
+        "unnamed: code={code}\n{out}"
+    );
     // Bytes that are not text: the first 4 as they are, not rune-trimmed
     // to nothing; the JSON carries their base64.
     let mut a = crate::App::new();
@@ -242,7 +348,10 @@ fn select_errors_say_why() {
     // a third is out of range, not missing history.
     must_write(join(dir, "apic.yaml"), "env: dev\n");
     let (code, out, _) = execute(&["-C", dir, "select", "thing", "status", "--entry", "2"]);
-    assert!(code == 0 && out == "200\n", "entry 2 with history off: code={code} out={out:?}");
+    assert!(
+        code == 0 && out == "200\n",
+        "entry 2 with history off: code={code} out={out:?}"
+    );
     let (code, _, errb) = execute(&["-C", dir, "select", "thing", "status", "--entry", "3"]);
     assert!(
         code == 2 && !errb.contains("history is off") && errb.contains("no #3"),
@@ -252,11 +361,22 @@ fn select_errors_say_why() {
     let (code, _, errb) = execute(&["-C", dir, "run", "thing", "--redact"]);
     assert_eq!(code, 0, "redacted run: err={errb}");
     let (code, _, errb) = execute(&["-C", dir, "select", "thing", "body.$.call"]);
-    assert!(code == 2 && errb.contains("--redact run"), "redacted entry: code={code} err={errb}");
+    assert!(
+        code == 2 && errb.contains("--redact run"),
+        "redacted entry: code={code} err={errb}"
+    );
     let rows = join(dir, "rows.csv");
     must_write(&rows, "n\n1\n");
     let (code, out, errb) = execute(&[
-        "-C", dir, "run", "thing", "--data", &rows, "--body-limit", "100", "--no-color",
+        "-C",
+        dir,
+        "run",
+        "thing",
+        "--data",
+        &rows,
+        "--body-limit",
+        "100",
+        "--no-color",
     ]);
     assert!(
         code == 0 && out.contains("a data run keeps no history"),

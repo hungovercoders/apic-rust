@@ -44,7 +44,8 @@ pub use root::{build_info, main, version, App, VersionInfo, VERSION};
 pub use signal::{signal_context, SignalGuard};
 pub use skill::skill_dirs;
 pub use spec::{
-    command_path, effective_flags, inherited_flags, use_line, ArgRule, CommandSpec, FlagKind, FlagSpec,
+    command_path, effective_flags, inherited_flags, use_line, ArgRule, CommandSpec, FlagKind,
+    FlagSpec,
 };
 
 #[cfg(test)]

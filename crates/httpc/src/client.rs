@@ -908,7 +908,13 @@ async fn run(inner: Arc<Inner>, mut req: Request) -> Result<Response, Error> {
     let expired = deadline.is_some_and(|at| at <= Instant::now());
     let outcome = tokio::select! {
         biased;
-        () = cancel => Err(Fail::new(ErrorKind::Cancelled, "context canceled")),
+        () = cancel => {
+            let cause = req.cancel.as_ref().and_then(CancelToken::cause);
+            Err(Fail::new(
+                ErrorKind::Cancelled,
+                cause.as_deref().unwrap_or("context canceled"),
+            ))
+        }
         () = timer => Err(Fail::new(ErrorKind::Timeout, "context deadline exceeded")),
         () = std::future::ready(()), if expired => {
             Err(Fail::new(ErrorKind::Timeout, "context deadline exceeded"))

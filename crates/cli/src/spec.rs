@@ -56,7 +56,13 @@ pub struct FlagSpec {
 }
 
 impl FlagSpec {
-    fn new(name: &'static str, short: Option<char>, kind: FlagKind, default: &str, usage: &str) -> FlagSpec {
+    fn new(
+        name: &'static str,
+        short: Option<char>,
+        kind: FlagKind,
+        default: &str,
+        usage: &str,
+    ) -> FlagSpec {
         FlagSpec {
             name,
             short,
@@ -136,14 +142,18 @@ impl ArgRule {
                 apic_gocompat::quote(&args[0]),
                 apic_gocompat::quote(path)
             )),
-            ArgRule::Exact(want) if n != want => Err(format!("accepts {want} arg(s), received {n}")),
-            ArgRule::Min(want) if n < want => {
-                Err(format!("requires at least {want} arg(s), only received {n}"))
+            ArgRule::Exact(want) if n != want => {
+                Err(format!("accepts {want} arg(s), received {n}"))
             }
-            ArgRule::Max(want) if n > want => Err(format!("accepts at most {want} arg(s), received {n}")),
-            ArgRule::Range(min, max) if n < min || n > max => {
-                Err(format!("accepts between {min} and {max} arg(s), received {n}"))
+            ArgRule::Min(want) if n < want => Err(format!(
+                "requires at least {want} arg(s), only received {n}"
+            )),
+            ArgRule::Max(want) if n > want => {
+                Err(format!("accepts at most {want} arg(s), received {n}"))
             }
+            ArgRule::Range(min, max) if n < min || n > max => Err(format!(
+                "accepts between {min} and {max} arg(s), received {n}"
+            )),
             _ => Ok(()),
         }
     }
