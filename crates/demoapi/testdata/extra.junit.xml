@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="apic" tests="7" skipped="0" failures="3" errors="2" time="T">
+  <testsuite name="Extra things" tests="7" skipped="0" failures="3" errors="2" time="T">
+    <testcase name="Fails on status" status="failed" time="T">
+      <failure message="Step the response status is 201: expected status == 201, got &#34;200&#34;&#xA;  GET BASE/todos&#xA;  200 OK (N ms)&#xA;  body: [{&#34;id&#34;:&#34;1&#34;,&#34;title&#34;:&#34;Buy milk&#34;,&#34;done&#34;:false},{&#34;id&#34;:&#34;2&#34;,&#34;title&#34;:&#34;Read the apic docs&#34;,&#34;done&#34;:true}]"></failure>
+      <error message="Step the response status is 200" type="skipped"></error>
+    </testcase>
+    <testcase name="Undefined and tables" status="undefined" time="T">
+      <error message="Step I do something unknown with 3 &#34;things&#34;" type="undefined"></error>
+      <error message="Step the response status is 200" type="skipped"></error>
+    </testcase>
+    <testcase name="Outline 200" status="passed" time="T"></testcase>
+    <testcase name="Outline 500" status="failed" time="T">
+      <failure message="Step the response status is 500: expected status == 500, got &#34;200&#34;&#xA;  GET BASE/todos&#xA;  200 OK (N ms)&#xA;  body: [{&#34;id&#34;:&#34;1&#34;,&#34;title&#34;:&#34;Buy milk&#34;,&#34;done&#34;:false},{&#34;id&#34;:&#34;2&#34;,&#34;title&#34;:&#34;Read the apic docs&#34;,&#34;done&#34;:true}]"></failure>
+    </testcase>
+    <testcase name="Doc string" status="failed" time="T">
+      <failure message="Step the response body contains:: response body mismatch: $: expected 1 items, got 2&#xA;  GET BASE/todos&#xA;  200 OK (N ms)&#xA;  body: [{&#34;id&#34;:&#34;1&#34;,&#34;title&#34;:&#34;Buy milk&#34;,&#34;done&#34;:false},{&#34;id&#34;:&#34;2&#34;,&#34;title&#34;:&#34;Read the apic docs&#34;,&#34;done&#34;:true}]"></failure>
+    </testcase>
+    <testcase name="Empty" status="" time="T"></testcase>
+    <testcase name="In rule" status="undefined" time="T">
+      <failure message="Step I run &#34;nope&#34;: no request named &#34;nope&#34;; known: api-key, basic-auth, create-job, create-todo, create-todo-invalid, daily-report, delete-todo, get-deleted, get-job, get-todo, get-updated, graphql, ... (run `apic list`)"></failure>
+      <error message="Step another undefined step" type="undefined"></error>
+    </testcase>
+  </testsuite>
+</testsuites>

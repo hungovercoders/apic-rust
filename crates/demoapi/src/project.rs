@@ -33,7 +33,11 @@ fn write_file(target: &str, content: &[u8], private: bool) -> std::io::Result<()
 /// pointing at `http://localhost:<port>`. Files that already exist are
 /// left alone unless `force` is set. Returns the paths written and the
 /// paths skipped.
-pub fn write_project(dir: &str, port: u16, force: bool) -> Result<(Vec<String>, Vec<String>), String> {
+pub fn write_project(
+    dir: &str,
+    port: u16,
+    force: bool,
+) -> Result<(Vec<String>, Vec<String>), String> {
     mkdir_all(Path::new(dir))?;
     let mut written = Vec::new();
     let mut skipped = Vec::new();
@@ -58,9 +62,8 @@ pub fn write_project(dir: &str, port: u16, force: bool) -> Result<(Vec<String>, 
         write(&native, content)?;
     }
 
-    let env_json = format!(
-        "{{\n  \"local\": {{\n    \"baseUrl\": \"http://localhost:{port}\"\n  }}\n}}\n"
-    );
+    let env_json =
+        format!("{{\n  \"local\": {{\n    \"baseUrl\": \"http://localhost:{port}\"\n  }}\n}}\n");
     write("http-client.env.json", env_json.as_bytes())?;
 
     Ok((written, skipped))

@@ -1,0 +1,429 @@
+[
+    {
+        "uri": "features/extra.feature",
+        "id": "extra-things",
+        "keyword": "Feature",
+        "name": "Extra things",
+        "description": "  Some description.",
+        "line": 3,
+        "comments": [
+            {
+                "value": "# a comment up top",
+                "line": 1
+            }
+        ],
+        "tags": [
+            {
+                "name": "@feat",
+                "line": 2
+            }
+        ],
+        "elements": [
+            {
+                "id": "extra-things;fails-on-status",
+                "keyword": "Scenario",
+                "name": "Fails on status",
+                "description": "",
+                "line": 10,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@feat",
+                        "line": 2
+                    },
+                    {
+                        "name": "@smoke",
+                        "line": 9
+                    },
+                    {
+                        "name": "@one",
+                        "line": 9
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "I am logged in",
+                        "line": 7,
+                        "match": {
+                            "location": "phrases.go:69"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": N
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "I list the todos",
+                        "line": 11,
+                        "match": {
+                            "location": "phrases.go:69"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": N
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the response status is 201",
+                        "line": 12,
+                        "match": {
+                            "location": "steps.go:75"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "expected status == 201, got \"200\"\n  GET BASE/todos\n  200 OK (N ms)\n  body: [{\"id\":\"1\",\"title\":\"Buy milk\",\"done\":false},{\"id\":\"2\",\"title\":\"Read the apic docs\",\"done\":true}]",
+                            "duration": N
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "the response status is 200",
+                        "line": 13,
+                        "match": {
+                            "location": "steps.go:75"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "extra-things;undefined-and-tables",
+                "keyword": "Scenario",
+                "name": "Undefined and tables",
+                "description": "",
+                "line": 15,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@feat",
+                        "line": 2
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "I am logged in",
+                        "line": 7,
+                        "match": {
+                            "location": "phrases.go:69"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": N
+                        }
+                    },
+                    {
+                        "keyword": "Given ",
+                        "name": "the variables:",
+                        "line": 16,
+                        "match": {
+                            "location": "steps.go:75"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": N
+                        },
+                        "rows": [
+                            {
+                                "cells": [
+                                    "name",
+                                    "value"
+                                ]
+                            },
+                            {
+                                "cells": [
+                                    "title",
+                                    "héllo"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "I do something unknown with 3 \"things\"",
+                        "line": 19,
+                        "match": {
+                            "location": "features/extra.feature:19"
+                        },
+                        "result": {
+                            "status": "undefined"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the response status is 200",
+                        "line": 20,
+                        "match": {
+                            "location": "steps.go:75"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "extra-things;outline-200;codes;2",
+                "keyword": "Scenario Outline",
+                "name": "Outline 200",
+                "description": "",
+                "line": 30,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@feat",
+                        "line": 2
+                    },
+                    {
+                        "name": "@slow",
+                        "line": 22
+                    },
+                    {
+                        "name": "@ex",
+                        "line": 27
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "I am logged in",
+                        "line": 7,
+                        "match": {
+                            "location": "phrases.go:69"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": N
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "I list the todos",
+                        "line": 24,
+                        "match": {
+                            "location": "phrases.go:69"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": N
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the response status is 200",
+                        "line": 25,
+                        "match": {
+                            "location": "steps.go:75"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": N
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "extra-things;outline-500;codes;3",
+                "keyword": "Scenario Outline",
+                "name": "Outline 500",
+                "description": "",
+                "line": 31,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@feat",
+                        "line": 2
+                    },
+                    {
+                        "name": "@slow",
+                        "line": 22
+                    },
+                    {
+                        "name": "@ex",
+                        "line": 27
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "I am logged in",
+                        "line": 7,
+                        "match": {
+                            "location": "phrases.go:69"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": N
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "I list the todos",
+                        "line": 24,
+                        "match": {
+                            "location": "phrases.go:69"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": N
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the response status is 500",
+                        "line": 25,
+                        "match": {
+                            "location": "steps.go:75"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "expected status == 500, got \"200\"\n  GET BASE/todos\n  200 OK (N ms)\n  body: [{\"id\":\"1\",\"title\":\"Buy milk\",\"done\":false},{\"id\":\"2\",\"title\":\"Read the apic docs\",\"done\":true}]",
+                            "duration": N
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "extra-things;doc-string",
+                "keyword": "Scenario",
+                "name": "Doc string",
+                "description": "",
+                "line": 33,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@feat",
+                        "line": 2
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "I am logged in",
+                        "line": 7,
+                        "match": {
+                            "location": "phrases.go:69"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": N
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "I list the todos",
+                        "line": 34,
+                        "match": {
+                            "location": "phrases.go:69"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": N
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the response body contains:",
+                        "line": 35,
+                        "doc_string": {
+                            "value": "[{\"id\": 99}]",
+                            "content_type": "json",
+                            "line": 36
+                        },
+                        "match": {
+                            "location": "steps.go:75"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "response body mismatch: $: expected 1 items, got 2\n  GET BASE/todos\n  200 OK (N ms)\n  body: [{\"id\":\"1\",\"title\":\"Buy milk\",\"done\":false},{\"id\":\"2\",\"title\":\"Read the apic docs\",\"done\":true}]",
+                            "duration": N
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "extra-things;empty",
+                "keyword": "Scenario",
+                "name": "Empty",
+                "description": "",
+                "line": 40,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@feat",
+                        "line": 2
+                    }
+                ]
+            },
+            {
+                "id": "extra-things;in-rule",
+                "keyword": "Scenario",
+                "name": "In rule",
+                "description": "",
+                "line": 46,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@feat",
+                        "line": 2
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "I am logged in",
+                        "line": 7,
+                        "match": {
+                            "location": "phrases.go:69"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": N
+                        }
+                    },
+                    {
+                        "keyword": "Given ",
+                        "name": "the variable \"x\" is \"1\"",
+                        "line": 44,
+                        "match": {
+                            "location": "steps.go:75"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": N
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "I run \"nope\"",
+                        "line": 47,
+                        "match": {
+                            "location": "steps.go:75"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "no request named \"nope\"; known: api-key, basic-auth, create-job, create-todo, create-todo-invalid, daily-report, delete-todo, get-deleted, get-job, get-todo, get-updated, graphql, ... (run `apic list`)",
+                            "duration": N
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "another undefined step",
+                        "line": 48,
+                        "match": {
+                            "location": "features/extra.feature:48"
+                        },
+                        "result": {
+                            "status": "undefined"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]

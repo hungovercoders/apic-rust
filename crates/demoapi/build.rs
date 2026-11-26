@@ -32,7 +32,11 @@ fn main() {
     let mut out = String::from("&[\n");
     for (rel, file) in &entries {
         println!("cargo:rerun-if-changed={}", file.display());
-        let _ = writeln!(out, "    ({rel:?}, include_bytes!({:?})),", file.display().to_string());
+        let _ = writeln!(
+            out,
+            "    ({rel:?}, include_bytes!({:?})),",
+            file.display().to_string()
+        );
     }
     out.push_str("]\n");
 

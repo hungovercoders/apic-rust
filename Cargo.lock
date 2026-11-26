@@ -180,10 +180,42 @@ dependencies = [
 [[package]]
 name = "apic-lsp"
 version = "0.0.0"
+dependencies = [
+ "apic-env",
+ "apic-gocompat",
+ "apic-history",
+ "apic-httpc",
+ "apic-httpd",
+ "apic-httpfile",
+ "apic-output",
+ "apic-project",
+ "apic-runner",
+ "apic-snippet",
+ "regex",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
 
 [[package]]
 name = "apic-mcp"
 version = "0.0.0"
+dependencies = [
+ "apic-assert",
+ "apic-bdd",
+ "apic-gocompat",
+ "apic-httpc",
+ "apic-httpd",
+ "apic-httpfile",
+ "apic-project",
+ "apic-runner",
+ "apic-session",
+ "apic-snippet",
+ "getrandom 0.2.17",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
 
 [[package]]
 name = "apic-openapi"

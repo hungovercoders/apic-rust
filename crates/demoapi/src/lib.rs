@@ -79,7 +79,11 @@ struct Job {
 
 impl Job {
     fn json(&self) -> String {
-        format!("{{\"id\":{},\"state\":\"{}\"}}", string(&self.id), self.state)
+        format!(
+            "{{\"id\":{},\"state\":\"{}\"}}",
+            string(&self.id),
+            self.state
+        )
     }
 }
 
@@ -271,7 +275,12 @@ pub fn new() -> Handler {
     }));
     // A todo's key is its id as a number; an id that is not one names
     // nothing.
-    let key = |r: &Request| r.path_value("id").parse::<i64>().ok().filter(|n| n.to_string() == r.path_value("id"));
+    let key = |r: &Request| {
+        r.path_value("id")
+            .parse::<i64>()
+            .ok()
+            .filter(|n| n.to_string() == r.path_value("id"))
+    };
     let mut route = |pattern: &str, h: Box<dyn Fn(&Request) -> Response + Send + Sync>| {
         mux.handle(pattern, h).expect("a valid route");
     };
@@ -299,7 +308,9 @@ pub fn new() -> Handler {
     route(
         "GET /basic-auth/{user}/{password}",
         Box::new(|r| match r.basic_auth() {
-            Some((user, pass)) if user == r.path_value("user") && pass == r.path_value("password") => {
+            Some((user, pass))
+                if user == r.path_value("user") && pass == r.path_value("password") =>
+            {
                 json(200, r#"{"authenticated":true}"#)
             }
             _ => error(401, "bad credentials"),
@@ -314,7 +325,10 @@ pub fn new() -> Handler {
             {
                 return error(401, "invalid_client");
             }
-            json(200, r#"{"access_token":"mock-oauth-token","expires_in":3600}"#)
+            json(
+                200,
+                r#"{"access_token":"mock-oauth-token","expires_in":3600}"#,
+            )
         }),
     );
 
@@ -501,7 +515,8 @@ pub fn new() -> Handler {
                             string(filename),
                             part.data.len()
                         );
-                        if let Some(ct) = part.headers.get("Content-Type").filter(|c| !c.is_empty()) {
+                        if let Some(ct) = part.headers.get("Content-Type").filter(|c| !c.is_empty())
+                        {
                             file.push_str(&format!(",\"content_type\":{}", string(ct)));
                         }
                         file.push('}');
@@ -552,13 +567,17 @@ pub fn new() -> Handler {
                 data.push("\"health\":\"ok\"".to_string());
             }
             if query.contains("todos") {
-                let done = variables.and_then(|v| v.get("done")).and_then(Value::as_bool);
+                let done = variables
+                    .and_then(|v| v.get("done"))
+                    .and_then(Value::as_bool);
                 data.push(format!("\"todos\":{}", todos_json(&list_todos(&st, done))));
             }
             if data.is_empty() {
                 return json(
                     200,
-                    graphql_errors("unknown field: the demo schema has todos(done: Boolean) and health"),
+                    graphql_errors(
+                        "unknown field: the demo schema has todos(done: Boolean) and health",
+                    ),
                 );
             }
             json(200, format!("{{\"data\":{{{}}}}}", data.join(",")))

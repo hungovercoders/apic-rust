@@ -9,5 +9,19 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+apic-env = { path = "../env" }
+apic-gocompat = { path = "../gocompat" }
+apic-history = { path = "../history" }
+apic-httpc = { path = "../httpc" }
+apic-httpfile = { path = "../httpfile" }
+apic-output = { path = "../output" }
+apic-project = { path = "../project" }
+apic-runner = { path = "../runner" }
+apic-snippet = { path = "../snippet" }
+regex.workspace = true
+serde = { workspace = true }
+serde_json = { workspace = true, features = ["raw_value"] }
 
 [dev-dependencies]
+apic-httpd = { path = "../httpd" }
+tempfile.workspace = true

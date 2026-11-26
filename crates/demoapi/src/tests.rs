@@ -63,17 +63,27 @@ fn todos_filter_and_paginate() {
     let srv = server();
     let res = call(&srv, "GET", "/todos", "", &[]);
     assert!(
-        res.status == 200 && res.len() == 2 && res.header("X-Total-Count") == "2" && res.header("Link").is_empty(),
+        res.status == 200
+            && res.len() == 2
+            && res.header("X-Total-Count") == "2"
+            && res.header("Link").is_empty(),
         "unfiltered: status={} body={}",
         res.status,
         res.body
     );
     let res = call(&srv, "GET", "/todos?done=true", "", &[]);
-    assert!(res.len() == 1 && res.header("X-Total-Count") == "1", "done=true: {}", res.body);
+    assert!(
+        res.len() == 1 && res.header("X-Total-Count") == "1",
+        "done=true: {}",
+        res.body
+    );
     let res = call(&srv, "GET", "/todos?limit=1", "", &[]);
     let link = res.header("Link");
     assert!(
-        res.len() == 1 && res.header("X-Total-Count") == "2" && link.contains("page=2") && link.contains(r#"rel="next""#),
+        res.len() == 1
+            && res.header("X-Total-Count") == "2"
+            && link.contains("page=2")
+            && link.contains(r#"rel="next""#),
         "limit=1: len={} link={link:?}",
         res.len()
     );
@@ -85,7 +95,12 @@ fn todos_filter_and_paginate() {
         res.body
     );
     let res = call(&srv, "GET", "/todos?done=maybe", "", &[]);
-    assert!(res.status == 400 && !res.body["error"].is_null(), "bad done value: {} {}", res.status, res.body);
+    assert!(
+        res.status == 400 && !res.body["error"].is_null(),
+        "bad done value: {} {}",
+        res.status,
+        res.body
+    );
     // Absurd page and limit values must not overflow: past the end is an
     // empty page, and limit is capped.
     for q in [
@@ -118,12 +133,18 @@ fn create_todo_validates() {
     let res = call(&srv, "POST", "/todos", r#"{"title": "  "}"#, &[]);
     assert_eq!(res.status, 422, "{}", res.body);
     assert!(
-        res.body["error"] == "validation failed" && res.body["fields"]["title"] == "must not be empty",
+        res.body["error"] == "validation failed"
+            && res.body["fields"]["title"] == "must not be empty",
         "body = {}",
         res.body
     );
     let res = call(&srv, "POST", "/todos", r#"{"title": "ok"}"#, &[]);
-    assert!(res.status == 201 && res.body["id"] == "3", "valid create: {} {}", res.status, res.body);
+    assert!(
+        res.status == 201 && res.body["id"] == "3",
+        "valid create: {} {}",
+        res.status,
+        res.body
+    );
 }
 
 #[test]
@@ -140,7 +161,11 @@ fn jobs_advance_per_poll() {
         let res = call(&srv, "GET", "/jobs/1", "", &[]);
         assert_eq!(res.body["state"], *want, "poll {}", i + 1);
     }
-    assert_eq!(call(&srv, "GET", "/jobs/99", "", &[]).status, 404, "unknown job");
+    assert_eq!(
+        call(&srv, "GET", "/jobs/99", "", &[]).status,
+        404,
+        "unknown job"
+    );
 }
 
 #[test]
@@ -157,7 +182,12 @@ fn upload_echoes_parts() {
     assert_eq!(res.status_code, 201);
 
     let res = call(&srv, "POST", "/upload", r#"{"not": "multipart"}"#, &[]);
-    assert!(res.status == 400 && !res.body["error"].is_null(), "non-multipart: {} {}", res.status, res.body);
+    assert!(
+        res.status == 400 && !res.body["error"].is_null(),
+        "non-multipart: {} {}",
+        res.status,
+        res.body
+    );
 }
 
 #[test]
@@ -177,9 +207,18 @@ fn graphql() {
         res.body
     );
     let res = call(&srv, "POST", "/graphql", r#"{"query": "{ nope }"}"#, &[]);
-    assert!(!res.body["errors"].is_null(), "unknown field should report errors: {}", res.body);
+    assert!(
+        !res.body["errors"].is_null(),
+        "unknown field should report errors: {}",
+        res.body
+    );
     let res = call(&srv, "POST", "/graphql", "not json", &[]);
-    assert!(res.status == 400 && !res.body["errors"].is_null(), "bad body: {} {}", res.status, res.body);
+    assert!(
+        res.status == 400 && !res.body["errors"].is_null(),
+        "bad body: {} {}",
+        res.status,
+        res.body
+    );
 }
 
 #[test]
@@ -187,14 +226,22 @@ fn api_key_csv_slow_and_health() {
     let srv = server();
     assert_eq!(call(&srv, "GET", "/keyed", "", &[]).status, 401, "no key");
     let res = call(&srv, "GET", "/keyed", "", &[("X-Api-Key", "demo-key")]);
-    assert!(res.status == 200 && res.body["ok"] == true, "with key: {} {}", res.status, res.body);
+    assert!(
+        res.status == 200 && res.body["ok"] == true,
+        "with key: {} {}",
+        res.status,
+        res.body
+    );
 
     let csv = Client::new()
         .send(&Request::get(&format!("{}/reports/daily.csv", srv.url())))
         .unwrap();
     let body = String::from_utf8_lossy(&csv.body);
     assert!(
-        csv.headers.get("Content-Type").unwrap_or("").starts_with("text/csv")
+        csv.headers
+            .get("Content-Type")
+            .unwrap_or("")
+            .starts_with("text/csv")
             && body.starts_with("date,total,done,open\n")
             && body.ends_with(",2,1,1\n"),
         "csv: body={body:?}"
@@ -203,7 +250,9 @@ fn api_key_csv_slow_and_health() {
     let start = Instant::now();
     let res = call(&srv, "GET", "/slow?ms=50", "", &[]);
     assert!(
-        res.status == 200 && res.body["slept_ms"] == 50 && start.elapsed() >= Duration::from_millis(50),
+        res.status == 200
+            && res.body["slept_ms"] == 50
+            && start.elapsed() >= Duration::from_millis(50),
         "slow: {} {} after {:?}",
         res.status,
         res.body,
@@ -234,11 +283,21 @@ fn response_bodies() {
         format!("{} {}", res.status_code, String::from_utf8_lossy(&res.body))
     };
     assert_eq!(
-        text("POST", "/auth/login", r#"{"USER":"alice","password":"s3cret"} trailing"#),
+        text(
+            "POST",
+            "/auth/login",
+            r#"{"USER":"alice","password":"s3cret"} trailing"#
+        ),
         "200 {\"access_token\":\"mock-token\"}\n"
     );
-    assert_eq!(text("POST", "/auth/login", "{}"), "401 {\"error\":\"bad credentials\"}\n");
-    assert_eq!(text("GET", "/me", ""), "200 {\"email\":\"alice@example.com\"}\n");
+    assert_eq!(
+        text("POST", "/auth/login", "{}"),
+        "401 {\"error\":\"bad credentials\"}\n"
+    );
+    assert_eq!(
+        text("GET", "/me", ""),
+        "200 {\"email\":\"alice@example.com\"}\n"
+    );
     assert_eq!(
         text("GET", "/todos", ""),
         "200 [{\"id\":\"1\",\"title\":\"Buy milk\",\"done\":false},{\"id\":\"2\",\"title\":\"Read the apic docs\",\"done\":true}]\n"
@@ -248,17 +307,34 @@ fn response_bodies() {
         "200 {\"id\":\"1\",\"title\":\"\\u003cb\\u003e \\u0026 co\",\"done\":true}\n"
     );
     assert_eq!(text("DELETE", "/todos/1", ""), "204 ");
-    assert_eq!(text("GET", "/todos/1", ""), "404 {\"error\":\"not found\"}\n");
-    assert_eq!(text("GET", "/todos/02", ""), "404 {\"error\":\"not found\"}\n");
+    assert_eq!(
+        text("GET", "/todos/1", ""),
+        "404 {\"error\":\"not found\"}\n"
+    );
+    assert_eq!(
+        text("GET", "/todos/02", ""),
+        "404 {\"error\":\"not found\"}\n"
+    );
     assert_eq!(text("GET", "/todos?done=true&page=2", ""), "200 []\n");
     assert_eq!(text("GET", "/status/418", ""), "418 {\"status\":418}\n");
-    assert_eq!(text("GET", "/keyed", ""), "401 {\"error\":\"missing or bad X-Api-Key\"}\n");
     assert_eq!(
-        text("POST", "/graphql", r#"{"query":"{ health todos }","variables":{"done":false}}"#),
+        text("GET", "/keyed", ""),
+        "401 {\"error\":\"missing or bad X-Api-Key\"}\n"
+    );
+    assert_eq!(
+        text(
+            "POST",
+            "/graphql",
+            r#"{"query":"{ health todos }","variables":{"done":false}}"#
+        ),
         "200 {\"data\":{\"health\":\"ok\",\"todos\":[]}}\n"
     );
     assert_eq!(
-        text("POST", "/graphql", r#"{"query":"{ health }","variables":[]}"#),
+        text(
+            "POST",
+            "/graphql",
+            r#"{"query":"{ health }","variables":[]}"#
+        ),
         "400 {\"errors\":[{\"message\":\"expected a JSON body with a query\"}]}\n"
     );
     assert_eq!(
@@ -268,7 +344,10 @@ fn response_bodies() {
     let res = Client::new()
         .send(&Request::get(&format!("{}/redirect", srv.url())))
         .unwrap();
-    assert_eq!((res.status_code, res.headers.get("Location")), (302, Some("/status/200")));
+    assert_eq!(
+        (res.status_code, res.headers.get("Location")),
+        (302, Some("/status/200"))
+    );
 }
 
 /// Runs every request in `project/` as one flow against a live instance
@@ -313,7 +392,8 @@ fn example_features() {
         vars: BTreeMap::from([("baseUrl".to_string(), srv.url())]),
         ..apic_bdd::Config::new(p)
     };
-    let (sum, _, code, err) = apic_bdd::run_summary(&CancelToken::new(), &apic_bdd::Options::new(cfg));
+    let (sum, _, code, err) =
+        apic_bdd::run_summary(&CancelToken::new(), &apic_bdd::Options::new(cfg));
     assert!(err.is_none(), "{err:?}");
     let sum = sum.expect("a summary");
     assert!(
@@ -347,7 +427,10 @@ fn write_project_scaffolds() {
     let dir = tmp.path().to_string_lossy().into_owned();
 
     let (written, skipped) = write_project(&dir, 9999, false).unwrap();
-    assert!(skipped.is_empty(), "first write should skip nothing, got {skipped:?}");
+    assert!(
+        skipped.is_empty(),
+        "first write should skip nothing, got {skipped:?}"
+    );
     let want: Vec<String> = [
         "apic.yaml",
         "auth.http",
@@ -364,7 +447,10 @@ fn write_project_scaffolds() {
     assert_eq!(written, want);
 
     let env = std::fs::read_to_string(tmp.path().join("http-client.env.json")).unwrap();
-    assert_eq!(env, "{\n  \"local\": {\n    \"baseUrl\": \"http://localhost:9999\"\n  }\n}\n");
+    assert_eq!(
+        env,
+        "{\n  \"local\": {\n    \"baseUrl\": \"http://localhost:9999\"\n  }\n}\n"
+    );
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -378,7 +464,10 @@ fn write_project_scaffolds() {
 
     let p = apic_project::load(&dir).unwrap();
     let diags = p.validate();
-    assert!(diags.is_empty(), "scaffolded project has diagnostics: {diags:?}");
+    assert!(
+        diags.is_empty(),
+        "scaffolded project has diagnostics: {diags:?}"
+    );
 
     // Re-running without force leaves existing files alone.
     let (written, skipped) = write_project(&dir, 9999, false).unwrap();
@@ -393,4 +482,86 @@ fn write_project_scaffolds() {
         skipped.is_empty() && written.len() == want.len(),
         "with force: written={written:?} skipped={skipped:?}"
     );
+}
+
+/// Makes a report comparable between runs: the server's address, the
+/// times taken and the durations are replaced by fixed words.
+fn scrub(report: &str, base: &str) -> String {
+    let report = report.replace(base, "BASE");
+    let mut out = Vec::new();
+    let mut duration_next = false;
+    for line in report.split('\n') {
+        let mut line = line.to_string();
+        if duration_next {
+            line = "DUR".to_string();
+        }
+        duration_next = line == "No steps"
+            || (line.contains(" steps (") && line.starts_with(|c: char| c.is_ascii_digit()));
+        if let Some(at) = line.find("\"duration\": ") {
+            line = format!("{}\"duration\": N", &line[..at]);
+        }
+        if let Some(end) = line.find(" ms)") {
+            let digits = line[..end].trim_end_matches(|c: char| c.is_ascii_digit());
+            if digits.ends_with('(') && digits.len() < end {
+                line = format!("{digits}N{}", &line[end..]);
+            }
+        }
+        let mut rest = line.as_str();
+        let mut timed = String::new();
+        while let Some(at) = rest.find("time=\"") {
+            let after = &rest[at + 6..];
+            let close = after.find('"').unwrap_or(after.len());
+            timed.push_str(&rest[..at]);
+            timed.push_str("time=\"T");
+            rest = &after[close..];
+        }
+        timed.push_str(rest);
+        out.push(timed);
+    }
+    out.join("\n")
+}
+
+/// Each report format, for a feature with failures, undefined steps, an
+/// outline, a rule and a scenario without steps, reads exactly as
+/// recorded in `testdata/`.
+#[test]
+fn reports_read_as_recorded() {
+    let testdata = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata");
+    let feature = std::fs::read(format!("{testdata}/extra.feature")).unwrap();
+    for (format, file) in [
+        ("pretty", "extra.pretty.txt"),
+        ("progress", "extra.progress.txt"),
+        ("junit", "extra.junit.xml"),
+        ("cucumber", "extra.cucumber.json"),
+    ] {
+        // A server of its own, so each report sees the same todos.
+        let srv = server();
+        let p = apic_project::load(concat!(env!("CARGO_MANIFEST_DIR"), "/project")).unwrap();
+        let out: Arc<std::sync::Mutex<Vec<u8>>> = Arc::default();
+        let opts = apic_bdd::Options {
+            features: vec![apic_bdd::Feature {
+                name: "features/extra.feature".to_string(),
+                contents: feature.clone(),
+            }],
+            format: format.to_string(),
+            no_colors: true,
+            output: Some(out.clone()),
+            ..apic_bdd::Options::new(apic_bdd::Config {
+                vars: BTreeMap::from([("baseUrl".to_string(), srv.url())]),
+                stderr: Some(Arc::new(std::sync::Mutex::new(std::io::sink()))),
+                ..apic_bdd::Config::new(p)
+            })
+        };
+        let (code, err) = apic_bdd::run(&CancelToken::new(), &opts);
+        assert!(
+            code == 2
+                && err
+                    .as_ref()
+                    .is_some_and(|e| e.to_string().contains("no request named \"nope\"")),
+            "{format}: code={code} err={err:?}"
+        );
+        let got = scrub(&String::from_utf8_lossy(&out.lock().unwrap()), &srv.url());
+        let want = std::fs::read_to_string(format!("{testdata}/{file}")).unwrap();
+        assert_eq!(got, want, "{format}");
+    }
 }

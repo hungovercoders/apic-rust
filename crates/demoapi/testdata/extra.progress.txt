@@ -1,0 +1,50 @@
+..F-..U-.....F..F..FU 21
+
+
+--- Failed steps:
+
+  Scenario: Fails on status # features/extra.feature:10
+    Then the response status is 201 # features/extra.feature:12
+      Error: expected status == 201, got "200"
+  GET BASE/todos
+  200 OK (N ms)
+  body: [{"id":"1","title":"Buy milk","done":false},{"id":"2","title":"Read the apic docs","done":true}]
+
+  Scenario Outline: Outline 500 # features/extra.feature:23
+    Then the response status is 500 # features/extra.feature:25
+      Error: expected status == 500, got "200"
+  GET BASE/todos
+  200 OK (N ms)
+  body: [{"id":"1","title":"Buy milk","done":false},{"id":"2","title":"Read the apic docs","done":true}]
+
+  Scenario: Doc string # features/extra.feature:33
+    Then the response body contains: # features/extra.feature:35
+      Error: response body mismatch: $: expected 1 items, got 2
+  GET BASE/todos
+  200 OK (N ms)
+  body: [{"id":"1","title":"Buy milk","done":false},{"id":"2","title":"Read the apic docs","done":true}]
+
+  Scenario: In rule # features/extra.feature:46
+    When I run "nope" # features/extra.feature:47
+      Error: no request named "nope"; known: api-key, basic-auth, create-job, create-todo, create-todo-invalid, daily-report, delete-todo, get-deleted, get-job, get-todo, get-updated, graphql, ... (run `apic list`)
+
+
+7 scenarios (1 passed, 4 failed, 3 undefined)
+21 steps (13 passed, 4 failed, 2 undefined, 2 skipped)
+DUR
+
+You can implement step definitions for undefined steps with these snippets:
+
+func anotherUndefinedStep() error {
+	return godog.ErrPending
+}
+
+func iDoSomethingUnknownWith(arg1 int, arg2 string) error {
+	return godog.ErrPending
+}
+
+func InitializeScenario(ctx *godog.ScenarioContext) {
+	ctx.Step(`^another undefined step$`, anotherUndefinedStep)
+	ctx.Step(`^I do something unknown with (\d+) "([^"]*)"$`, iDoSomethingUnknownWith)
+}
+
