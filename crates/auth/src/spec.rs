@@ -49,8 +49,7 @@ pub fn parse(raw: &str) -> Result<Spec, Error> {
             type_names().join(", ")
         )));
     }
-    let fields =
-        split(raw).map_err(|e| Error::msg(format!("@auth {}: {}", quote(raw), e)))?;
+    let fields = split(raw).map_err(|e| Error::msg(format!("@auth {}: {}", quote(raw), e)))?;
     let mut s = Spec {
         r#type: fields[0].to_lowercase(),
         args: Vec::new(),
@@ -117,10 +116,8 @@ impl Spec {
             "apikey" => return self.check_api_key(),
             "aws" => return self.check_aws(),
             "oauth2" => return self.check_oauth2(),
-            "exec" => {
-                if self.args.is_empty() {
-                    return Err(Error::msg("@auth exec needs a command"));
-                }
+            "exec" if self.args.is_empty() => {
+                return Err(Error::msg("@auth exec needs a command"));
             }
             _ => {}
         }
@@ -177,9 +174,7 @@ impl Spec {
         }
         let ca = self.option("clientAuth");
         if !ca.is_empty() && ca != "body" && ca != "basic" {
-            return Err(Error::msg(
-                "@auth oauth2: clientAuth must be body or basic",
-            ));
+            return Err(Error::msg("@auth oauth2: clientAuth must be body or basic"));
         }
         Ok(())
     }

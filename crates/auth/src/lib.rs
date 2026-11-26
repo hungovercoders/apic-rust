@@ -28,7 +28,7 @@ mod sigv4;
 mod spec;
 mod urlutil;
 
-pub use apply::{apply, Cache, Env, Stderr};
+pub use apply::{apply, BrowserOpener, Cache, Clock, Env, Getenv, Stderr};
 pub use authcode::{open_browser, ERR_NOT_INTERACTIVE};
 pub use digest::{digest_host, DigestState, DigestTransport};
 pub use error::Error;
