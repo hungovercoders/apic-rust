@@ -133,6 +133,11 @@ likely to write: a scalar under an explicit core tag that it does not fit
 the parser's words; a file in UTF-16 is decoded, but its quoted numbers may
 be taken for numbers.
 
+`resolve_yaml_scalar(text) -> YamlScalar` is the resolution of one plain
+scalar by those rules (`Null`, `Bool`, `Int`, `Uint`, `Float`,
+`Timestamp`, `Merge` or `Str`, with `tag()` for the `!!int` form), public
+for the OpenAPI reader, which walks YAML nodes of its own.
+
 ## Confinement
 
 | Item | Signature |

@@ -197,7 +197,8 @@ else `404 page not found`.
   HTML `text/html; charset=utf-8`, binary `application/octet-stream`.
 - `Content-Length` for a body of up to 2048 bytes (4096 over HTTP/2); a
   longer body is sent chunked unless the handler set the length.
-- HEAD: the GET's headers, no body. 1xx, 204 and 304: no body, no length.
+- HEAD: the GET's headers, no body; no `Content-Length` when the handler
+  wrote no body at all. 1xx, 204 and 304: no body, no length.
 - The reason phrase of an unknown status is `status code N`.
 
 ## Protocols

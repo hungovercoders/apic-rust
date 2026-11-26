@@ -236,7 +236,7 @@ impl<'de> Visitor<'de> for BuildVisitor<'_> {
 /// with: YAML 1.2's core types, plus the older spellings of octal numbers
 /// (`0777`) and digit groups (`1_000`).
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub(crate) enum Resolved {
+pub enum Resolved {
     Null,
     Bool(bool),
     Int(i64),
@@ -251,7 +251,7 @@ pub(crate) enum Resolved {
 
 impl Resolved {
     /// The tag as messages name it.
-    pub(crate) fn tag(self) -> &'static str {
+    pub fn tag(self) -> &'static str {
         match self {
             Resolved::Null => "!!null",
             Resolved::Bool(_) => "!!bool",
@@ -346,7 +346,7 @@ fn parse_int(s: &str) -> Option<(bool, u64)> {
 }
 
 /// Resolves a plain scalar.
-pub(crate) fn resolve(raw: &str) -> Resolved {
+pub fn resolve(raw: &str) -> Resolved {
     match raw {
         "" | "~" | "null" | "Null" | "NULL" => return Resolved::Null,
         "true" | "True" | "TRUE" => return Resolved::Bool(true),

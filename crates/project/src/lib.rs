@@ -43,3 +43,4 @@ pub use config::{
 };
 pub use confine::{confine, real_prefix, ConfineError, ERR_OUTSIDE_ROOT};
 pub use project::{discover, load, load_overlay, within, Error, NotFoundError, Project};
+pub use yaml::{resolve as resolve_yaml_scalar, Resolved as YamlScalar};
