@@ -9,5 +9,8 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+regex.workspace = true
 
 [dev-dependencies]
+apic-cli = { path = "../../crates/cli" }
+apic-skills = { path = "../../crates/skills" }

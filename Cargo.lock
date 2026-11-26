@@ -556,6 +556,11 @@ checksum = "e0921b3876b3a1df8a1c9f912e7f94342458022c2e84288015893d83c4d62a79"
 [[package]]
 name = "clidocs"
 version = "0.0.0"
+dependencies = [
+ "apic-cli",
+ "apic-gocompat",
+ "regex",
+]
 
 [[package]]
 name = "core-foundation"
@@ -1423,6 +1428,11 @@ checksum = "3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea"
 [[package]]
 name = "skilldocs"
 version = "0.0.0"
+dependencies = [
+ "apic-cli",
+ "apic-skills",
+ "regex",
+]
 
 [[package]]
 name = "slab"

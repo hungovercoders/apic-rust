@@ -9,5 +9,8 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+apic-cli = { path = "../../crates/cli" }
+apic-gocompat = { path = "../../crates/gocompat" }
 
 [dev-dependencies]
+regex.workspace = true
