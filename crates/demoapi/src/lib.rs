@@ -229,6 +229,136 @@ fn graphql_errors(message: &str) -> String {
     format!("{{\"errors\":[{{\"message\":{}}}]}}", string(message))
 }
 
+/// `GET /todos`: one page of the todos, with the paging headers.
+fn todos_page(st: &Shared, r: &Request) -> Response {
+    let mut done = None;
+    if let Some(v) = r.query_get("done").filter(|v| !v.is_empty()) {
+        match parse_bool(&v) {
+            Some(b) => done = Some(b),
+            None => return error(400, "done must be true or false"),
+        }
+    }
+    let page = positive_int(r.query_get("page"), 1);
+    let limit = positive_int(r.query_get("limit"), DEFAULT_PAGE_SIZE).min(MAX_PAGE_SIZE);
+    let all = list_todos(st, done);
+    let len = all.len() as i64;
+    // Bound the window without multiplying first: a huge page
+    // must not overflow.
+    let start = if page - 1 <= len / limit {
+        ((page - 1) * limit).min(len)
+    } else {
+        len
+    };
+    let end = (start + limit).min(len);
+    let mut resp = Response::new(200)
+        .with_header("X-Total-Count", &len.to_string())
+        .with_header("X-Page", &page.to_string());
+    if end < len {
+        let mut next: Vec<(String, String)> = r
+            .query()
+            .into_iter()
+            .filter(|(k, _)| k != "page" && k != "limit")
+            .collect();
+        next.push(("page".to_string(), (page + 1).to_string()));
+        next.push(("limit".to_string(), limit.to_string()));
+        resp = resp.with_header(
+            "Link",
+            &format!("</todos?{}>; rel=\"next\"", encode_query(&next)),
+        );
+    }
+    resp.with_header("Content-Type", "application/json")
+        .with_body(format!(
+            "{}\n",
+            todos_json(&all[start as usize..end as usize])
+        ))
+}
+
+/// `POST /upload`: echoes the parts of a multipart form.
+fn upload(r: &Request) -> Response {
+    let parts = match r.multipart() {
+        Ok(parts) => parts,
+        Err(err) => {
+            return error(400, &format!("expected multipart/form-data: {err}"));
+        }
+    };
+    let mut fields: BTreeMap<&str, String> = BTreeMap::new();
+    let mut files: Vec<(&str, String)> = Vec::new();
+    for part in &parts {
+        match part.filename.as_deref().filter(|f| !f.is_empty()) {
+            None => {
+                fields
+                    .entry(part.name.as_str())
+                    .or_insert_with(|| String::from_utf8_lossy(&part.data).into_owned());
+            }
+            Some(filename) => {
+                let mut file = format!(
+                    "{{\"field\":{},\"filename\":{},\"size\":{}",
+                    string(&part.name),
+                    string(filename),
+                    part.data.len()
+                );
+                if let Some(ct) = part.headers.get("Content-Type").filter(|c| !c.is_empty()) {
+                    file.push_str(&format!(",\"content_type\":{}", string(ct)));
+                }
+                file.push('}');
+                files.push((part.name.as_str(), file));
+            }
+        }
+    }
+    files.sort_by(|a, b| a.0.cmp(b.0));
+    let fields: Vec<String> = fields
+        .iter()
+        .map(|(k, v)| format!("{}:{}", string(k), string(v)))
+        .collect();
+    let files: Vec<String> = files.into_iter().map(|(_, f)| f).collect();
+    json(
+        201,
+        format!(
+            "{{\"fields\":{{{}}},\"files\":[{}]}}",
+            fields.join(","),
+            files.join(",")
+        ),
+    )
+}
+
+/// `POST /graphql`: the demo schema's two fields.
+fn graphql(st: &Shared, r: &Request) -> Response {
+    let bad = || json(400, graphql_errors("expected a JSON body with a query"));
+    let Some(body) = body_object(r) else {
+        return bad();
+    };
+    let query = match member(&body, "query") {
+        None | Some(Value::Null) => "",
+        Some(Value::String(q)) => q.as_str(),
+        Some(_) => return bad(),
+    };
+    let variables = match member(&body, "variables") {
+        None | Some(Value::Null) => None,
+        Some(Value::Object(vars)) => Some(vars),
+        Some(_) => return bad(),
+    };
+    if query.trim().is_empty() {
+        return bad();
+    }
+    let mut data: Vec<String> = Vec::new();
+    if query.contains("health") {
+        data.push("\"health\":\"ok\"".to_string());
+    }
+    if query.contains("todos") {
+        let done = variables
+            .and_then(|v| v.get("done"))
+            .and_then(Value::as_bool);
+        data.push(format!("\"todos\":{}", todos_json(&list_todos(st, done))));
+    }
+    if data.is_empty() {
+        return json(
+            200,
+            graphql_errors("unknown field: the demo schema has todos(done: Boolean) and health"),
+        );
+    }
+    json(200, format!("{{\"data\":{{{}}}}}", data.join(",")))
+}
+
 /// Returns the demo API as a handler.
 ///
 /// Routes (bearer means `Authorization: Bearer <anything>`, as `login`
@@ -345,48 +475,7 @@ pub fn new() -> Handler {
     let st = state.clone();
     route(
         "GET /todos",
-        Box::new(require_bearer(move |r| {
-            let mut done = None;
-            if let Some(v) = r.query_get("done").filter(|v| !v.is_empty()) {
-                match parse_bool(&v) {
-                    Some(b) => done = Some(b),
-                    None => return error(400, "done must be true or false"),
-                }
-            }
-            let page = positive_int(r.query_get("page"), 1);
-            let limit = positive_int(r.query_get("limit"), DEFAULT_PAGE_SIZE).min(MAX_PAGE_SIZE);
-            let all = list_todos(&st, done);
-            let len = all.len() as i64;
-            // Bound the window without multiplying first: a huge page
-            // must not overflow.
-            let start = if page - 1 <= len / limit {
-                ((page - 1) * limit).min(len)
-            } else {
-                len
-            };
-            let end = (start + limit).min(len);
-            let mut resp = Response::new(200)
-                .with_header("X-Total-Count", &len.to_string())
-                .with_header("X-Page", &page.to_string());
-            if end < len {
-                let mut next: Vec<(String, String)> = r
-                    .query()
-                    .into_iter()
-                    .filter(|(k, _)| k != "page" && k != "limit")
-                    .collect();
-                next.push(("page".to_string(), (page + 1).to_string()));
-                next.push(("limit".to_string(), limit.to_string()));
-                resp = resp.with_header(
-                    "Link",
-                    &format!("</todos?{}>; rel=\"next\"", encode_query(&next)),
-                );
-            }
-            resp.with_header("Content-Type", "application/json")
-                .with_body(format!(
-                    "{}\n",
-                    todos_json(&all[start as usize..end as usize])
-                ))
-        })),
+        Box::new(require_bearer(move |r| todos_page(&st, r))),
     );
 
     let st = state.clone();
@@ -490,98 +579,12 @@ pub fn new() -> Handler {
         })),
     );
 
-    route(
-        "POST /upload",
-        Box::new(|r| {
-            let parts = match r.multipart() {
-                Ok(parts) => parts,
-                Err(err) => {
-                    return error(400, &format!("expected multipart/form-data: {err}"));
-                }
-            };
-            let mut fields: BTreeMap<&str, String> = BTreeMap::new();
-            let mut files: Vec<(&str, String)> = Vec::new();
-            for part in &parts {
-                match part.filename.as_deref().filter(|f| !f.is_empty()) {
-                    None => {
-                        fields
-                            .entry(part.name.as_str())
-                            .or_insert_with(|| String::from_utf8_lossy(&part.data).into_owned());
-                    }
-                    Some(filename) => {
-                        let mut file = format!(
-                            "{{\"field\":{},\"filename\":{},\"size\":{}",
-                            string(&part.name),
-                            string(filename),
-                            part.data.len()
-                        );
-                        if let Some(ct) = part.headers.get("Content-Type").filter(|c| !c.is_empty())
-                        {
-                            file.push_str(&format!(",\"content_type\":{}", string(ct)));
-                        }
-                        file.push('}');
-                        files.push((part.name.as_str(), file));
-                    }
-                }
-            }
-            files.sort_by(|a, b| a.0.cmp(b.0));
-            let fields: Vec<String> = fields
-                .iter()
-                .map(|(k, v)| format!("{}:{}", string(k), string(v)))
-                .collect();
-            let files: Vec<String> = files.into_iter().map(|(_, f)| f).collect();
-            json(
-                201,
-                format!(
-                    "{{\"fields\":{{{}}},\"files\":[{}]}}",
-                    fields.join(","),
-                    files.join(",")
-                ),
-            )
-        }),
-    );
+    route("POST /upload", Box::new(upload));
 
     let st = state.clone();
     route(
         "POST /graphql",
-        Box::new(require_bearer(move |r| {
-            let bad = || json(400, graphql_errors("expected a JSON body with a query"));
-            let Some(body) = body_object(r) else {
-                return bad();
-            };
-            let query = match member(&body, "query") {
-                None | Some(Value::Null) => "",
-                Some(Value::String(q)) => q.as_str(),
-                Some(_) => return bad(),
-            };
-            let variables = match member(&body, "variables") {
-                None | Some(Value::Null) => None,
-                Some(Value::Object(vars)) => Some(vars),
-                Some(_) => return bad(),
-            };
-            if query.trim().is_empty() {
-                return bad();
-            }
-            let mut data: Vec<String> = Vec::new();
-            if query.contains("health") {
-                data.push("\"health\":\"ok\"".to_string());
-            }
-            if query.contains("todos") {
-                let done = variables
-                    .and_then(|v| v.get("done"))
-                    .and_then(Value::as_bool);
-                data.push(format!("\"todos\":{}", todos_json(&list_todos(&st, done))));
-            }
-            if data.is_empty() {
-                return json(
-                    200,
-                    graphql_errors(
-                        "unknown field: the demo schema has todos(done: Boolean) and health",
-                    ),
-                );
-            }
-            json(200, format!("{{\"data\":{{{}}}}}", data.join(",")))
-        })),
+        Box::new(require_bearer(move |r| graphql(&st, r))),
     );
 
     let st = state.clone();

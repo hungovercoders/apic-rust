@@ -325,6 +325,22 @@ fn scan(s: &str, top: bool, mut visit: impl FnMut(usize, i64) -> bool) {
     }
 }
 
+/// The character a one-letter escape stands for.
+fn simple_escape(e: char) -> Option<char> {
+    match e {
+        'a' => Some('\u{07}'),
+        'b' => Some('\u{08}'),
+        'f' => Some('\u{0c}'),
+        'n' => Some('\n'),
+        'r' => Some('\r'),
+        't' => Some('\t'),
+        'v' => Some('\u{0b}'),
+        '\\' => Some('\\'),
+        '"' => Some('"'),
+        _ => None,
+    }
+}
+
 /// Reads a double-quoted string with the escapes of a string literal:
 /// `\n`, `\t`, `\\`, `\"`, `\xNN`, `\uNNNN`, `\UNNNNNNNN` and octal `\NNN`.
 fn unquote_double(body: &str) -> Option<String> {
@@ -348,19 +364,7 @@ fn unquote_double(body: &str) -> Option<String> {
             }
         }
         let e = chars.next()?;
-        let simple = match e {
-            'a' => Some('\u{07}'),
-            'b' => Some('\u{08}'),
-            'f' => Some('\u{0c}'),
-            'n' => Some('\n'),
-            'r' => Some('\r'),
-            't' => Some('\t'),
-            'v' => Some('\u{0b}'),
-            '\\' => Some('\\'),
-            '"' => Some('"'),
-            _ => None,
-        };
-        if let Some(ch) = simple {
+        if let Some(ch) = simple_escape(e) {
             flush(&mut bytes, &mut out);
             out.push(ch);
             continue;

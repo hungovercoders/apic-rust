@@ -200,6 +200,68 @@ pub(crate) fn lock<T>(m: &Mutex<T>) -> MutexGuard<'_, T> {
     m.lock().unwrap_or_else(|e| e.into_inner())
 }
 
+/// The error for an environment the project's files do not have, with
+/// the closest names it does have.
+fn unknown_environment(env: &str, envs: &apic_env::Environments, root: &str) -> Error {
+    let names = envs.names();
+    let file = apic_env::PUBLIC_FILE;
+    if names.is_empty() {
+        return uerr(
+            Code::Environment,
+            format!(
+                "environment {} requested but no {file} found in {}",
+                quote(env),
+                root
+            ),
+        );
+    }
+    let closest = apic_suggest::closest(env, &names);
+    if !closest.is_empty() {
+        let mut ue = UsageError::new(
+            Code::Environment,
+            format!(
+                "environment {} not found in {file}; {} (have: {})",
+                quote(env),
+                apic_suggest::phrase(&closest),
+                names.join(", ")
+            ),
+        );
+        ue.suggestions = closest;
+        return ue.into();
+    }
+    uerr(
+        Code::Environment,
+        format!(
+            "environment {} not found in {file} (have: {})",
+            quote(env),
+            names.join(", ")
+        ),
+    )
+}
+
+/// The proxy requests go through, from the flag or else the project's
+/// configuration.
+fn proxy_settings(
+    p: &Project,
+    opts: &Options,
+) -> std::result::Result<Option<ProxySettings>, Error> {
+    if opts.proxy.is_empty() && p.config.proxy.is_empty() {
+        return Ok(None);
+    }
+    let from_flag = !opts.proxy.is_empty();
+    let raw = if from_flag {
+        &opts.proxy
+    } else {
+        &p.config.proxy
+    };
+    let source = proxy_source(from_flag);
+    Ok(Some(ProxySettings {
+        url: parse_proxy(raw, source)?,
+        source: source.to_string(),
+        no_proxy: p.config.no_proxy.clone(),
+    }))
+}
+
 impl Runner {
     /// Builds a runner, loading env files and the session.
     pub fn new(p: Arc<Project>, mut opts: Options) -> std::result::Result<Runner, Error> {
@@ -228,40 +290,7 @@ impl Runner {
         let envs =
             apic_env::load(Path::new(&p.root)).map_err(|e| uerr(Code::Project, e.to_string()))?;
         if !opts.env.is_empty() && !envs.has(&opts.env) {
-            let names = envs.names();
-            let file = apic_env::PUBLIC_FILE;
-            if names.is_empty() {
-                return Err(uerr(
-                    Code::Environment,
-                    format!(
-                        "environment {} requested but no {file} found in {}",
-                        quote(&opts.env),
-                        p.root
-                    ),
-                ));
-            }
-            let closest = apic_suggest::closest(&opts.env, &names);
-            if !closest.is_empty() {
-                let mut ue = UsageError::new(
-                    Code::Environment,
-                    format!(
-                        "environment {} not found in {file}; {} (have: {})",
-                        quote(&opts.env),
-                        apic_suggest::phrase(&closest),
-                        names.join(", ")
-                    ),
-                );
-                ue.suggestions = closest;
-                return Err(ue.into());
-            }
-            return Err(uerr(
-                Code::Environment,
-                format!(
-                    "environment {} not found in {file} (have: {})",
-                    quote(&opts.env),
-                    names.join(", ")
-                ),
-            ));
+            return Err(unknown_environment(&opts.env, &envs, &p.root));
         }
         // Flag paths are the user's own, relative to where they typed
         // them, which absolute paths tell apart from the project's
@@ -273,21 +302,7 @@ impl Runner {
                 }
             }
         }
-        let mut proxy = None;
-        if !opts.proxy.is_empty() || !p.config.proxy.is_empty() {
-            let from_flag = !opts.proxy.is_empty();
-            let raw = if from_flag {
-                &opts.proxy
-            } else {
-                &p.config.proxy
-            };
-            let source = proxy_source(from_flag);
-            proxy = Some(ProxySettings {
-                url: parse_proxy(raw, source)?,
-                source: source.to_string(),
-                no_proxy: p.config.no_proxy.clone(),
-            });
-        }
+        let proxy = proxy_settings(&p, &opts)?;
         let root = Path::new(&p.root);
         let session = match &opts.session {
             Some(s) => Some(s.clone()),

@@ -322,45 +322,85 @@ fn lower_first(s: &str) -> String {
     }
 }
 
+/// The text of each TLS alert apic names.
+const ALERTS: &[(AlertDescription, &str)] = &[
+    (AlertDescription::CloseNotify, "close notify"),
+    (AlertDescription::UnexpectedMessage, "unexpected message"),
+    (AlertDescription::BadRecordMac, "bad record MAC"),
+    (AlertDescription::DecryptionFailed, "decryption failed"),
+    (AlertDescription::RecordOverflow, "record overflow"),
+    (
+        AlertDescription::DecompressionFailure,
+        "decompression failure",
+    ),
+    (AlertDescription::HandshakeFailure, "handshake failure"),
+    (AlertDescription::BadCertificate, "bad certificate"),
+    (
+        AlertDescription::UnsupportedCertificate,
+        "unsupported certificate",
+    ),
+    (AlertDescription::CertificateRevoked, "revoked certificate"),
+    (AlertDescription::CertificateExpired, "expired certificate"),
+    (AlertDescription::CertificateUnknown, "unknown certificate"),
+    (AlertDescription::IllegalParameter, "illegal parameter"),
+    (AlertDescription::UnknownCA, "unknown certificate authority"),
+    (AlertDescription::AccessDenied, "access denied"),
+    (AlertDescription::DecodeError, "error decoding message"),
+    (AlertDescription::DecryptError, "error decrypting message"),
+    (AlertDescription::ExportRestriction, "export restriction"),
+    (
+        AlertDescription::ProtocolVersion,
+        "protocol version not supported",
+    ),
+    (
+        AlertDescription::InsufficientSecurity,
+        "insufficient security level",
+    ),
+    (AlertDescription::InternalError, "internal error"),
+    (
+        AlertDescription::InappropriateFallback,
+        "inappropriate fallback",
+    ),
+    (AlertDescription::UserCanceled, "user canceled"),
+    (AlertDescription::NoRenegotiation, "no renegotiation"),
+    (AlertDescription::MissingExtension, "missing extension"),
+    (
+        AlertDescription::UnsupportedExtension,
+        "unsupported extension",
+    ),
+    (
+        AlertDescription::CertificateUnobtainable,
+        "certificate unobtainable",
+    ),
+    (AlertDescription::UnrecognisedName, "unrecognized name"),
+    (
+        AlertDescription::BadCertificateStatusResponse,
+        "bad certificate status response",
+    ),
+    (
+        AlertDescription::BadCertificateHashValue,
+        "bad certificate hash value",
+    ),
+    (AlertDescription::UnknownPSKIdentity, "unknown PSK identity"),
+    (
+        AlertDescription::CertificateRequired,
+        "certificate required",
+    ),
+    (
+        AlertDescription::NoApplicationProtocol,
+        "no application protocol",
+    ),
+];
+
 /// The text of a TLS alert the peer sent.
 fn alert_text(alert: AlertDescription) -> String {
-    let text = match alert {
-        AlertDescription::CloseNotify => "close notify",
-        AlertDescription::UnexpectedMessage => "unexpected message",
-        AlertDescription::BadRecordMac => "bad record MAC",
-        AlertDescription::DecryptionFailed => "decryption failed",
-        AlertDescription::RecordOverflow => "record overflow",
-        AlertDescription::DecompressionFailure => "decompression failure",
-        AlertDescription::HandshakeFailure => "handshake failure",
-        AlertDescription::BadCertificate => "bad certificate",
-        AlertDescription::UnsupportedCertificate => "unsupported certificate",
-        AlertDescription::CertificateRevoked => "revoked certificate",
-        AlertDescription::CertificateExpired => "expired certificate",
-        AlertDescription::CertificateUnknown => "unknown certificate",
-        AlertDescription::IllegalParameter => "illegal parameter",
-        AlertDescription::UnknownCA => "unknown certificate authority",
-        AlertDescription::AccessDenied => "access denied",
-        AlertDescription::DecodeError => "error decoding message",
-        AlertDescription::DecryptError => "error decrypting message",
-        AlertDescription::ExportRestriction => "export restriction",
-        AlertDescription::ProtocolVersion => "protocol version not supported",
-        AlertDescription::InsufficientSecurity => "insufficient security level",
-        AlertDescription::InternalError => "internal error",
-        AlertDescription::InappropriateFallback => "inappropriate fallback",
-        AlertDescription::UserCanceled => "user canceled",
-        AlertDescription::NoRenegotiation => "no renegotiation",
-        AlertDescription::MissingExtension => "missing extension",
-        AlertDescription::UnsupportedExtension => "unsupported extension",
-        AlertDescription::CertificateUnobtainable => "certificate unobtainable",
-        AlertDescription::UnrecognisedName => "unrecognized name",
-        AlertDescription::BadCertificateStatusResponse => "bad certificate status response",
-        AlertDescription::BadCertificateHashValue => "bad certificate hash value",
-        AlertDescription::UnknownPSKIdentity => "unknown PSK identity",
-        AlertDescription::CertificateRequired => "certificate required",
-        AlertDescription::NoApplicationProtocol => "no application protocol",
-        other => return format!("alert({other:?})"),
-    };
-    text.to_string()
+    ALERTS
+        .iter()
+        .find(|(known, _)| *known == alert)
+        .map_or_else(
+            || format!("alert({alert:?})"),
+            |(_, text)| (*text).to_string(),
+        )
 }
 
 #[cfg(test)]

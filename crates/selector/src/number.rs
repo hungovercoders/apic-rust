@@ -108,6 +108,97 @@ fn scan_exponent(b: &[u8]) -> Option<i64> {
     text.parse().ok()
 }
 
+/// The mantissa of a number as it is written.
+struct Mantissa {
+    base: u32,
+    /// The value of each digit.
+    digits: Vec<u8>,
+    /// Minus the number of digits after the point.
+    fcount: i64,
+    /// Where the mantissa ends in the text.
+    end: usize,
+}
+
+/// Reads a mantissa from `b[i..]`: a base prefix, then digits with an
+/// optional point and single underscores between them.
+fn scan_mantissa(b: &[u8], mut i: usize) -> Option<Mantissa> {
+    let mut base = 10u32;
+    let mut prev = b'.';
+    let mut inval_sep = false;
+    let mut count = 0i64;
+    if b.get(i) == Some(&b'0') {
+        prev = b'0';
+        count = 1;
+        i += 1;
+        let prefixed = match b.get(i) {
+            Some(b'b' | b'B') => Some(2),
+            Some(b'o' | b'O') => Some(8),
+            Some(b'x' | b'X') => Some(16),
+            _ => None,
+        };
+        if let Some(n) = prefixed {
+            base = n;
+            count = 0;
+            i += 1;
+        }
+    }
+    let mut frac_ok = true;
+    let mut dp: Option<i64> = None;
+    let mut mantissa: Vec<u8> = Vec::new(); // digit values
+    while let Some(&c) = b.get(i) {
+        if c == b'.' && frac_ok {
+            frac_ok = false;
+            if prev == b'_' {
+                inval_sep = true;
+            }
+            prev = b'.';
+            dp = Some(count);
+        } else if c == b'_' {
+            if prev != b'0' {
+                inval_sep = true;
+            }
+            prev = b'_';
+        } else {
+            let d = match c {
+                b'0'..=b'9' => u32::from(c - b'0'),
+                b'a'..=b'z' => u32::from(c - b'a') + 10,
+                b'A'..=b'Z' => u32::from(c - b'A') + 10,
+                _ => u32::MAX,
+            };
+            if d >= base {
+                break;
+            }
+            prev = b'0';
+            count += 1;
+            mantissa.push(d as u8);
+        }
+        i += 1;
+    }
+    if inval_sep || prev == b'_' || count == 0 {
+        return None;
+    }
+    Some(Mantissa {
+        base,
+        digits: mantissa,
+        fcount: dp.map_or(0, |dp| dp - count),
+        end: i,
+    })
+}
+
+/// The powers of two and of five that the digits after the point of a
+/// mantissa in `base` scale it by.
+fn fraction_exponents(base: u32, fcount: i64) -> (i64, i64) {
+    if fcount >= 0 {
+        return (0, 0);
+    }
+    match base {
+        10 => (fcount, fcount),
+        2 => (fcount, 0),
+        8 => (fcount * 3, 0),
+        _ => (fcount * 4, 0),
+    }
+}
+
 impl Number {
     /// Reads a number: an optional sign, digits with an optional fraction,
     /// and an optional exponent (`1.5e3`). A `0x`, `0o` or `0b` prefix
@@ -125,63 +216,12 @@ impl Number {
             neg = b[0] == b'-';
             i = 1;
         }
-        // The mantissa.
-        let mut base = 10u32;
-        let mut prev = b'.';
-        let mut inval_sep = false;
-        let mut count = 0i64;
-        if b.get(i) == Some(&b'0') {
-            prev = b'0';
-            count = 1;
-            i += 1;
-            let prefixed = match b.get(i) {
-                Some(b'b' | b'B') => Some(2),
-                Some(b'o' | b'O') => Some(8),
-                Some(b'x' | b'X') => Some(16),
-                _ => None,
-            };
-            if let Some(n) = prefixed {
-                base = n;
-                count = 0;
-                i += 1;
-            }
-        }
-        let mut frac_ok = true;
-        let mut dp: Option<i64> = None;
-        let mut mantissa: Vec<u8> = Vec::new(); // digit values
-        while let Some(&c) = b.get(i) {
-            if c == b'.' && frac_ok {
-                frac_ok = false;
-                if prev == b'_' {
-                    inval_sep = true;
-                }
-                prev = b'.';
-                dp = Some(count);
-            } else if c == b'_' {
-                if prev != b'0' {
-                    inval_sep = true;
-                }
-                prev = b'_';
-            } else {
-                let d = match c {
-                    b'0'..=b'9' => u32::from(c - b'0'),
-                    b'a'..=b'z' => u32::from(c - b'a') + 10,
-                    b'A'..=b'Z' => u32::from(c - b'A') + 10,
-                    _ => u32::MAX,
-                };
-                if d >= base {
-                    break;
-                }
-                prev = b'0';
-                count += 1;
-                mantissa.push(d as u8);
-            }
-            i += 1;
-        }
-        if inval_sep || prev == b'_' || count == 0 {
-            return None;
-        }
-        let fcount = dp.map_or(0, |dp| dp - count);
+        let Mantissa {
+            base,
+            digits: mantissa,
+            fcount,
+            end: i,
+        } = scan_mantissa(b, i)?;
         // The exponent.
         let (exp, ebase) = match b.get(i) {
             None => (0, 10),
@@ -196,18 +236,7 @@ impl Number {
                 exp: 0,
             });
         }
-        let (mut exp2, mut exp5) = (0i64, 0i64);
-        if fcount < 0 {
-            match base {
-                10 => {
-                    exp5 = fcount;
-                    exp2 = fcount;
-                }
-                2 => exp2 = fcount,
-                8 => exp2 = fcount * 3,
-                _ => exp2 = fcount * 4,
-            }
-        }
+        let (mut exp2, mut exp5) = fraction_exponents(base, fcount);
         if ebase == 10 {
             exp5 = exp5.checked_add(exp)?;
         }

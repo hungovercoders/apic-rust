@@ -500,6 +500,67 @@ impl Style {
             return self.convert_tabs(s);
         }
 
+        let width = self.width.unwrap_or(0);
+        let height = self.height.unwrap_or(0);
+        let horizontal_align = self.align_horizontal.unwrap_or(Position::LEFT);
+        let vertical_align = self.align_vertical.unwrap_or(Position::TOP);
+
+        let pad = |i: usize| self.padding[i].unwrap_or(0);
+
+        let color_whitespace = self.color_whitespace.unwrap_or(true);
+        let inline = self.inline.unwrap_or(false);
+
+        // Is white space (padding, and the room beside short lines) styled
+        // apart from the text?
+        let style_whitespace = self.reverse.unwrap_or(false);
+
+        let styles = self.text_styles(p);
+
+        // Tabs become spaces, and carriage returns go: they make a mess of
+        // a rendered block.
+        let mut str = self.convert_tabs(s).replace("\r\n", "\n");
+
+        if inline {
+            str = str.replace('\n', "");
+        }
+
+        // Word wrap
+        if !inline && width > 0 {
+            let wrap_at = width - pad(LEFT) - pad(RIGHT);
+            str = cell_wrap(&str, wrap_at);
+        }
+
+        str = styles.style_lines(&str);
+
+        let whitespace = (color_whitespace || style_whitespace).then_some(&styles.whitespace);
+
+        if !inline {
+            str = self.apply_padding(str, whitespace);
+        }
+
+        // Height
+        if height > 0 {
+            str = align_text_vertical(&str, vertical_align, height);
+        }
+
+        // Alignment. This also pads short lines so that every line is as
+        // wide as the widest, which is why it runs for any block of more
+        // than one line.
+        if str.contains('\n') || width != 0 {
+            str = align_text_horizontal(&str, horizontal_align, width, whitespace);
+        }
+
+        if !inline {
+            str = self.apply_border(&str, p);
+            str = self.apply_margins(&str, p);
+        }
+
+        self.apply_limits(str)
+    }
+
+    /// The sequences for the text, for the spaces between words and for
+    /// the white space around the text.
+    fn text_styles(&self, p: Profile) -> TextStyles {
         let flag = |v: Option<bool>| v.unwrap_or(false);
         let bold = flag(self.bold);
         let italic = flag(self.italic);
@@ -512,17 +573,7 @@ impl Style {
         let fg = set_color(&self.foreground);
         let bg = set_color(&self.background);
 
-        let width = self.width.unwrap_or(0);
-        let height = self.height.unwrap_or(0);
-        let horizontal_align = self.align_horizontal.unwrap_or(Position::LEFT);
-        let vertical_align = self.align_vertical.unwrap_or(Position::TOP);
-
-        let pad = |i: usize| self.padding[i].unwrap_or(0);
-
         let color_whitespace = self.color_whitespace.unwrap_or(true);
-        let inline = flag(self.inline);
-        let max_width = self.max_width.unwrap_or(0);
-        let max_height = self.max_height.unwrap_or(0);
 
         let underline_spaces =
             flag(self.underline_spaces) || (underline && self.underline_spaces.unwrap_or(true));
@@ -599,80 +650,35 @@ impl Style {
             te_space.push(CROSS_OUT);
         }
 
-        // Tabs become spaces, and carriage returns go: they make a mess of
-        // a rendered block.
-        let mut str = self.convert_tabs(s).replace("\r\n", "\n");
-
-        if inline {
-            str = str.replace('\n', "");
+        TextStyles {
+            text: te,
+            space: use_space_styler.then_some(te_space),
+            whitespace: te_whitespace,
         }
+    }
 
-        // Word wrap
-        if !inline && width > 0 {
-            let wrap_at = width - pad(LEFT) - pad(RIGHT);
-            str = cell_wrap(&str, wrap_at);
+    /// Padding
+    fn apply_padding(&self, mut str: String, whitespace: Option<&Sgr>) -> String {
+        let pad = |i: usize| self.padding[i].unwrap_or(0);
+        if pad(LEFT) > 0 {
+            str = pad_lines(&str, -pad(LEFT), whitespace);
         }
-
-        // The text itself, line by line
-        {
-            let mut b = String::with_capacity(str.len() + 16);
-            let lines: Vec<&str> = str.split('\n').collect();
-            for (i, line) in lines.iter().enumerate() {
-                if use_space_styler {
-                    // Spaces get a style of their own.
-                    let mut buf = [0u8; 4];
-                    for r in line.chars() {
-                        let r = &*r.encode_utf8(&mut buf);
-                        if r.chars().all(char::is_whitespace) {
-                            b.push_str(&te_space.styled(r));
-                        } else {
-                            b.push_str(&te.styled(r));
-                        }
-                    }
-                } else {
-                    b.push_str(&te.styled(line));
-                }
-                if i != lines.len() - 1 {
-                    b.push('\n');
-                }
-            }
-            str = b;
+        if pad(RIGHT) > 0 {
+            str = pad_lines(&str, pad(RIGHT), whitespace);
         }
-
-        let whitespace = (color_whitespace || style_whitespace).then_some(&te_whitespace);
-
-        // Padding
-        if !inline {
-            if pad(LEFT) > 0 {
-                str = pad_lines(&str, -pad(LEFT), whitespace);
-            }
-            if pad(RIGHT) > 0 {
-                str = pad_lines(&str, pad(RIGHT), whitespace);
-            }
-            if pad(TOP) > 0 {
-                str = "\n".repeat(pad(TOP) as usize) + &str;
-            }
-            if pad(BOTTOM) > 0 {
-                str.push_str(&"\n".repeat(pad(BOTTOM) as usize));
-            }
+        if pad(TOP) > 0 {
+            str = "\n".repeat(pad(TOP) as usize) + &str;
         }
-
-        // Height
-        if height > 0 {
-            str = align_text_vertical(&str, vertical_align, height);
+        if pad(BOTTOM) > 0 {
+            str.push_str(&"\n".repeat(pad(BOTTOM) as usize));
         }
+        str
+    }
 
-        // Alignment. This also pads short lines so that every line is as
-        // wide as the widest, which is why it runs for any block of more
-        // than one line.
-        if str.contains('\n') || width != 0 {
-            str = align_text_horizontal(&str, horizontal_align, width, whitespace);
-        }
-
-        if !inline {
-            str = self.apply_border(&str, p);
-            str = self.apply_margins(&str, p);
-        }
+    /// Cuts a rendered block to the most width and height allowed.
+    fn apply_limits(&self, mut str: String) -> String {
+        let max_width = self.max_width.unwrap_or(0);
+        let max_height = self.max_height.unwrap_or(0);
 
         // Cut to the most width allowed
         if max_width > 0 {
@@ -691,6 +697,30 @@ impl Style {
         }
 
         str
+    }
+
+    /// Styles a piece of the border on one side.
+    fn style_border(&self, text: &str, side: usize, p: Profile) -> String {
+        let fg = set_color(&self.border_foreground[side]);
+        let bg = set_color(&self.border_background[side]);
+        if fg.is_none() && bg.is_none() {
+            return text.to_string();
+        }
+        // Border colours are written whatever the profile says about
+        // attributes: only a profile without colour leaves them out,
+        // by resolving each colour to nothing.
+        let mut sgr = Sgr::new(Profile::Ansi);
+        if let Some(fg) = fg {
+            if let Some(c) = fg.resolve(p) {
+                sgr.styles.push(c.sequence(false));
+            }
+        }
+        if let Some(bg) = bg {
+            if let Some(c) = bg.resolve(p) {
+                sgr.styles.push(c.sequence(true));
+            }
+        }
+        sgr.styled(text)
     }
 
     fn apply_border(&self, s: &str, p: Profile) -> String {
@@ -713,80 +743,14 @@ impl Style {
         if has_right && border.right.is_empty() {
             border.right = " ".to_string();
         }
-
-        // A corner that is to be drawn but has no character is a space.
-        let fill = |s: &mut String| {
-            if s.is_empty() {
-                *s = " ".to_string();
-            }
-        };
-        if has_top && has_left {
-            fill(&mut border.top_left);
-        }
-        if has_top && has_right {
-            fill(&mut border.top_right);
-        }
-        if has_bottom && has_left {
-            fill(&mut border.bottom_left);
-        }
-        if has_bottom && has_right {
-            fill(&mut border.bottom_right);
-        }
-
-        // A corner is drawn only where both of its sides are.
-        if has_top {
-            if !has_left {
-                border.top_left.clear();
-            }
-            if !has_right {
-                border.top_right.clear();
-            }
-        }
-        if has_bottom {
-            if !has_left {
-                border.bottom_left.clear();
-            }
-            if !has_right {
-                border.bottom_right.clear();
-            }
-        }
-
-        // A corner is one character.
-        let first = |s: &str| s.chars().next().map(String::from).unwrap_or_default();
-        border.top_left = first(&border.top_left);
-        border.top_right = first(&border.top_right);
-        border.bottom_right = first(&border.bottom_right);
-        border.bottom_left = first(&border.bottom_left);
-
-        let style_border = |text: &str, side: usize| -> String {
-            let fg = set_color(&self.border_foreground[side]);
-            let bg = set_color(&self.border_background[side]);
-            if fg.is_none() && bg.is_none() {
-                return text.to_string();
-            }
-            // Border colours are written whatever the profile says about
-            // attributes: only a profile without colour leaves them out,
-            // by resolving each colour to nothing.
-            let mut sgr = Sgr::new(Profile::Ansi);
-            if let Some(fg) = fg {
-                if let Some(c) = fg.resolve(p) {
-                    sgr.styles.push(c.sequence(false));
-                }
-            }
-            if let Some(bg) = bg {
-                if let Some(c) = bg.resolve(p) {
-                    sgr.styles.push(c.sequence(true));
-                }
-            }
-            sgr.styled(text)
-        };
+        settle_corners(&mut border, (has_top, has_right, has_bottom, has_left));
 
         let mut out = String::new();
 
         if has_top {
             let top =
                 render_horizontal_edge(&border.top_left, &border.top, &border.top_right, width);
-            out.push_str(&style_border(&top, TOP));
+            out.push_str(&self.style_border(&top, TOP, p));
             out.push('\n');
         }
 
@@ -798,13 +762,13 @@ impl Style {
             if has_left {
                 let r = left_runes[left_index].to_string();
                 left_index = (left_index + 1) % left_runes.len();
-                out.push_str(&style_border(&r, LEFT));
+                out.push_str(&self.style_border(&r, LEFT, p));
             }
             out.push_str(l);
             if has_right {
                 let r = right_runes[right_index].to_string();
                 right_index = (right_index + 1) % right_runes.len();
-                out.push_str(&style_border(&r, RIGHT));
+                out.push_str(&self.style_border(&r, RIGHT, p));
             }
             if i < lines.len() - 1 {
                 out.push('\n');
@@ -819,7 +783,7 @@ impl Style {
                 width,
             );
             out.push('\n');
-            out.push_str(&style_border(&bottom, BOTTOM));
+            out.push_str(&self.style_border(&bottom, BOTTOM, p));
         }
 
         out
@@ -849,6 +813,93 @@ impl Style {
         }
         str
     }
+}
+
+/// The sequences one rendering writes: for the text, for the spaces
+/// between words when they are styled apart from the words, and for the
+/// white space around the text.
+struct TextStyles {
+    text: Sgr,
+    space: Option<Sgr>,
+    whitespace: Sgr,
+}
+
+impl TextStyles {
+    /// The text itself, line by line
+    fn style_lines(&self, str: &str) -> String {
+        let mut b = String::with_capacity(str.len() + 16);
+        let lines: Vec<&str> = str.split('\n').collect();
+        for (i, line) in lines.iter().enumerate() {
+            if let Some(space) = &self.space {
+                // Spaces get a style of their own.
+                let mut buf = [0u8; 4];
+                for r in line.chars() {
+                    let r = &*r.encode_utf8(&mut buf);
+                    if r.chars().all(char::is_whitespace) {
+                        b.push_str(&space.styled(r));
+                    } else {
+                        b.push_str(&self.text.styled(r));
+                    }
+                }
+            } else {
+                b.push_str(&self.text.styled(line));
+            }
+            if i != lines.len() - 1 {
+                b.push('\n');
+            }
+        }
+        b
+    }
+}
+
+/// Settles the corners of a border whose sides, in the order top, right,
+/// bottom, left, are drawn or not.
+fn settle_corners(border: &mut Border, sides: (bool, bool, bool, bool)) {
+    let (has_top, has_right, has_bottom, has_left) = sides;
+
+    // A corner that is to be drawn but has no character is a space.
+    let fill = |s: &mut String| {
+        if s.is_empty() {
+            *s = " ".to_string();
+        }
+    };
+    if has_top && has_left {
+        fill(&mut border.top_left);
+    }
+    if has_top && has_right {
+        fill(&mut border.top_right);
+    }
+    if has_bottom && has_left {
+        fill(&mut border.bottom_left);
+    }
+    if has_bottom && has_right {
+        fill(&mut border.bottom_right);
+    }
+
+    // A corner is drawn only where both of its sides are.
+    if has_top {
+        if !has_left {
+            border.top_left.clear();
+        }
+        if !has_right {
+            border.top_right.clear();
+        }
+    }
+    if has_bottom {
+        if !has_left {
+            border.bottom_left.clear();
+        }
+        if !has_right {
+            border.bottom_right.clear();
+        }
+    }
+
+    // A corner is one character.
+    let first = |s: &str| s.chars().next().map(String::from).unwrap_or_default();
+    border.top_left = first(&border.top_left);
+    border.top_right = first(&border.top_right);
+    border.bottom_right = first(&border.bottom_right);
+    border.bottom_left = first(&border.bottom_left);
 }
 
 /// Pads every line of a block: on the right for a positive `n`, on the

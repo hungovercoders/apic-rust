@@ -81,25 +81,7 @@ impl Resolved {
             }
         }
         if let Some(object) = v.as_object() {
-            for name in &s.required {
-                if !object.contains_key(*name) {
-                    return Err(format!("{at}: {name} is required"));
-                }
-            }
-            for (key, member) in object {
-                let here = format!("{at}/{key}");
-                if let Some(names) = &s.property_names {
-                    self.check(names, &Value::from(key.as_str()), &here)?;
-                }
-                match s.properties.as_ref().and_then(|p| p.get(key)) {
-                    Some(prop) => self.check(prop, member, &here)?,
-                    None => {
-                        if let Some(extra) = &s.additional_properties {
-                            self.check(extra, member, &here)?;
-                        }
-                    }
-                }
-            }
+            self.check_object(s, object, at)?;
         }
         if !s.one_of.is_empty() {
             let passing = s
@@ -116,6 +98,35 @@ impl Resolved {
         if let Some(not) = &s.not {
             if self.check(not, v, at).is_ok() {
                 return Err(format!("{at}: not allowed here"));
+            }
+        }
+        Ok(())
+    }
+
+    /// The keywords for an object: `required` and those for its members.
+    fn check_object(
+        &self,
+        s: &Schema,
+        object: &serde_json::Map<String, Value>,
+        at: &str,
+    ) -> Result<(), String> {
+        for name in &s.required {
+            if !object.contains_key(*name) {
+                return Err(format!("{at}: {name} is required"));
+            }
+        }
+        for (key, member) in object {
+            let here = format!("{at}/{key}");
+            if let Some(names) = &s.property_names {
+                self.check(names, &Value::from(key.as_str()), &here)?;
+            }
+            match s.properties.as_ref().and_then(|p| p.get(key)) {
+                Some(prop) => self.check(prop, member, &here)?,
+                None => {
+                    if let Some(extra) = &s.additional_properties {
+                        self.check(extra, member, &here)?;
+                    }
+                }
             }
         }
         Ok(())

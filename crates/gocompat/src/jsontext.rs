@@ -228,6 +228,37 @@ impl Scanner {
                     Err(Self::error(c, "after top-level value"))
                 }
             }
+            State::InString | State::InStringEsc | State::InStringEscU(_) => self.step_string(c),
+            State::Neg
+            | State::Int
+            | State::Zero
+            | State::Dot
+            | State::Frac
+            | State::Exp
+            | State::ExpSign
+            | State::ExpDigits => self.step_number(c),
+            State::Literal(word, pos) => {
+                let want = word.as_bytes()[pos];
+                if c == want {
+                    self.state = if pos + 1 == word.len() {
+                        State::EndValue
+                    } else {
+                        State::Literal(word, pos + 1)
+                    };
+                    Ok(())
+                } else {
+                    Err(Self::error(
+                        c,
+                        &format!("in literal {} (expecting {})", word, quote_char(want)),
+                    ))
+                }
+            }
+        }
+    }
+
+    /// A step inside a string.
+    fn step_string(&mut self, c: u8) -> Result<(), String> {
+        match self.state {
             State::InString => {
                 match c {
                     b'"' => self.state = State::EndValue,
@@ -260,6 +291,13 @@ impl Scanner {
                     Err(Self::error(c, "in \\u hexadecimal character escape"))
                 }
             }
+            _ => Ok(()),
+        }
+    }
+
+    /// A step inside a number.
+    fn step_number(&mut self, c: u8) -> Result<(), String> {
+        match self.state {
             State::Neg => match c {
                 b'0' => {
                     self.state = State::Zero;
@@ -313,22 +351,7 @@ impl Scanner {
                     self.end_value(c)
                 }
             }
-            State::Literal(word, pos) => {
-                let want = word.as_bytes()[pos];
-                if c == want {
-                    self.state = if pos + 1 == word.len() {
-                        State::EndValue
-                    } else {
-                        State::Literal(word, pos + 1)
-                    };
-                    Ok(())
-                } else {
-                    Err(Self::error(
-                        c,
-                        &format!("in literal {} (expecting {})", word, quote_char(want)),
-                    ))
-                }
-            }
+            _ => Ok(()),
         }
     }
 

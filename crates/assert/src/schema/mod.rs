@@ -206,152 +206,280 @@ impl Document {
                 continue;
             }
             s.nonzero = true;
-            match key {
-                "$id" => s.id = string(v, key)?,
-                "$schema" => s.schema = string(v, key)?,
-                "$ref" => s.ref_ = string(v, key)?,
-                "$anchor" => s.anchor = string(v, key)?,
-                "$dynamicAnchor" => s.dynamic_anchor = string(v, key)?,
-                "$dynamicRef" => s.dynamic_ref = string(v, key)?,
-                "pattern" => s.pattern = string(v, key)?,
-                "$comment" | "title" | "description" | "contentEncoding" | "contentMediaType"
-                | "format" => {
-                    string(v, key)?;
-                }
-                "deprecated" | "readOnly" | "writeOnly" => {
-                    boolean(v, key)?;
-                }
-                "uniqueItems" => s.unique_items = boolean(v, key)?,
-                "examples" => {
-                    if !v.is_array() {
-                        return Err(mismatch(v, key, "[]interface {}"));
-                    }
-                }
-                "$vocabulary" => match v {
-                    Value::Object(o) => {
-                        for e in o.values() {
-                            if !e.is_null() {
-                                boolean(e, key)?;
-                            }
-                        }
-                        s.vocabulary = true;
-                    }
-                    v => return Err(mismatch(v, key, "map[string]bool")),
-                },
-                "$defs" => s.defs = self.map(v, key)?,
-                "definitions" => s.definitions = self.map(v, key)?,
-                "dependentSchemas" => s.dependent_schemas = self.map(v, key)?,
-                "properties" => s.properties = self.map(v, key)?,
-                "patternProperties" => s.pattern_properties = self.map(v, key)?,
-                "prefixItems" => s.prefix_items = self.list(v, key)?.unwrap_or_default(),
-                "allOf" => s.all_of = self.list(v, key)?,
-                "anyOf" => s.any_of = self.list(v, key)?,
-                "oneOf" => s.one_of = self.list(v, key)?,
-                "additionalItems" => s.additional_items = self.one(v, key)?,
-                "contains" => s.contains = self.one(v, key)?,
-                "unevaluatedItems" => s.unevaluated_items = self.one(v, key)?,
-                "additionalProperties" => s.additional_properties = self.one(v, key)?,
-                "propertyNames" => s.property_names = self.one(v, key)?,
-                "unevaluatedProperties" => s.unevaluated_properties = self.one(v, key)?,
-                "not" => s.not = self.one(v, key)?,
-                "if" => s.if_ = self.one(v, key)?,
-                "then" => s.then = self.one(v, key)?,
-                "else" => s.else_ = self.one(v, key)?,
-                "contentSchema" => s.content_schema = self.one(v, key)?,
-                "type" => match v {
-                    Value::String(t) => s.type_ = t.clone(),
-                    Value::Array(a) => {
-                        let mut types = Vec::new();
-                        for e in a {
-                            match e {
-                                Value::Null => types.push(String::new()),
-                                Value::String(t) => types.push(t.clone()),
-                                e => return Err(mismatch(e, "", "string")),
-                            }
-                        }
-                        s.types = Some(types);
-                    }
-                    v => {
-                        return Err(format!(
-                            "invalid value for \"type\": {}",
-                            quote(&v.to_string())
-                        ))
-                    }
-                },
-                "items" => match v {
-                    Value::Array(a) => {
-                        let mut ids = Vec::new();
-                        for e in a {
-                            ids.push(self.add(e, "")?);
-                        }
-                        s.items_array = Some(ids);
-                    }
-                    // Here a null reads as false.
-                    Value::Null => s.items = Some(self.add(&Value::Bool(false), "")?),
-                    v => s.items = Some(self.add(v, "")?),
-                },
-                "dependencies" => match v {
-                    Value::Null => {}
-                    Value::Object(o) => {
-                        for (k, d) in o {
-                            if d.is_array() {
-                                let names = strings(d, "")?;
-                                s.dependency_strings
-                                    .get_or_insert_with(BTreeMap::new)
-                                    .insert(k.clone(), names);
-                            } else {
-                                let id = self
-                                    .add(if d.is_null() { &Value::Bool(false) } else { d }, "")?;
-                                s.dependency_schemas
-                                    .get_or_insert_with(BTreeMap::new)
-                                    .insert(k.clone(), id);
-                            }
-                        }
-                    }
-                    v => return Err(mismatch(v, key, "map[string]json.RawMessage")),
-                },
-                "const" => s.const_ = Some(v.clone()),
-                "enum" => match v {
-                    Value::Array(a) => s.enum_ = Some(a.clone()),
-                    v => return Err(mismatch(v, key, "[]interface {}")),
-                },
-                "multipleOf" => s.multiple_of = Some(float(v, key)?),
-                "minimum" => s.minimum = Some(float(v, key)?),
-                "maximum" => s.maximum = Some(float(v, key)?),
-                "exclusiveMinimum" => s.exclusive_minimum = Some(float(v, key)?),
-                "exclusiveMaximum" => s.exclusive_maximum = Some(float(v, key)?),
-                "minLength" => s.min_length = Some(integer(v)?),
-                "maxLength" => s.max_length = Some(integer(v)?),
-                "minItems" => s.min_items = Some(integer(v)?),
-                "maxItems" => s.max_items = Some(integer(v)?),
-                "minProperties" => s.min_properties = Some(integer(v)?),
-                "maxProperties" => s.max_properties = Some(integer(v)?),
-                "minContains" => s.min_contains = Some(integer(v)?),
-                "maxContains" => s.max_contains = Some(integer(v)?),
-                "required" => s.required = Some(strings(v, key)?),
-                "dependentRequired" => match v {
-                    Value::Object(o) => {
-                        let mut out = BTreeMap::new();
-                        for (k, names) in o {
-                            let names = if names.is_null() {
-                                Vec::new()
-                            } else {
-                                strings(names, key)?
-                            };
-                            out.insert(k.clone(), names);
-                        }
-                        s.dependent_required = Some(out);
-                    }
-                    v => return Err(mismatch(v, key, "map[string][]string")),
-                },
-                // "default" and keywords this reader does not know say
-                // nothing about validity.
-                _ => {}
+            // "default" and keywords this reader does not know say
+            // nothing about validity.
+            if let Some((_, keyword)) = KEYWORDS.iter().find(|(name, _)| *name == key) {
+                self.read_keyword(&mut s, keyword, v, key)?;
             }
         }
         Ok(Some(s))
     }
+
+    /// Reads one keyword's value into the schema.
+    fn read_keyword(
+        &mut self,
+        s: &mut Schema,
+        keyword: &Keyword,
+        v: &Value,
+        key: &str,
+    ) -> Result<(), String> {
+        match keyword {
+            Keyword::Str(field) => *field(s) = string(v, key)?,
+            Keyword::UnusedStr => {
+                string(v, key)?;
+            }
+            Keyword::UnusedBool => {
+                boolean(v, key)?;
+            }
+            Keyword::Map(field) => *field(s) = self.map(v, key)?,
+            Keyword::List(field) => *field(s) = self.list(v, key)?,
+            Keyword::One(field) => *field(s) = self.one(v, key)?,
+            Keyword::Float(field) => *field(s) = Some(float(v, key)?),
+            Keyword::Int(field) => *field(s) = Some(integer(v)?),
+            Keyword::Other(read) => read(self, s, v, key)?,
+        }
+        Ok(())
+    }
+
+    fn read_unique_items(&mut self, s: &mut Schema, v: &Value, key: &str) -> Result<(), String> {
+        s.unique_items = boolean(v, key)?;
+        Ok(())
+    }
+
+    fn read_examples(&mut self, _: &mut Schema, v: &Value, key: &str) -> Result<(), String> {
+        if !v.is_array() {
+            return Err(mismatch(v, key, "[]interface {}"));
+        }
+        Ok(())
+    }
+
+    fn read_vocabulary(&mut self, s: &mut Schema, v: &Value, key: &str) -> Result<(), String> {
+        let Value::Object(o) = v else {
+            return Err(mismatch(v, key, "map[string]bool"));
+        };
+        for e in o.values() {
+            if !e.is_null() {
+                boolean(e, key)?;
+            }
+        }
+        s.vocabulary = true;
+        Ok(())
+    }
+
+    fn read_prefix_items(&mut self, s: &mut Schema, v: &Value, key: &str) -> Result<(), String> {
+        s.prefix_items = self.list(v, key)?.unwrap_or_default();
+        Ok(())
+    }
+
+    fn read_type(&mut self, s: &mut Schema, v: &Value, _: &str) -> Result<(), String> {
+        match v {
+            Value::String(t) => s.type_ = t.clone(),
+            Value::Array(a) => {
+                let mut types = Vec::new();
+                for e in a {
+                    match e {
+                        Value::Null => types.push(String::new()),
+                        Value::String(t) => types.push(t.clone()),
+                        e => return Err(mismatch(e, "", "string")),
+                    }
+                }
+                s.types = Some(types);
+            }
+            v => {
+                return Err(format!(
+                    "invalid value for \"type\": {}",
+                    quote(&v.to_string())
+                ))
+            }
+        }
+        Ok(())
+    }
+
+    fn read_items(&mut self, s: &mut Schema, v: &Value, _: &str) -> Result<(), String> {
+        match v {
+            Value::Array(a) => {
+                let mut ids = Vec::new();
+                for e in a {
+                    ids.push(self.add(e, "")?);
+                }
+                s.items_array = Some(ids);
+            }
+            // Here a null reads as false.
+            Value::Null => s.items = Some(self.add(&Value::Bool(false), "")?),
+            v => s.items = Some(self.add(v, "")?),
+        }
+        Ok(())
+    }
+
+    fn read_dependencies(&mut self, s: &mut Schema, v: &Value, key: &str) -> Result<(), String> {
+        match v {
+            Value::Null => {}
+            Value::Object(o) => {
+                for (k, d) in o {
+                    if d.is_array() {
+                        let names = strings(d, "")?;
+                        s.dependency_strings
+                            .get_or_insert_with(BTreeMap::new)
+                            .insert(k.clone(), names);
+                    } else {
+                        let id = self.add(if d.is_null() { &Value::Bool(false) } else { d }, "")?;
+                        s.dependency_schemas
+                            .get_or_insert_with(BTreeMap::new)
+                            .insert(k.clone(), id);
+                    }
+                }
+            }
+            v => return Err(mismatch(v, key, "map[string]json.RawMessage")),
+        }
+        Ok(())
+    }
+
+    fn read_const(&mut self, s: &mut Schema, v: &Value, _: &str) -> Result<(), String> {
+        s.const_ = Some(v.clone());
+        Ok(())
+    }
+
+    fn read_enum(&mut self, s: &mut Schema, v: &Value, key: &str) -> Result<(), String> {
+        match v {
+            Value::Array(a) => s.enum_ = Some(a.clone()),
+            v => return Err(mismatch(v, key, "[]interface {}")),
+        }
+        Ok(())
+    }
+
+    fn read_required(&mut self, s: &mut Schema, v: &Value, key: &str) -> Result<(), String> {
+        s.required = Some(strings(v, key)?);
+        Ok(())
+    }
+
+    fn read_dependent_required(
+        &mut self,
+        s: &mut Schema,
+        v: &Value,
+        key: &str,
+    ) -> Result<(), String> {
+        let Value::Object(o) = v else {
+            return Err(mismatch(v, key, "map[string][]string"));
+        };
+        let mut out = BTreeMap::new();
+        for (k, names) in o {
+            let names = if names.is_null() {
+                Vec::new()
+            } else {
+                strings(names, key)?
+            };
+            out.insert(k.clone(), names);
+        }
+        s.dependent_required = Some(out);
+        Ok(())
+    }
 }
+
+/// How a keyword's value is read, and the field of the schema it fills.
+enum Keyword {
+    Str(fn(&mut Schema) -> &mut String),
+    /// A string that is checked and not kept.
+    UnusedStr,
+    /// A boolean that is checked and not kept.
+    UnusedBool,
+    /// A map of names to subschemas.
+    Map(fn(&mut Schema) -> &mut Option<BTreeMap<String, Id>>),
+    /// A list of subschemas.
+    List(fn(&mut Schema) -> &mut Option<Vec<Id>>),
+    /// One subschema.
+    One(fn(&mut Schema) -> &mut Option<Id>),
+    Float(fn(&mut Schema) -> &mut Option<f64>),
+    Int(fn(&mut Schema) -> &mut Option<i64>),
+    /// A keyword with a reader of its own.
+    Other(fn(&mut Document, &mut Schema, &Value, &str) -> Result<(), String>),
+}
+
+/// The keywords the reader knows.
+const KEYWORDS: &[(&str, Keyword)] = &[
+    ("$id", Keyword::Str(|s| &mut s.id)),
+    ("$schema", Keyword::Str(|s| &mut s.schema)),
+    ("$ref", Keyword::Str(|s| &mut s.ref_)),
+    ("$anchor", Keyword::Str(|s| &mut s.anchor)),
+    ("$dynamicAnchor", Keyword::Str(|s| &mut s.dynamic_anchor)),
+    ("$dynamicRef", Keyword::Str(|s| &mut s.dynamic_ref)),
+    ("pattern", Keyword::Str(|s| &mut s.pattern)),
+    ("$comment", Keyword::UnusedStr),
+    ("title", Keyword::UnusedStr),
+    ("description", Keyword::UnusedStr),
+    ("contentEncoding", Keyword::UnusedStr),
+    ("contentMediaType", Keyword::UnusedStr),
+    ("format", Keyword::UnusedStr),
+    ("deprecated", Keyword::UnusedBool),
+    ("readOnly", Keyword::UnusedBool),
+    ("writeOnly", Keyword::UnusedBool),
+    ("$defs", Keyword::Map(|s| &mut s.defs)),
+    ("definitions", Keyword::Map(|s| &mut s.definitions)),
+    (
+        "dependentSchemas",
+        Keyword::Map(|s| &mut s.dependent_schemas),
+    ),
+    ("properties", Keyword::Map(|s| &mut s.properties)),
+    (
+        "patternProperties",
+        Keyword::Map(|s| &mut s.pattern_properties),
+    ),
+    ("allOf", Keyword::List(|s| &mut s.all_of)),
+    ("anyOf", Keyword::List(|s| &mut s.any_of)),
+    ("oneOf", Keyword::List(|s| &mut s.one_of)),
+    ("additionalItems", Keyword::One(|s| &mut s.additional_items)),
+    ("contains", Keyword::One(|s| &mut s.contains)),
+    (
+        "unevaluatedItems",
+        Keyword::One(|s| &mut s.unevaluated_items),
+    ),
+    (
+        "additionalProperties",
+        Keyword::One(|s| &mut s.additional_properties),
+    ),
+    ("propertyNames", Keyword::One(|s| &mut s.property_names)),
+    (
+        "unevaluatedProperties",
+        Keyword::One(|s| &mut s.unevaluated_properties),
+    ),
+    ("not", Keyword::One(|s| &mut s.not)),
+    ("if", Keyword::One(|s| &mut s.if_)),
+    ("then", Keyword::One(|s| &mut s.then)),
+    ("else", Keyword::One(|s| &mut s.else_)),
+    ("contentSchema", Keyword::One(|s| &mut s.content_schema)),
+    ("multipleOf", Keyword::Float(|s| &mut s.multiple_of)),
+    ("minimum", Keyword::Float(|s| &mut s.minimum)),
+    ("maximum", Keyword::Float(|s| &mut s.maximum)),
+    (
+        "exclusiveMinimum",
+        Keyword::Float(|s| &mut s.exclusive_minimum),
+    ),
+    (
+        "exclusiveMaximum",
+        Keyword::Float(|s| &mut s.exclusive_maximum),
+    ),
+    ("minLength", Keyword::Int(|s| &mut s.min_length)),
+    ("maxLength", Keyword::Int(|s| &mut s.max_length)),
+    ("minItems", Keyword::Int(|s| &mut s.min_items)),
+    ("maxItems", Keyword::Int(|s| &mut s.max_items)),
+    ("minProperties", Keyword::Int(|s| &mut s.min_properties)),
+    ("maxProperties", Keyword::Int(|s| &mut s.max_properties)),
+    ("minContains", Keyword::Int(|s| &mut s.min_contains)),
+    ("maxContains", Keyword::Int(|s| &mut s.max_contains)),
+    ("uniqueItems", Keyword::Other(Document::read_unique_items)),
+    ("examples", Keyword::Other(Document::read_examples)),
+    ("$vocabulary", Keyword::Other(Document::read_vocabulary)),
+    ("prefixItems", Keyword::Other(Document::read_prefix_items)),
+    ("type", Keyword::Other(Document::read_type)),
+    ("items", Keyword::Other(Document::read_items)),
+    ("dependencies", Keyword::Other(Document::read_dependencies)),
+    ("const", Keyword::Other(Document::read_const)),
+    ("enum", Keyword::Other(Document::read_enum)),
+    ("required", Keyword::Other(Document::read_required)),
+    (
+        "dependentRequired",
+        Keyword::Other(Document::read_dependent_required),
+    ),
+];
 
 fn string(v: &Value, field: &str) -> Result<String, String> {
     match v {

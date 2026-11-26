@@ -352,67 +352,71 @@ fn equal(a: &Val, b: &Val) -> Result<bool, String> {
     }
 }
 
+/// Checks that a function was given as many arguments as it takes.
+fn arity(args: &[Val], n: usize, name: &str) -> Result<(), String> {
+    if args.len() == n {
+        Ok(())
+    } else {
+        Err(format!("{name} takes {n} arguments, got {}", args.len()))
+    }
+}
+
+/// Calls one of the comparisons: `lt`, `gt`, `eq` or `ne`.
+fn compare(name: &str, args: &[Val]) -> Result<Val, String> {
+    arity(args, 2, name)?;
+    let holds = match name {
+        "lt" => int(&args[0])? < int(&args[1])?,
+        "gt" => int(&args[0])? > int(&args[1])?,
+        "eq" => equal(&args[0], &args[1])?,
+        _ => !equal(&args[0], &args[1])?,
+    };
+    Ok(Val::Bool(holds))
+}
+
+/// Calls a function of the template language by name.
+fn call(name: &str, args: &[Val]) -> Result<Val, String> {
+    match name {
+        "not" => {
+            arity(args, 1, name)?;
+            Ok(Val::Bool(!args[0].truthy()))
+        }
+        "or" => {
+            // The first argument that holds, else the last.
+            let hit = args.iter().find(|a| a.truthy()).or(args.last());
+            hit.cloned().ok_or_else(|| "or takes arguments".to_string())
+        }
+        "lt" | "gt" | "eq" | "ne" => compare(name, args),
+        "len" => {
+            arity(args, 1, name)?;
+            match &args[0] {
+                Val::List(l) => Ok(Val::from(l.len())),
+                Val::Str(s) => Ok(Val::from(s.len())),
+                other => Err(format!("len of {other:?}")),
+            }
+        }
+        "ms" => {
+            arity(args, 1, name)?;
+            match &args[0] {
+                Val::Duration(d) => Ok(Val::Str(format!("{} ms", d / 1_000_000))),
+                other => Err(format!("ms of {other:?}")),
+            }
+        }
+        "json" => {
+            arity(args, 1, name)?;
+            Ok(Val::Str(crate::html::pretty_json(&args[0].text())))
+        }
+        other => Err(format!("function {other:?} not defined")),
+    }
+}
+
 /// Evaluates a command against the value in hand.
 fn eval(cmd: &Command, dot: &Val) -> Result<Val, String> {
     let Some(first) = cmd.first() else {
         return Err("empty action".to_string());
     };
     let args: Vec<Val> = cmd[1..].iter().map(|t| term(t, dot)).collect();
-    let arity = |n: usize, name: &str| -> Result<(), String> {
-        if args.len() == n {
-            Ok(())
-        } else {
-            Err(format!("{name} takes {n} arguments, got {}", args.len()))
-        }
-    };
     match first {
-        Term::Ident(name) => match name.as_str() {
-            "not" => {
-                arity(1, name)?;
-                Ok(Val::Bool(!args[0].truthy()))
-            }
-            "or" => {
-                // The first argument that holds, else the last.
-                let hit = args.iter().find(|a| a.truthy()).or(args.last());
-                hit.cloned().ok_or_else(|| "or takes arguments".to_string())
-            }
-            "lt" => {
-                arity(2, name)?;
-                Ok(Val::Bool(int(&args[0])? < int(&args[1])?))
-            }
-            "gt" => {
-                arity(2, name)?;
-                Ok(Val::Bool(int(&args[0])? > int(&args[1])?))
-            }
-            "eq" => {
-                arity(2, name)?;
-                Ok(Val::Bool(equal(&args[0], &args[1])?))
-            }
-            "ne" => {
-                arity(2, name)?;
-                Ok(Val::Bool(!equal(&args[0], &args[1])?))
-            }
-            "len" => {
-                arity(1, name)?;
-                match &args[0] {
-                    Val::List(l) => Ok(Val::from(l.len())),
-                    Val::Str(s) => Ok(Val::from(s.len())),
-                    other => Err(format!("len of {other:?}")),
-                }
-            }
-            "ms" => {
-                arity(1, name)?;
-                match &args[0] {
-                    Val::Duration(d) => Ok(Val::Str(format!("{} ms", d / 1_000_000))),
-                    other => Err(format!("ms of {other:?}")),
-                }
-            }
-            "json" => {
-                arity(1, name)?;
-                Ok(Val::Str(crate::html::pretty_json(&args[0].text())))
-            }
-            other => Err(format!("function {other:?} not defined")),
-        },
+        Term::Ident(name) => call(name, &args),
         Term::Field(path) => {
             // A time shows itself the way a layout says.
             if let (Some((last, head)), [Val::Str(layout)]) = (path.split_last(), args.as_slice()) {

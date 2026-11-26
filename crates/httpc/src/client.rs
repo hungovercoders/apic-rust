@@ -972,21 +972,13 @@ async fn round_trip(
     in_body.store(true, Ordering::Relaxed);
 
     let (parts, mut incoming) = head.into_parts();
-    let is_h2 = parts.version == hyper::Version::HTTP_2;
     let proto = match parts.version {
         hyper::Version::HTTP_10 => "HTTP/1.0",
         hyper::Version::HTTP_2 => "HTTP/2.0",
         _ => "HTTP/1.1",
     };
     let code = parts.status.as_u16();
-    let reason = if is_h2 {
-        status_text(code).to_string()
-    } else {
-        match parts.extensions.get::<hyper::ext::ReasonPhrase>() {
-            Some(r) => String::from_utf8_lossy(r.as_bytes()).into_owned(),
-            None => parts.status.canonical_reason().unwrap_or("").to_string(),
-        }
-    };
+    let reason = reason_phrase(&parts);
     let mut headers = Headers::new();
     for (name, value) in &parts.headers {
         headers.add(name.as_str(), &String::from_utf8_lossy(value.as_bytes()));
@@ -1000,44 +992,8 @@ async fn round_trip(
         headers.del("Content-Length");
     }
 
-    let mut sink = if gzip {
-        Sink::Gzip(Box::new(flate2::write::MultiGzDecoder::new(Vec::new())))
-    } else {
-        Sink::Plain(Vec::new())
-    };
-    let mut truncated = false;
-    let mut received = false;
-    let complete = loop {
-        match incoming.frame().await {
-            None => break true,
-            Some(Err(e)) => {
-                let fail = conn.fail(&e, &target.host);
-                return Err(if fail.message == "EOF" {
-                    Fail::other("unexpected EOF")
-                } else {
-                    fail
-                });
-            }
-            Some(Ok(frame)) => {
-                let Ok(data) = frame.into_data() else {
-                    continue;
-                };
-                if data.is_empty() {
-                    continue;
-                }
-                received = true;
-                sink.write(&data)?;
-                if req.max_body.is_some_and(|max| sink.len() as u64 > max) {
-                    truncated = true;
-                    break false;
-                }
-            }
-        }
-    };
-    let mut data = sink.finish(received && !truncated)?;
-    if let (true, Some(max)) = (truncated, req.max_body) {
-        data.truncate(usize::try_from(max).unwrap_or(usize::MAX));
-    }
+    let (data, truncated, complete) =
+        read_body(&mut incoming, &conn, &target.host, req.max_body, gzip).await?;
     let ended = Instant::now();
 
     if complete {
@@ -1072,6 +1028,69 @@ async fn round_trip(
         method: req.method.clone(),
         url: req.url.clone(),
     })
+}
+
+/// The reason phrase of a response: the server's own words on HTTP/1,
+/// the standard text on HTTP/2, which sends none.
+fn reason_phrase(parts: &hyper::http::response::Parts) -> String {
+    if parts.version == hyper::Version::HTTP_2 {
+        return status_text(parts.status.as_u16()).to_string();
+    }
+    match parts.extensions.get::<hyper::ext::ReasonPhrase>() {
+        Some(r) => String::from_utf8_lossy(r.as_bytes()).into_owned(),
+        None => parts.status.canonical_reason().unwrap_or("").to_string(),
+    }
+}
+
+/// Reads a response body up to `max_body`, through gzip when asked.
+/// Returns the bytes, whether they were cut short at the limit, and
+/// whether the body was read to its end.
+async fn read_body(
+    incoming: &mut Incoming,
+    conn: &Conn,
+    host: &str,
+    max_body: Option<u64>,
+    gzip: bool,
+) -> Result<(Vec<u8>, bool, bool), Fail> {
+    let mut sink = if gzip {
+        Sink::Gzip(Box::new(flate2::write::MultiGzDecoder::new(Vec::new())))
+    } else {
+        Sink::Plain(Vec::new())
+    };
+    let mut truncated = false;
+    let mut received = false;
+    let complete = loop {
+        match incoming.frame().await {
+            None => break true,
+            Some(Err(e)) => {
+                let fail = conn.fail(&e, host);
+                return Err(if fail.message == "EOF" {
+                    Fail::other("unexpected EOF")
+                } else {
+                    fail
+                });
+            }
+            Some(Ok(frame)) => {
+                let Ok(data) = frame.into_data() else {
+                    continue;
+                };
+                if data.is_empty() {
+                    continue;
+                }
+                received = true;
+                sink.write(&data)?;
+                if max_body.is_some_and(|max| sink.len() as u64 > max) {
+                    truncated = true;
+                    break false;
+                }
+            }
+        }
+    };
+    let mut data = sink.finish(received && !truncated)?;
+    if let (true, Some(max)) = (truncated, max_body) {
+        data.truncate(usize::try_from(max).unwrap_or(usize::MAX));
+    }
+    Ok((data, truncated, complete))
 }
 
 /// Where the body goes as it arrives: as it is, or through gzip.

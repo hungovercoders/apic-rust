@@ -101,31 +101,14 @@ pub fn follow_redirects(
 
     loop {
         if let Some(jar) = policy.jar {
-            for (name, value) in jar.cookies(&current.url) {
-                let pair = format!("{name}={value}");
-                match current.headers.get("Cookie").filter(|c| !c.is_empty()) {
-                    Some(have) => {
-                        let joined = format!("{have}; {pair}");
-                        current.headers.set("Cookie", &joined);
-                    }
-                    None => current.headers.set("Cookie", &pair),
-                }
-            }
+            add_jar_cookies(jar, &mut current);
         }
         let mut resp = transport.round_trip(&current).map_err(|mut e| {
             e.op = Error::new(e.kind, &first_method, "", "").op;
             e
         })?;
         if let Some(jar) = policy.jar {
-            let set: Vec<String> = resp
-                .headers
-                .values("Set-Cookie")
-                .into_iter()
-                .map(str::to_string)
-                .collect();
-            if !set.is_empty() {
-                jar.set_cookies(&current.url, &set);
-            }
+            store_jar_cookies(jar, &current.url, &resp);
         }
         resp.timings = match &timings {
             Some(earlier) => crate::client::Timings::then(earlier, &resp.timings),
@@ -133,17 +116,9 @@ pub fn follow_redirects(
         };
         timings = Some(resp.timings);
 
-        let (next_method, hop_keeps_body) = match resp.status_code {
-            301..=303 => {
-                let method = if current.method == "GET" || current.method == "HEAD" {
-                    current.method.clone()
-                } else {
-                    "GET".to_string()
-                };
-                (method, false)
-            }
-            307 | 308 => (current.method.clone(), true),
-            _ => return Ok(resp),
+        let Some((next_method, hop_keeps_body)) = next_hop(resp.status_code, &current.method)
+        else {
+            return Ok(resp);
         };
         // Once a hop drops the body it is never sent again.
         include_body &= hop_keeps_body;
@@ -198,26 +173,7 @@ pub fn follow_redirects(
             strip_sensitive = true;
         }
         if let Some(cookies) = &mut initial_cookies {
-            let mut changed = false;
-            for set in resp.headers.values("Set-Cookie") {
-                let name = set
-                    .split(';')
-                    .next()
-                    .unwrap_or("")
-                    .split('=')
-                    .next()
-                    .unwrap_or("")
-                    .trim();
-                changed |= cookies.remove(name).is_some();
-            }
-            if changed {
-                let mut pairs: Vec<String> = cookies
-                    .iter()
-                    .flat_map(|(name, values)| values.iter().map(move |v| format!("{name}={v}")))
-                    .collect();
-                pairs.sort();
-                copied_headers.set("Cookie", &pairs.join("; "));
-            }
+            drop_replaced_cookies(cookies, &resp, &mut copied_headers);
         }
         for (name, value) in copied_headers.iter() {
             if name == "Host" || (strip_sensitive && SENSITIVE.contains(&name)) {
@@ -242,6 +198,79 @@ pub fn follow_redirects(
             Ok(RedirectAction::Follow) => current = next,
             Err(message) => return Err(fail(&location, message)),
         }
+    }
+}
+
+/// Adds the jar's cookies for the request's URL to its `Cookie` header.
+fn add_jar_cookies(jar: &dyn CookieJar, current: &mut Request) {
+    for (name, value) in jar.cookies(&current.url) {
+        let pair = format!("{name}={value}");
+        match current.headers.get("Cookie").filter(|c| !c.is_empty()) {
+            Some(have) => {
+                let joined = format!("{have}; {pair}");
+                current.headers.set("Cookie", &joined);
+            }
+            None => current.headers.set("Cookie", &pair),
+        }
+    }
+}
+
+/// Hands the cookies a response set to the jar.
+fn store_jar_cookies(jar: &dyn CookieJar, url: &str, resp: &Response) {
+    let set: Vec<String> = resp
+        .headers
+        .values("Set-Cookie")
+        .into_iter()
+        .map(str::to_string)
+        .collect();
+    if !set.is_empty() {
+        jar.set_cookies(url, &set);
+    }
+}
+
+/// The method of the request that follows a redirect status, and whether
+/// it keeps the body; `None` for a status that is not followed.
+fn next_hop(status: u16, method: &str) -> Option<(String, bool)> {
+    match status {
+        301..=303 => {
+            let method = if method == "GET" || method == "HEAD" {
+                method.to_string()
+            } else {
+                "GET".to_string()
+            };
+            Some((method, false))
+        }
+        307 | 308 => Some((method.to_string(), true)),
+        _ => None,
+    }
+}
+
+/// Takes the cookies a response set out of the ones the caller wrote by
+/// hand, and rewrites the copied `Cookie` header when any went.
+fn drop_replaced_cookies(
+    cookies: &mut BTreeMap<String, Vec<String>>,
+    resp: &Response,
+    copied_headers: &mut Headers,
+) {
+    let mut changed = false;
+    for set in resp.headers.values("Set-Cookie") {
+        let name = set
+            .split(';')
+            .next()
+            .unwrap_or("")
+            .split('=')
+            .next()
+            .unwrap_or("")
+            .trim();
+        changed |= cookies.remove(name).is_some();
+    }
+    if changed {
+        let mut pairs: Vec<String> = cookies
+            .iter()
+            .flat_map(|(name, values)| values.iter().map(move |v| format!("{name}={v}")))
+            .collect();
+        pairs.sort();
+        copied_headers.set("Cookie", &pairs.join("; "));
     }
 }
 

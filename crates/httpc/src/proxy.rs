@@ -157,6 +157,33 @@ where
     ))
 }
 
+/// Words the failures of one SOCKS5 exchange, which all name the proxy and
+/// the target.
+struct SocksFailure<'a> {
+    proxy_addr: &'a str,
+    target: String,
+}
+
+impl SocksFailure<'_> {
+    fn fail(&self, why: &str) -> Fail {
+        Fail::new(
+            ErrorKind::Connect,
+            format!(
+                "socks connect tcp {}->{}: {why}",
+                self.proxy_addr, self.target
+            ),
+        )
+    }
+
+    fn io(&self, e: std::io::Error) -> Fail {
+        if e.kind() == std::io::ErrorKind::UnexpectedEof {
+            self.fail("EOF")
+        } else {
+            self.fail(&io_message(&e))
+        }
+    }
+}
+
 /// Asks a SOCKS5 proxy that is already connected to connect to the target.
 /// The host goes to the proxy as a name unless it is an IP address.
 pub(crate) async fn socks5_connect<S>(
@@ -169,49 +196,72 @@ pub(crate) async fn socks5_connect<S>(
 where
     S: AsyncRead + AsyncWrite + Unpin,
 {
-    let target = crate::target::join_host_port(host, port);
-    let fail = |why: &str| {
-        Fail::new(
-            ErrorKind::Connect,
-            format!("socks connect tcp {proxy_addr}->{target}: {why}"),
-        )
+    let failure = SocksFailure {
+        proxy_addr,
+        target: crate::target::join_host_port(host, port),
     };
-    let io_fail = |e: std::io::Error| {
-        if e.kind() == std::io::ErrorKind::UnexpectedEof {
-            fail("EOF")
-        } else {
-            fail(&io_message(&e))
-        }
-    };
+    socks5_negotiate(io, proxy, &failure).await?;
+    let msg = socks5_request(host, port).map_err(|why| failure.fail(why))?;
+    io.write_all(&msg).await.map_err(|e| failure.io(e))?;
+    io.flush().await.map_err(|e| failure.io(e))?;
+    socks5_read_reply(io, &failure).await
+}
+
+/// Greets the proxy and, when it asks for them, sends the credentials.
+async fn socks5_negotiate<S>(
+    io: &mut S,
+    proxy: &Proxy,
+    failure: &SocksFailure<'_>,
+) -> Result<(), Fail>
+where
+    S: AsyncRead + AsyncWrite + Unpin,
+{
     let with_auth = proxy.username.is_some();
     let greeting: &[u8] = if with_auth { &[5, 2, 0, 2] } else { &[5, 1, 0] };
-    io.write_all(greeting).await.map_err(io_fail)?;
+    io.write_all(greeting).await.map_err(|e| failure.io(e))?;
     let mut choice = [0u8; 2];
-    io.read_exact(&mut choice).await.map_err(io_fail)?;
+    io.read_exact(&mut choice)
+        .await
+        .map_err(|e| failure.io(e))?;
     if choice[0] != 5 {
-        return Err(fail(&format!("unexpected protocol version {}", choice[0])));
+        return Err(failure.fail(&format!("unexpected protocol version {}", choice[0])));
     }
     match choice[1] {
-        0 => {}
-        2 if with_auth => {
-            let user = proxy.username.as_deref().unwrap_or("");
-            let pass = proxy.password.as_deref().unwrap_or("");
-            if user.is_empty() || user.len() > 255 || pass.len() > 255 {
-                return Err(fail("invalid username/password"));
-            }
-            let mut msg = vec![1, user.len() as u8];
-            msg.extend_from_slice(user.as_bytes());
-            msg.push(pass.len() as u8);
-            msg.extend_from_slice(pass.as_bytes());
-            io.write_all(&msg).await.map_err(io_fail)?;
-            let mut reply = [0u8; 2];
-            io.read_exact(&mut reply).await.map_err(io_fail)?;
-            if reply[1] != 0 {
-                return Err(fail("username/password authentication failed"));
-            }
-        }
-        _ => return Err(fail("no acceptable authentication methods")),
+        0 => Ok(()),
+        2 if with_auth => socks5_authenticate(io, proxy, failure).await,
+        _ => Err(failure.fail("no acceptable authentication methods")),
     }
+}
+
+/// The username and password exchange of RFC 1929.
+async fn socks5_authenticate<S>(
+    io: &mut S,
+    proxy: &Proxy,
+    failure: &SocksFailure<'_>,
+) -> Result<(), Fail>
+where
+    S: AsyncRead + AsyncWrite + Unpin,
+{
+    let user = proxy.username.as_deref().unwrap_or("");
+    let pass = proxy.password.as_deref().unwrap_or("");
+    if user.is_empty() || user.len() > 255 || pass.len() > 255 {
+        return Err(failure.fail("invalid username/password"));
+    }
+    let mut msg = vec![1, user.len() as u8];
+    msg.extend_from_slice(user.as_bytes());
+    msg.push(pass.len() as u8);
+    msg.extend_from_slice(pass.as_bytes());
+    io.write_all(&msg).await.map_err(|e| failure.io(e))?;
+    let mut reply = [0u8; 2];
+    io.read_exact(&mut reply).await.map_err(|e| failure.io(e))?;
+    if reply[1] != 0 {
+        return Err(failure.fail("username/password authentication failed"));
+    }
+    Ok(())
+}
+
+/// The connect request for a target, or why it cannot be written.
+fn socks5_request(host: &str, port: u16) -> Result<Vec<u8>, &'static str> {
     let mut msg = vec![5, 1, 0];
     match host.parse::<std::net::IpAddr>() {
         Ok(std::net::IpAddr::V4(ip)) => {
@@ -224,7 +274,7 @@ where
         }
         Err(_) => {
             if host.len() > 255 {
-                return Err(fail("FQDN too long"));
+                return Err("FQDN too long");
             }
             msg.push(3);
             msg.push(host.len() as u8);
@@ -232,26 +282,37 @@ where
         }
     }
     msg.extend_from_slice(&port.to_be_bytes());
-    io.write_all(&msg).await.map_err(io_fail)?;
-    io.flush().await.map_err(io_fail)?;
+    Ok(msg)
+}
+
+/// What a SOCKS5 reply code other than success means.
+fn socks5_reply_text(code: u8) -> &'static str {
+    match code {
+        1 => "general SOCKS server failure",
+        2 => "connection not allowed by ruleset",
+        3 => "network unreachable",
+        4 => "host unreachable",
+        5 => "connection refused",
+        6 => "TTL expired",
+        7 => "command not supported",
+        8 => "address type not supported",
+        _ => "unknown code",
+    }
+}
+
+/// Reads the proxy's answer to the connect request.
+async fn socks5_read_reply<S>(io: &mut S, failure: &SocksFailure<'_>) -> Result<(), Fail>
+where
+    S: AsyncRead + AsyncWrite + Unpin,
+{
     let mut reply = [0u8; 4];
-    io.read_exact(&mut reply).await.map_err(io_fail)?;
+    io.read_exact(&mut reply).await.map_err(|e| failure.io(e))?;
     if reply[0] != 5 {
-        return Err(fail(&format!("unexpected protocol version {}", reply[0])));
+        return Err(failure.fail(&format!("unexpected protocol version {}", reply[0])));
     }
     if reply[1] != 0 {
-        let why = match reply[1] {
-            1 => "general SOCKS server failure",
-            2 => "connection not allowed by ruleset",
-            3 => "network unreachable",
-            4 => "host unreachable",
-            5 => "connection refused",
-            6 => "TTL expired",
-            7 => "command not supported",
-            8 => "address type not supported",
-            _ => "unknown code",
-        };
-        return Err(fail(&format!("unknown error {why}")));
+        let why = socks5_reply_text(reply[1]);
+        return Err(failure.fail(&format!("unknown error {why}")));
     }
     // The bound address follows; read past it.
     let skip = match reply[3] {
@@ -259,13 +320,13 @@ where
         4 => 16,
         3 => {
             let mut len = [0u8; 1];
-            io.read_exact(&mut len).await.map_err(io_fail)?;
+            io.read_exact(&mut len).await.map_err(|e| failure.io(e))?;
             len[0] as usize
         }
-        other => return Err(fail(&format!("unknown address type {other}"))),
+        other => return Err(failure.fail(&format!("unknown address type {other}"))),
     };
     let mut rest = vec![0u8; skip + 2];
-    io.read_exact(&mut rest).await.map_err(io_fail)?;
+    io.read_exact(&mut rest).await.map_err(|e| failure.io(e))?;
     Ok(())
 }
 

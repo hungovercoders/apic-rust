@@ -628,187 +628,214 @@ impl Builder<'_> {
         tags
     }
 
-    fn transform(&mut self, mut node: Node) -> (Built, Option<ParseError>) {
+    fn transform(&mut self, node: Node) -> (Built, Option<ParseError>) {
         match node.rule {
-            RuleType::Step => {
-                let Some(line) = node.token(TokenType::StepLine).cloned() else {
-                    return (Built::Node(node), None);
-                };
-                let id = (self.new_id)();
-                let data_table = match node.take(RuleType::DataTable) {
-                    Some(Built::DataTable(t)) => Some(t),
-                    _ => None,
-                };
-                let doc_string = match node.take(RuleType::DocString) {
-                    Some(Built::DocString(d)) => Some(d),
-                    _ => None,
-                };
-                let step = Step {
-                    id,
-                    line: line.line,
-                    keyword: line.keyword,
-                    text: line.text,
-                    data_table,
-                    doc_string,
-                };
-                (Built::Step(step), None)
-            }
-            RuleType::DocString => {
-                let Some(sep) = node.token(TokenType::DocStringSeparator) else {
-                    return (Built::Node(node), None);
-                };
-                let content: Vec<&str> = node
-                    .tokens(TokenType::Other)
-                    .map(|t| t.text.as_str())
-                    .collect();
-                let doc = DocString {
-                    line: sep.line,
-                    media_type: sep.text.clone(),
-                    content: content.join("\n"),
-                    delimiter: sep.keyword.clone(),
-                };
-                (Built::DocString(doc), None)
-            }
+            RuleType::Step => self.step(node),
+            RuleType::DocString => self.doc_string(node),
             RuleType::DataTable => {
                 let (rows, err) = self.table_rows(&node);
                 (Built::DataTable(DataTable { rows }), err)
             }
-            RuleType::Background => {
-                let Some(line) = node.token(TokenType::BackgroundLine).cloned() else {
-                    return (Built::Node(node), None);
-                };
-                (self.new_id)();
-                let bg = Background {
-                    keyword: line.keyword,
-                    name: line.text,
-                    steps: node.steps(),
-                };
-                (Built::Background(bg), None)
-            }
-            RuleType::ScenarioDefinition => {
-                let Some(mut scenario_node) = node.take_node(RuleType::Scenario) else {
-                    return (Built::Node(node), None);
-                };
-                let Some(line) = scenario_node.token(TokenType::ScenarioLine).cloned() else {
-                    return (Built::Node(node), None);
-                };
-                let tags = self.tags(&mut node);
-                let examples = scenario_node
-                    .take_all(RuleType::ExamplesDefinition)
-                    .into_iter()
-                    .filter_map(|b| match b {
-                        Built::Examples(e) => Some(e),
-                        _ => None,
-                    })
-                    .collect();
-                let sc = Scenario {
-                    id: (self.new_id)(),
-                    line: line.line,
-                    tags,
-                    keyword: line.keyword,
-                    name: line.text,
-                    description: scenario_node.description(),
-                    steps: scenario_node.steps(),
-                    examples,
-                };
-                (Built::Scenario(sc), None)
-            }
-            RuleType::ExamplesDefinition => {
-                let tags = self.tags(&mut node);
-                let Some(mut examples_node) = node.take_node(RuleType::Examples) else {
-                    return (Built::Node(node), None);
-                };
-                let Some(line) = examples_node.token(TokenType::ExamplesLine).cloned() else {
-                    return (Built::Node(node), None);
-                };
-                let mut rows = match examples_node.take(RuleType::ExamplesTable) {
-                    Some(Built::Rows(rows)) => rows,
-                    _ => Vec::new(),
-                };
-                let table_header = (!rows.is_empty()).then(|| rows.remove(0));
-                (self.new_id)();
-                let ex = Examples {
-                    line: line.line,
-                    tags,
-                    keyword: line.keyword,
-                    name: line.text,
-                    table_header,
-                    table_body: rows,
-                };
-                (Built::Examples(ex), None)
-            }
+            RuleType::Background => self.background(node),
+            RuleType::ScenarioDefinition => self.scenario(node),
+            RuleType::ExamplesDefinition => self.examples(node),
             RuleType::ExamplesTable => {
                 let (rows, err) = self.table_rows(&node);
                 (Built::Rows(rows), err)
             }
-            RuleType::Description => {
-                let mut lines: Vec<&str> = node
-                    .tokens(TokenType::Other)
-                    .map(|t| t.text.as_str())
-                    .collect();
-                while lines.last().is_some_and(|l| l.trim().is_empty()) {
-                    lines.pop();
-                }
-                (Built::Description(lines.join("\n")), None)
-            }
-            RuleType::Feature => {
-                let Some(mut header) = node.take_node(RuleType::FeatureHeader) else {
-                    return (Built::Feature(None), None);
-                };
-                let tags = self.tags(&mut header);
-                let Some(line) = header.token(TokenType::FeatureLine).cloned() else {
-                    return (Built::Feature(None), None);
-                };
-                let mut children = Vec::new();
-                if let Some(bg) = node.background() {
-                    children.push(FeatureChild::Background(bg));
-                }
-                children.extend(node.scenarios().into_iter().map(FeatureChild::Scenario));
-                for built in node.take_all(RuleType::Rule) {
-                    if let Built::Rule(Some(rule)) = built {
-                        children.push(FeatureChild::Rule(rule));
-                    }
-                }
-                let feature = Feature {
-                    line: line.line,
-                    tags,
-                    keyword: line.keyword,
-                    name: line.text,
-                    description: header.description(),
-                    children,
-                };
-                (Built::Feature(Some(feature)), None)
-            }
-            RuleType::Rule => {
-                let Some(mut header) = node.take_node(RuleType::RuleHeader) else {
-                    return (Built::Rule(None), None);
-                };
-                if header.token(TokenType::RuleLine).is_none() {
-                    return (Built::Rule(None), None);
-                }
-                let tags = self.tags(&mut header);
-                let mut children = Vec::new();
-                if let Some(bg) = node.background() {
-                    children.push(RuleChild::Background(bg));
-                }
-                children.extend(node.scenarios().into_iter().map(RuleChild::Scenario));
-                (self.new_id)();
-                let rule = Rule { tags, children };
-                (Built::Rule(Some(rule)), None)
-            }
-            RuleType::GherkinDocument => {
-                let feature = match node.take(RuleType::Feature) {
-                    Some(Built::Feature(f)) => f,
-                    _ => None,
-                };
-                let doc = Document {
-                    feature,
-                    comments: std::mem::take(&mut self.comments),
-                };
-                (Built::Document(doc), None)
-            }
+            RuleType::Description => self.description(node),
+            RuleType::Feature => self.feature(node),
+            RuleType::Rule => self.rule(node),
+            RuleType::GherkinDocument => self.document(node),
             _ => (Built::Node(node), None),
         }
+    }
+
+    /// A step, with the table or doc string under it.
+    fn step(&mut self, mut node: Node) -> (Built, Option<ParseError>) {
+        let Some(line) = node.token(TokenType::StepLine).cloned() else {
+            return (Built::Node(node), None);
+        };
+        let id = (self.new_id)();
+        let data_table = match node.take(RuleType::DataTable) {
+            Some(Built::DataTable(t)) => Some(t),
+            _ => None,
+        };
+        let doc_string = match node.take(RuleType::DocString) {
+            Some(Built::DocString(d)) => Some(d),
+            _ => None,
+        };
+        let step = Step {
+            id,
+            line: line.line,
+            keyword: line.keyword,
+            text: line.text,
+            data_table,
+            doc_string,
+        };
+        (Built::Step(step), None)
+    }
+
+    /// A doc string.
+    fn doc_string(&self, node: Node) -> (Built, Option<ParseError>) {
+        let Some(sep) = node.token(TokenType::DocStringSeparator) else {
+            return (Built::Node(node), None);
+        };
+        let content: Vec<&str> = node
+            .tokens(TokenType::Other)
+            .map(|t| t.text.as_str())
+            .collect();
+        let doc = DocString {
+            line: sep.line,
+            media_type: sep.text.clone(),
+            content: content.join("\n"),
+            delimiter: sep.keyword.clone(),
+        };
+        (Built::DocString(doc), None)
+    }
+
+    /// A background.
+    fn background(&mut self, mut node: Node) -> (Built, Option<ParseError>) {
+        let Some(line) = node.token(TokenType::BackgroundLine).cloned() else {
+            return (Built::Node(node), None);
+        };
+        (self.new_id)();
+        let bg = Background {
+            keyword: line.keyword,
+            name: line.text,
+            steps: node.steps(),
+        };
+        (Built::Background(bg), None)
+    }
+
+    /// A scenario and its examples.
+    fn scenario(&mut self, mut node: Node) -> (Built, Option<ParseError>) {
+        let Some(mut scenario_node) = node.take_node(RuleType::Scenario) else {
+            return (Built::Node(node), None);
+        };
+        let Some(line) = scenario_node.token(TokenType::ScenarioLine).cloned() else {
+            return (Built::Node(node), None);
+        };
+        let tags = self.tags(&mut node);
+        let examples = scenario_node
+            .take_all(RuleType::ExamplesDefinition)
+            .into_iter()
+            .filter_map(|b| match b {
+                Built::Examples(e) => Some(e),
+                _ => None,
+            })
+            .collect();
+        let sc = Scenario {
+            id: (self.new_id)(),
+            line: line.line,
+            tags,
+            keyword: line.keyword,
+            name: line.text,
+            description: scenario_node.description(),
+            steps: scenario_node.steps(),
+            examples,
+        };
+        (Built::Scenario(sc), None)
+    }
+
+    /// One examples table of a scenario outline.
+    fn examples(&mut self, mut node: Node) -> (Built, Option<ParseError>) {
+        let tags = self.tags(&mut node);
+        let Some(mut examples_node) = node.take_node(RuleType::Examples) else {
+            return (Built::Node(node), None);
+        };
+        let Some(line) = examples_node.token(TokenType::ExamplesLine).cloned() else {
+            return (Built::Node(node), None);
+        };
+        let mut rows = match examples_node.take(RuleType::ExamplesTable) {
+            Some(Built::Rows(rows)) => rows,
+            _ => Vec::new(),
+        };
+        let table_header = (!rows.is_empty()).then(|| rows.remove(0));
+        (self.new_id)();
+        let ex = Examples {
+            line: line.line,
+            tags,
+            keyword: line.keyword,
+            name: line.text,
+            table_header,
+            table_body: rows,
+        };
+        (Built::Examples(ex), None)
+    }
+
+    /// The free text under a heading, without the blank lines that end it.
+    fn description(&self, node: Node) -> (Built, Option<ParseError>) {
+        let mut lines: Vec<&str> = node
+            .tokens(TokenType::Other)
+            .map(|t| t.text.as_str())
+            .collect();
+        while lines.last().is_some_and(|l| l.trim().is_empty()) {
+            lines.pop();
+        }
+        (Built::Description(lines.join("\n")), None)
+    }
+
+    /// The feature: its header, then its background, scenarios and rules.
+    fn feature(&mut self, mut node: Node) -> (Built, Option<ParseError>) {
+        let Some(mut header) = node.take_node(RuleType::FeatureHeader) else {
+            return (Built::Feature(None), None);
+        };
+        let tags = self.tags(&mut header);
+        let Some(line) = header.token(TokenType::FeatureLine).cloned() else {
+            return (Built::Feature(None), None);
+        };
+        let mut children = Vec::new();
+        if let Some(bg) = node.background() {
+            children.push(FeatureChild::Background(bg));
+        }
+        children.extend(node.scenarios().into_iter().map(FeatureChild::Scenario));
+        for built in node.take_all(RuleType::Rule) {
+            if let Built::Rule(Some(rule)) = built {
+                children.push(FeatureChild::Rule(rule));
+            }
+        }
+        let feature = Feature {
+            line: line.line,
+            tags,
+            keyword: line.keyword,
+            name: line.text,
+            description: header.description(),
+            children,
+        };
+        (Built::Feature(Some(feature)), None)
+    }
+
+    /// A rule: its background and scenarios.
+    fn rule(&mut self, mut node: Node) -> (Built, Option<ParseError>) {
+        let Some(mut header) = node.take_node(RuleType::RuleHeader) else {
+            return (Built::Rule(None), None);
+        };
+        if header.token(TokenType::RuleLine).is_none() {
+            return (Built::Rule(None), None);
+        }
+        let tags = self.tags(&mut header);
+        let mut children = Vec::new();
+        if let Some(bg) = node.background() {
+            children.push(RuleChild::Background(bg));
+        }
+        children.extend(node.scenarios().into_iter().map(RuleChild::Scenario));
+        (self.new_id)();
+        let rule = Rule { tags, children };
+        (Built::Rule(Some(rule)), None)
+    }
+
+    /// The whole document.
+    fn document(&mut self, mut node: Node) -> (Built, Option<ParseError>) {
+        let feature = match node.take(RuleType::Feature) {
+            Some(Built::Feature(f)) => f,
+            _ => None,
+        };
+        let doc = Document {
+            feature,
+            comments: std::mem::take(&mut self.comments),
+        };
+        (Built::Document(doc), None)
     }
 }
 
