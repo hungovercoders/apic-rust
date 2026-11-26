@@ -7,7 +7,7 @@ use apic_httpc::CancelToken;
 use apic_output::style;
 use apic_runner::{shared_session, Options, Runner};
 
-use super::{ascii, kp, new_fixture, write, Fixture};
+use super::{ascii, kp, new_fixture, write};
 use crate::editor::editor_command;
 use crate::ui::short_duration;
 use crate::{Cmd, Config, Key, KeyType, Model, Msg};

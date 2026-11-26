@@ -29,7 +29,7 @@ publish = false
 # docs/licensing.md before adding to it.
 [workspace.dependencies]
 base64 = "0.22"
-clap = { version = "4", default-features = false, features = ["std", "help", "usage", "error-context", "suggestions"] }
+clap = { version = "4", default-features = false, features = ["std", "help", "usage", "error-context", "suggestions", "string"] }
 clap_complete = "4"
 flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
 getrandom = "0.2"

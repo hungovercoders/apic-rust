@@ -18,7 +18,7 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
     let (chain, rest) = crate::parse::find(root, &inv.args);
     if chain.len() == 1 && !rest.is_empty() {
         let topics: Vec<String> = inv.args.iter().map(|t| format!("`{t}`")).collect();
-        w!(a.stdout, "Unknown help topic [{}]\n{}", topics.join(" "), usage(&chain));
+        w!(a.stdout, "Unknown help topic [{}]\n{}", topics.join(" "), usage_with(&chain, false));
         return Ok(());
     }
     a.stdout.print(&help(&chain));
@@ -42,6 +42,11 @@ pub(crate) fn help(chain: &[&CommandSpec]) -> String {
 /// The usage of a command: its usage line, examples, subcommands and
 /// flags.
 pub(crate) fn usage(chain: &[&CommandSpec]) -> String {
+    usage_with(chain, true)
+}
+
+/// The usage, with or without the line for the help flag itself.
+fn usage_with(chain: &[&CommandSpec], with_help: bool) -> String {
     let leaf = chain[chain.len() - 1];
     let path = command_path(chain);
     let subs: Vec<&CommandSpec> = leaf.subcommands.iter().filter(|c| !c.hidden).collect();
@@ -66,7 +71,9 @@ pub(crate) fn usage(chain: &[&CommandSpec]) -> String {
     }
     let help_flag = FlagSpec::bool("help", &format!("help for {}", leaf.name)).short('h');
     let mut local: Vec<&FlagSpec> = leaf.flags.iter().filter(|f| !f.hidden).collect();
-    local.push(&help_flag);
+    if with_help {
+        local.push(&help_flag);
+    }
     local.sort_by_key(|f| f.name);
     out.push_str(&format!("\n\nFlags:\n{}", flag_usages(&local).trim_end()));
     let inherited: Vec<&FlagSpec> = inherited_flags(chain).into_iter().filter(|f| !f.hidden).collect();

@@ -38,7 +38,7 @@ pub(crate) fn spec() -> CommandSpec {
         "Send one request, or every request in a file as a flow",
     )
     .long(
-        r#"Send requests and report status, timing, body, captures and assertions.
+        r##"Send requests and report status, timing, body, captures and assertions.
 
 Targets:
   get-user             a request with "# @name get-user"
@@ -57,10 +57,10 @@ seconds apart; each failed attempt prints a line as it happens.
 run only, the same expressions "# @assert" and "# @capture" take, so a
 selector can be tried before it is written into the file. --dry-run
 resolves each target as a run would and prints the request instead of
-sending it: no dependency runs, no auth is applied and nothing is captured."#,
+sending it: no dependency runs, no auth is applied and nothing is captured."##,
     )
     .example(
-        r#"  apic run login
+        r##"  apic run login
   apic run get-user --env staging --var userId=42
   apic run smoke.http --json | jq .response.status
   apic run get-user --body-only | jq .email
@@ -68,7 +68,7 @@ sending it: no dependency runs, no auth is applied and nothing is captured."#,
   apic run daily-report --output reports/daily.csv
   apic run list-todos --assert 'body.$[?(@.done != true)].# == 0'
   apic run create-todo --capture id=body.$.id --json
-  apic run delete-todo --var todoId=3 --dry-run"#,
+  apic run delete-todo --var todoId=3 --dry-run"##,
     )
     .args(ArgRule::Min(1))
     .flag(FlagSpec::bool("verbose", "show request and response headers").short('v'))

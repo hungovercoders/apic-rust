@@ -4,6 +4,7 @@ use std::time::Duration;
 
 use apic_httpc::CancelToken;
 
+use super::{memory_pipe, PipeWriter};
 use crate::term::{decode_key, read_keys};
 use crate::viewport::{Spinner, Viewport};
 use crate::Key;
@@ -65,8 +66,8 @@ fn decode_keys() {
 
 /// Starts `read_keys` over a pipe and returns the pipe's write end, the
 /// keys it decodes, and the token that ends it.
-fn reading() -> (std::io::PipeWriter, mpsc::Receiver<Key>, CancelToken) {
-    let (pr, pw) = std::io::pipe().expect("pipe");
+fn reading() -> (PipeWriter, mpsc::Receiver<Key>, CancelToken) {
+    let (pr, pw) = memory_pipe();
     let (tx, keys) = mpsc::channel();
     let done = CancelToken::new();
     let token = done.clone();

@@ -153,7 +153,7 @@ pub(crate) fn clap_tree(spec: &CommandSpec) -> Command {
     if spec.args != ArgRule::None {
         let mut arg = Arg::new("args").num_args(0..).action(ArgAction::Append).hide(true);
         if !spec.valid_args.is_empty() {
-            arg = arg.value_parser(spec.valid_args.clone());
+            arg = arg.value_parser(clap::builder::PossibleValuesParser::new(spec.valid_args.clone()));
         }
         cmd = cmd.arg(arg);
     }

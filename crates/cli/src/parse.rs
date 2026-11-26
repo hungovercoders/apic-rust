@@ -12,14 +12,13 @@ use crate::spec::{effective_flags, CommandSpec, FlagKind, FlagSpec};
 /// Reports whether `token`, a long flag without its dashes, is a switch:
 /// the value of any other flag is the argument after it.
 fn long_is_switch(name: &str, flags: &[&FlagSpec]) -> bool {
-    name == "help" || flags.iter().any(|f| f.name == name && !f.takes_value())
+    flags.iter().any(|f| f.name == name && !f.takes_value())
 }
 
 fn short_is_switch(c: &str, flags: &[&FlagSpec]) -> bool {
-    c == "h"
-        || flags
-            .iter()
-            .any(|f| f.short.is_some_and(|s| s.to_string() == c) && !f.takes_value())
+    flags
+        .iter()
+        .any(|f| f.short.is_some_and(|s| s.to_string() == c) && !f.takes_value())
 }
 
 /// Reports whether `s` is a flag whose value is the next argument. A flag

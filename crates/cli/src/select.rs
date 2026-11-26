@@ -21,7 +21,7 @@ pub(crate) fn spec() -> CommandSpec {
         "Read a value out of a request's last recorded response, without sending it again",
     )
     .long(
-        r#"select evaluates a selector, the kind "# @assert" and "# @capture" take,
+        r##"select evaluates a selector, the kind "# @assert" and "# @capture" take,
 against the newest response recorded for a request in the current
 environment (or entry N with --entry, 1 being the newest), and prints the
 value. Nothing is sent: it is for looking at a response again, or at the
@@ -30,7 +30,7 @@ that may have changed something.
 
 It reads the response history, so apic.yaml needs history: N (apic init
 and apic demo set history: 10). Sensitive response headers are stored
-masked, so header.set-cookie and cookie.<name> read as ***."#,
+masked, so header.set-cookie and cookie.<name> read as ***."##,
     )
     .example(
         "  apic select list-todos 'body.$.items[0].id'

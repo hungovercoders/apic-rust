@@ -3,6 +3,7 @@ use std::sync::mpsc;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
+use super::memory_pipe;
 use crate::input::{BgSource, KeySource, ReadError};
 
 /// One read's outcome, carried over a channel so a test can wait on it
@@ -32,7 +33,7 @@ pub(crate) fn wait_read(c: &mpsc::Receiver<ReadResult>) -> ReadResult {
 // sees only what came after.
 #[test]
 fn bg_source_cancel_and_resume() {
-    let (pr, mut pw) = std::io::pipe().expect("pipe");
+    let (pr, mut pw) = memory_pipe();
     let bg = Arc::new(BgSource::new(pr));
     let s: Arc<dyn KeySource> = bg.clone();
 

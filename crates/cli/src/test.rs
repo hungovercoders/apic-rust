@@ -21,7 +21,7 @@ pub(crate) fn spec() -> CommandSpec {
         "Run Gherkin feature files against the project's requests",
     )
     .long(
-        r#"Run .feature files with a built-in step vocabulary, no Cucumber runtime
+        r##"Run .feature files with a built-in step vocabulary, no Cucumber runtime
 needed. Requests are referenced by id ("When I run \"get-user\"") or through
 phrases declared on them with "# @step" in the .http file.
 
@@ -32,7 +32,7 @@ the run.
 Exit codes: 0 all scenarios passed · 1 assertion failures or undefined
 steps · 2 definition problems (no features, feature path outside the
 project, unknown environment, unknown request, missing variable, bad
-phrase) · 3 a server could not be reached."#,
+phrase) · 3 a server could not be reached."##,
     )
     .example(
         "  apic test
@@ -51,7 +51,7 @@ phrase) · 3 a server could not be reached."#,
         .short('f'),
     )
     .flag(FlagSpec::string("output", "", "write the report to a file instead of stdout").short('o'))
-    .flag(FlagSpec::string("tags", "", r#"tag expression, e.g. "@smoke && ~@slow""#).short('t'))
+    .flag(FlagSpec::string("tags", "", r##"tag expression, e.g. "@smoke && ~@slow""##).short('t'))
     .flag(FlagSpec::bool("stop-on-failure", "stop after the first failed scenario"))
     .flag(FlagSpec::bool(
         "use-session",
@@ -306,7 +306,7 @@ pub(crate) fn output_overlaps_sources(output: &str, p: &Project, features: &[Str
             return refuse();
         }
     }
-    if walk_finds(&p.root, true, &|path| is_input(path) && same_as(path)) {
+    if walk_finds(&p.root, &|path| is_input(path) && same_as(path)) {
         return refuse();
     }
     Ok(())
@@ -315,7 +315,7 @@ pub(crate) fn output_overlaps_sources(output: &str, p: &Project, features: &[Str
 /// Walks a directory the way the project is scanned, hidden directories
 /// (but for the session's), node_modules and vendor left out, and reports
 /// whether `hit` is true of any file.
-fn walk_finds(dir: &str, top: bool, hit: &dyn Fn(&str) -> bool) -> bool {
+fn walk_finds(dir: &str, hit: &dyn Fn(&str) -> bool) -> bool {
     let Ok(entries) = std::fs::read_dir(dir) else {
         return false;
     };
@@ -326,14 +326,13 @@ fn walk_finds(dir: &str, top: bool, hit: &dyn Fn(&str) -> bool) -> bool {
         if is_dir {
             let skip = name != apic_session::DIR
                 && (name.starts_with('.') || name == "node_modules" || name == "vendor");
-            if !skip && walk_finds(&path, false, hit) {
+            if !skip && walk_finds(&path, hit) {
                 return true;
             }
         } else if hit(&path) {
             return true;
         }
     }
-    let _ = top;
     false
 }
 
@@ -353,15 +352,7 @@ impl LazyFile {
 
     fn close(&mut self) -> Result<(), String> {
         if let Some(f) = self.f.take() {
-            if let Err(e) = f.sync_all().or_else(|e| match e.kind() {
-                // Not every file can be synced (a pipe, /dev/null).
-                std::io::ErrorKind::InvalidInput | std::io::ErrorKind::Unsupported => Ok(()),
-                _ => Err(e),
-            }) {
-                if self.err.is_none() {
-                    self.fail(e, "close");
-                }
-            }
+            drop(f);
         }
         match self.err.take() {
             Some(e) => Err(e),

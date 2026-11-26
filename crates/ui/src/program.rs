@@ -377,12 +377,12 @@ impl<'a> Program<'a> {
             }
             let cmd = match self.mail.next(size_at.min(tick_at)) {
                 Some(Event::Key(k)) => self.m.update(Msg::Key(k)),
-                Some(Event::Msg(Msg::Panic(pm))) => {
+                Some(Event::Msg(msg)) => match *msg {
                     // Raised here rather than on the worker so that the
                     // terminal is put back before the crash prints.
-                    panic::panic_any(pm);
-                }
-                Some(Event::Msg(msg)) => self.m.update(msg),
+                    Msg::Panic(pm) => panic::panic_any(pm),
+                    msg => self.m.update(msg),
+                },
                 None => {
                     let now = Instant::now();
                     if now >= size_at {

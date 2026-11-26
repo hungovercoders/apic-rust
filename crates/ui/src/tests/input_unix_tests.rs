@@ -1,6 +1,5 @@
 use std::fs::File;
 use std::io::{Read, Write};
-use std::os::fd::OwnedFd;
 use std::process::Command;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -9,16 +8,13 @@ use super::input_tests::{read_async, wait_read};
 use super::program_tests::empty_model;
 use crate::input::{new_key_source, ReadError};
 use crate::program::{ExecMsg, Mailbox, Program, ALT_SCREEN_ON, CLEAR_SCREEN, HIDE_CURSOR};
-use crate::Msg;
+use crate::{sys, Msg};
 
 /// Stands in for the terminal: the read end is what the UI and the editor
 /// read, the write end is the keyboard.
 pub(crate) fn terminal_pipe() -> (Arc<File>, File) {
-    let (pr, pw) = std::io::pipe().expect("pipe");
-    (
-        Arc::new(File::from(OwnedFd::from(pr))),
-        File::from(OwnedFd::from(pw)),
-    )
+    let (pr, pw) = sys::pipe().expect("pipe");
+    (Arc::new(pr), pw)
 }
 
 fn want_key(mail: &Mailbox, want: &str) {

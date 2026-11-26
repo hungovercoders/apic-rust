@@ -82,7 +82,7 @@ impl Read for FileReader {
     }
 }
 
-#[cfg(any(test, not(unix)))]
+#[cfg(test)]
 pub(crate) use bg::BgSource;
 
 #[cfg(any(test, not(unix)))]

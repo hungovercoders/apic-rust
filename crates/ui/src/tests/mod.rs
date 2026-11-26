@@ -6,15 +6,17 @@ mod golden_tests;
 mod input_tests;
 #[cfg(unix)]
 mod input_unix_tests;
+#[cfg(unix)]
 mod program_tests;
 mod sweep_tests;
 mod term_tests;
 mod ui_tests;
 
 use std::cell::RefCell;
+use std::io::{Read, Write};
 use std::path::Path;
 use std::rc::Rc;
-use std::sync::Arc;
+use std::sync::{mpsc, Arc};
 
 use apic_gocompat::quote;
 use apic_output::style::{with_color_profile, Profile};
@@ -32,7 +34,8 @@ pub(crate) fn ascii<R>(f: impl FnOnce() -> R) -> R {
 
 pub(crate) struct Fixture {
     pub(crate) dir: TempDir,
-    pub(crate) srv: apic_httpd::Server,
+    /// Kept so that the server lives as long as the model.
+    pub(crate) _srv: apic_httpd::Server,
     pub(crate) m: Model,
     pub(crate) rebuilt: Rc<RefCell<Vec<String>>>,
 }
@@ -96,9 +99,57 @@ pub(crate) fn new_fixture(opts: Options) -> Fixture {
     });
     Fixture {
         dir,
-        srv,
+        _srv: srv,
         m,
         rebuilt,
+    }
+}
+
+/// A pipe in memory: what is written to one end is read from the other,
+/// and dropping the writer ends the reader's input.
+pub(crate) fn memory_pipe() -> (PipeReader, PipeWriter) {
+    let (tx, rx) = mpsc::channel();
+    (
+        PipeReader {
+            rx,
+            rest: Vec::new(),
+        },
+        PipeWriter(tx),
+    )
+}
+
+pub(crate) struct PipeReader {
+    rx: mpsc::Receiver<Vec<u8>>,
+    rest: Vec<u8>,
+}
+
+pub(crate) struct PipeWriter(mpsc::Sender<Vec<u8>>);
+
+impl Read for PipeReader {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        if self.rest.is_empty() {
+            match self.rx.recv() {
+                Ok(chunk) => self.rest = chunk,
+                Err(_) => return Ok(0),
+            }
+        }
+        let n = self.rest.len().min(buf.len());
+        buf[..n].copy_from_slice(&self.rest[..n]);
+        self.rest.drain(..n);
+        Ok(n)
+    }
+}
+
+impl Write for PipeWriter {
+    fn write(&mut self, b: &[u8]) -> std::io::Result<usize> {
+        self.0
+            .send(b.to_vec())
+            .map_err(|_| std::io::Error::from(std::io::ErrorKind::BrokenPipe))?;
+        Ok(b.len())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
     }
 }
 

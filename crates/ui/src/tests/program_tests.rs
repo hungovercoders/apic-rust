@@ -7,6 +7,7 @@ use apic_httpc::CancelToken;
 use apic_runner::{shared_session, Options, Runner};
 use tempfile::TempDir;
 
+use super::input_unix_tests::terminal_pipe;
 use super::{ascii, kp, new_fixture};
 use crate::input::new_key_source;
 use crate::program::{
@@ -40,33 +41,11 @@ impl Write for Screen {
     }
 }
 
-/// A pipe standing in for the terminal: the read end is the program's
-/// input, the write end its keyboard.
-fn terminal() -> (Arc<File>, File) {
-    let (pr, pw) = std::io::pipe().expect("pipe");
-    #[cfg(unix)]
-    {
-        use std::os::fd::OwnedFd;
-        (
-            Arc::new(File::from(OwnedFd::from(pr))),
-            File::from(OwnedFd::from(pw)),
-        )
-    }
-    #[cfg(windows)]
-    {
-        use std::os::windows::io::OwnedHandle;
-        (
-            Arc::new(File::from(OwnedHandle::from(pr))),
-            File::from(OwnedHandle::from(pw)),
-        )
-    }
-}
-
 /// Builds a program around `m` with a pipe standing in for the terminal:
 /// the returned file is its keyboard, the screen its output. The loop,
 /// render, dispatch and resize all work without a terminal.
 fn program_over<'a>(m: &'a mut Model, screen: &'a mut Screen) -> (Program<'a>, File) {
-    let (pr, pw) = terminal();
+    let (pr, pw) = terminal_pipe();
     let src = new_key_source(pr.clone()).expect("a key source");
     (Program::new(m, pr, screen, src), pw)
 }
