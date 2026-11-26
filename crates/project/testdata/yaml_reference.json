@@ -1,0 +1,4620 @@
+[
+ {
+  "input": "",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "# nothing here\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "---\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "---\n...\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "~\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "null\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "\n\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "--- # c\nenv: dev\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: dev\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: dev\ndir: api\ntimeout: 10s\nretry: 10 2s\ncookies: true\nhistory: 20\nproxy: http://proxy.internal:3128\nnoProxy: [localhost, .internal]\nmaxBodyBytes: 1048576\nauth:\n  default: bearer {{token}}\n  allowExec: true\ntest:\n  paths:\n    - features\n    - smoke.feature\ntls:\n  caFile: certs/ca.pem\n  certFile: certs/client.pem\n  keyFile: certs/key.pem\n  verifyHost: false\n  hosts:\n    api.internal.example.com:\n      caFile: a.pem\n      verifyHost: true\n    '*.internal.example.com':\n      certFile: c.pem\n      keyFile: k.pem\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "api",
+   "Timeout": "10s",
+   "Retry": "10 2s",
+   "Cookies": true,
+   "History": 20,
+   "Proxy": "http://proxy.internal:3128",
+   "NoProxy": [
+    "localhost",
+    ".internal"
+   ],
+   "MaxBodyBytes": 1048576,
+   "Auth": {
+    "Default": "bearer {{token}}",
+    "AllowExec": true
+   },
+   "Test": {
+    "Paths": [
+     "features",
+     "smoke.feature"
+    ]
+   },
+   "TLS": {
+    "CAFile": "certs/ca.pem",
+    "CertFile": "certs/client.pem",
+    "KeyFile": "certs/key.pem",
+    "VerifyHost": false,
+    "Hosts": {
+     "*.internal.example.com": {
+      "CAFile": "",
+      "CertFile": "c.pem",
+      "KeyFile": "k.pem",
+      "VerifyHost": null
+     },
+     "api.internal.example.com": {
+      "CAFile": "a.pem",
+      "CertFile": "",
+      "KeyFile": "",
+      "VerifyHost": true
+     }
+    }
+   }
+  }
+ },
+ {
+  "input": "timeout: 30\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "30",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: 1.0\n",
+  "config": {
+   "Env": "1.0",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: 0x10\n",
+  "config": {
+   "Env": "0x10",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: true\n",
+  "config": {
+   "Env": "true",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: True\n",
+  "config": {
+   "Env": "True",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: yes\n",
+  "config": {
+   "Env": "yes",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: ~\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env:\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: null\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: 'null'\n",
+  "config": {
+   "Env": "null",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: \"\"\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: 2001-01-01\n",
+  "config": {
+   "Env": "2001-01-01",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: 1_000\n",
+  "config": {
+   "Env": "1_000",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: .inf\n",
+  "config": {
+   "Env": ".inf",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: |\n  a\n  b\n",
+  "config": {
+   "Env": "a\nb\n",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: >\n  a\n  b\n",
+  "config": {
+   "Env": "a b\n",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: a b  c # comment\n",
+  "config": {
+   "Env": "a b  c",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: \"a\\tb\"\n",
+  "config": {
+   "Env": "a\tb",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: 'it''s'\n",
+  "config": {
+   "Env": "it's",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: !!str 12\n",
+  "config": {
+   "Env": "12",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: !!int 12\n",
+  "config": {
+   "Env": "12",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: !foo bar\n",
+  "config": {
+   "Env": "bar",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: [a]\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!seq into string"
+ },
+ {
+  "input": "env: {a: b}\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!map into string"
+ },
+ {
+  "input": "env: {a: b, a: c}\n",
+  "error": "yaml: unmarshal errors:\n  line 1: mapping key \"a\" already defined at line 1"
+ },
+ {
+  "input": "cookies: true\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": true,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: True\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": true,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: TRUE\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": true,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: false\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: yes\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": true,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: Yes\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": true,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: on\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": true,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: ON\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": true,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: off\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: n\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: N\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: y\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": true,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: 'yes'\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": true,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: \"true\"\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `true` into bool"
+ },
+ {
+  "input": "cookies: 1\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!int `1` into bool"
+ },
+ {
+  "input": "cookies: 0\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!int `0` into bool"
+ },
+ {
+  "input": "cookies: maybe\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `maybe` into bool"
+ },
+ {
+  "input": "cookies: ~\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies:\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: [true]\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!seq into bool"
+ },
+ {
+  "input": "cookies: {a: 1}\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!map into bool"
+ },
+ {
+  "input": "cookies: tRuE\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `tRuE` into bool"
+ },
+ {
+  "input": "cookies: a very long string here\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `a very ...` into bool"
+ },
+ {
+  "input": "cookies: 12345678901\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!int `1234567...` into bool"
+ },
+ {
+  "input": "cookies: 1234567890\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!int `1234567890` into bool"
+ },
+ {
+  "input": "cookies: 1.5\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!float `1.5` into bool"
+ },
+ {
+  "input": "cookies: 2001-01-01\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!timestamp `2001-01-01` into bool"
+ },
+ {
+  "input": "cookies: \"quoted long string\"\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `quoted ...` into bool"
+ },
+ {
+  "input": "cookies: <<\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!merge `<<` into bool"
+ },
+ {
+  "input": "history: 20\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 20,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: -3\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": -3,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: +3\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 3,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 0x1F\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 31,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 0o17\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 15,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 0b101\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 5,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: -0b101\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": -5,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 0777\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 511,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 089\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 89,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 1_000\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 1000,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 2.7\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 2,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: -2.7\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": -2,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 1e3\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 1000,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 1.0e3\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 1000,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: .5\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 9223372036854775807\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 9223372036854775807,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 9223372036854775808\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!int `9223372...` into int"
+ },
+ {
+  "input": "history: -9223372036854775808\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": -9223372036854775808,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: -9223372036854775809\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": -9223372036854775808,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 18446744073709551615\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!int `1844674...` into int"
+ },
+ {
+  "input": "history: 18446744073709551616\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!float `1844674...` into int"
+ },
+ {
+  "input": "history: 1e30\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!float `1e30` into int"
+ },
+ {
+  "input": "history: -1e30\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": -9223372036854775808,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: .inf\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!float `.inf` into int"
+ },
+ {
+  "input": "history: -.inf\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": -9223372036854775808,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: .nan\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!float `.nan` into int"
+ },
+ {
+  "input": "history: abc\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `abc` into int"
+ },
+ {
+  "input": "history: '20'\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `20` into int"
+ },
+ {
+  "input": "history: \"20\"\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `20` into int"
+ },
+ {
+  "input": "history: true\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!bool `true` into int"
+ },
+ {
+  "input": "history: ~\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: [1]\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!seq into int"
+ },
+ {
+  "input": "history: {a: 1}\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!map into int"
+ },
+ {
+  "input": "history: 2001-01-01\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!timestamp `2001-01-01` into int"
+ },
+ {
+  "input": "history: 2001-01-01T10:00:00Z\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!timestamp `2001-01...` into int"
+ },
+ {
+  "input": "history: 2001-13-01\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `2001-13-01` into int"
+ },
+ {
+  "input": "history: 20 # c\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 20,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 1e999\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `1e999` into int"
+ },
+ {
+  "input": "history: 0x\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `0x` into int"
+ },
+ {
+  "input": "history: 1__0\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 10,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 0X1f\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 31,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: +0x10\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 16,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 0o8\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `0o8` into int"
+ },
+ {
+  "input": "history: 1.\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 1,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 1.e2\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 100,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: +.5\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 1e\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `1e` into int"
+ },
+ {
+  "input": "history: --1\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `--1` into int"
+ },
+ {
+  "input": "history: 9.223372036854775807e18\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": -9223372036854775808,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 9.3e18\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!float `9.3e18` into int"
+ },
+ {
+  "input": "history: !!int \"3\"\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 3,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: !!str 3\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `3` into int"
+ },
+ {
+  "input": "history: !!float 3\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 3,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 2001-1-1 10:00:00\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!timestamp `2001-1-...` into int"
+ },
+ {
+  "input": "history: 2001-02-30\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `2001-02-30` into int"
+ },
+ {
+  "input": "history: 2000-02-29\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!timestamp `2000-02-29` into int"
+ },
+ {
+  "input": "history: 1900-02-29\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `1900-02-29` into int"
+ },
+ {
+  "input": "history: 2001-01-01t10:00:00+01:00\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!timestamp `2001-01...` into int"
+ },
+ {
+  "input": "history: 2001-01-01T10:00:00\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `2001-01...` into int"
+ },
+ {
+  "input": "history: 2001-01-01T1:2:3.5Z\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!timestamp `2001-01...` into int"
+ },
+ {
+  "input": "maxBodyBytes: 67108864\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 67108864,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "maxBodyBytes: big\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `big` into int64"
+ },
+ {
+  "input": "maxBodyBytes: 1.5\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 1,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "maxBodyBytes: 9223372036854775808\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!int `9223372...` into int64"
+ },
+ {
+  "input": "noProxy: [a, b]\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": [
+    "a",
+    "b"
+   ],
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "noProxy:\n  - a\n  - b\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": [
+    "a",
+    "b"
+   ],
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "noProxy: []\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": [],
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "noProxy: ~\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "noProxy:\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "noProxy: localhost\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `localhost` into []string"
+ },
+ {
+  "input": "noProxy: 12\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!int `12` into []string"
+ },
+ {
+  "input": "noProxy: {a: b}\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!map into []string"
+ },
+ {
+  "input": "noProxy: [a, ~, b]\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": [
+    "a",
+    "b"
+   ],
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "noProxy: [1, 2.5, true]\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": [
+    "1",
+    "2.5",
+    "true"
+   ],
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "noProxy: [a, [b], c]\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!seq into string"
+ },
+ {
+  "input": "noProxy: [a, {b: c}, d]\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!map into string"
+ },
+ {
+  "input": "noProxy:\n- a\n- b\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": [
+    "a",
+    "b"
+   ],
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "noProxy: [a, , b]\n",
+  "error": "yaml: did not find expected node content"
+ },
+ {
+  "input": "noProxy: ['', \"\"]\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": [
+    "",
+    ""
+   ],
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "test:\n  paths: features\n",
+  "error": "yaml: unmarshal errors:\n  line 2: cannot unmarshal !!str `features` into []string"
+ },
+ {
+  "input": "test:\n  paths: [features]\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": [
+     "features"
+    ]
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "test: features\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `features` into project.TestConfig"
+ },
+ {
+  "input": "test: [a]\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!seq into project.TestConfig"
+ },
+ {
+  "input": "test: ~\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "test: {}\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "test:\n  other: 1\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "auth: exec\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `exec` into project.AuthConfig"
+ },
+ {
+  "input": "auth: 3\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!int `3` into project.AuthConfig"
+ },
+ {
+  "input": "auth: [a]\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!seq into project.AuthConfig"
+ },
+ {
+  "input": "auth:\n  default: [a]\n  allowExec: 3\n",
+  "error": "yaml: unmarshal errors:\n  line 2: cannot unmarshal !!seq into string\n  line 3: cannot unmarshal !!int `3` into bool"
+ },
+ {
+  "input": "auth:\n  default: exec whoami\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "exec whoami",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "auth: {default: x, allowExec: yes}\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "x",
+    "AllowExec": true
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "tls: 3\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!int `3` into project.TLSConfig"
+ },
+ {
+  "input": "tls:\n  verifyHost: no\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": false,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "tls:\n  verifyHost: ~\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "tls:\n  verifyHost: maybe\n",
+  "error": "yaml: unmarshal errors:\n  line 2: cannot unmarshal !!str `maybe` into bool"
+ },
+ {
+  "input": "tls:\n  hosts: 3\n",
+  "error": "yaml: unmarshal errors:\n  line 2: cannot unmarshal !!int `3` into map[string]project.TLSHost"
+ },
+ {
+  "input": "tls:\n  hosts: [a]\n",
+  "error": "yaml: unmarshal errors:\n  line 2: cannot unmarshal !!seq into map[string]project.TLSHost"
+ },
+ {
+  "input": "tls:\n  hosts: {}\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": {}
+   }
+  }
+ },
+ {
+  "input": "tls:\n  hosts:\n    a: ~\n    b:\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": {
+     "a": {
+      "CAFile": "",
+      "CertFile": "",
+      "KeyFile": "",
+      "VerifyHost": null
+     },
+     "b": {
+      "CAFile": "",
+      "CertFile": "",
+      "KeyFile": "",
+      "VerifyHost": null
+     }
+    }
+   }
+  }
+ },
+ {
+  "input": "tls:\n  hosts:\n    a: 3\n",
+  "error": "yaml: unmarshal errors:\n  line 3: cannot unmarshal !!int `3` into project.TLSHost"
+ },
+ {
+  "input": "tls:\n  hosts:\n    a: [x]\n",
+  "error": "yaml: unmarshal errors:\n  line 3: cannot unmarshal !!seq into project.TLSHost"
+ },
+ {
+  "input": "tls:\n  hosts:\n    a: {caFile: x}\n    a: {caFile: y}\n",
+  "error": "yaml: unmarshal errors:\n  line 4: mapping key \"a\" already defined at line 3"
+ },
+ {
+  "input": "tls:\n  hosts:\n    1: {caFile: x}\n    true: {caFile: y}\n    ~: {caFile: z}\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": {
+     "1": {
+      "CAFile": "x",
+      "CertFile": "",
+      "KeyFile": "",
+      "VerifyHost": null
+     },
+     "true": {
+      "CAFile": "y",
+      "CertFile": "",
+      "KeyFile": "",
+      "VerifyHost": null
+     }
+    }
+   }
+  }
+ },
+ {
+  "input": "tls:\n  hosts:\n    [a]: {caFile: x}\n",
+  "error": "yaml: unmarshal errors:\n  line 3: cannot unmarshal !!seq into string"
+ },
+ {
+  "input": "tls:\n  hosts:\n    {a: b}: {caFile: x}\n",
+  "error": "yaml: unmarshal errors:\n  line 3: cannot unmarshal !!map into string"
+ },
+ {
+  "input": "tls:\n  hosts:\n    a:\n      verifyHost: 3\n      caFile: [x]\n",
+  "error": "yaml: unmarshal errors:\n  line 4: cannot unmarshal !!int `3` into bool\n  line 5: cannot unmarshal !!seq into string"
+ },
+ {
+  "input": "unknown: 1\nenv: dev\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: a\nenv: b\n",
+  "error": "yaml: unmarshal errors:\n  line 2: mapping key \"env\" already defined at line 1"
+ },
+ {
+  "input": "env: a\ndir: x\nenv: b\nenv: c\n",
+  "error": "yaml: unmarshal errors:\n  line 3: mapping key \"env\" already defined at line 1\n  line 4: mapping key \"env\" already defined at line 1\n  line 4: mapping key \"env\" already defined at line 3"
+ },
+ {
+  "input": "Env: dev\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "ENV: dev\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "1: a\nenv: dev\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "~: a\nenv: dev\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "[a]: b\nenv: dev\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!seq into string"
+ },
+ {
+  "input": "{a: b}: c\nenv: dev\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!map into string"
+ },
+ {
+  "input": "[a]: b\n[c]: d\n",
+  "error": "yaml: unmarshal errors:\n  line 2: mapping key \"\" already defined at line 1"
+ },
+ {
+  "input": "auth:\n  default: a\n  default: b\nenv: [x]\n",
+  "error": "yaml: unmarshal errors:\n  line 3: mapping key \"default\" already defined at line 2\n  line 4: cannot unmarshal !!seq into string"
+ },
+ {
+  "input": "'env': dev\n\"dir\": api\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "api",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "? env\n: dev\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "nested:\n  env: dev\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: dev\nunknown:\n  a: 1\n  a: 2\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "1: a\n\"1\": b\n",
+  "error": "yaml: unmarshal errors:\n  line 2: mapping key \"1\" already defined at line 1"
+ },
+ {
+  "input": "true: a\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "dev\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `dev` into project.Config"
+ },
+ {
+  "input": "3\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!int `3` into project.Config"
+ },
+ {
+  "input": "[a, b]\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!seq into project.Config"
+ },
+ {
+  "input": "- a\n- b\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!seq into project.Config"
+ },
+ {
+  "input": "\"text\"\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `text` into project.Config"
+ },
+ {
+  "input": "a very long root scalar\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `a very ...` into project.Config"
+ },
+ {
+  "input": "true\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!bool `true` into project.Config"
+ },
+ {
+  "input": "history: abc\ncookies: 3\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `abc` into int\n  line 2: cannot unmarshal !!int `3` into bool"
+ },
+ {
+  "input": "env: [a]\ndir: {a: b}\ntimeout: [1]\nhistory: x\nnoProxy: 3\nauth: 1\ntls:\n  hosts: 2\n  verifyHost: x\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!seq into string\n  line 2: cannot unmarshal !!map into string\n  line 3: cannot unmarshal !!seq into string\n  line 4: cannot unmarshal !!str `x` into int\n  line 5: cannot unmarshal !!int `3` into []string\n  line 6: cannot unmarshal !!int `1` into project.AuthConfig\n  line 8: cannot unmarshal !!int `2` into map[string]project.TLSHost\n  line 9: cannot unmarshal !!str `x` into bool"
+ },
+ {
+  "input": "\n\n# comment\nhistory: abc # trailing\n\ncookies: maybe\n",
+  "error": "yaml: unmarshal errors:\n  line 4: cannot unmarshal !!str `abc` into int\n  line 6: cannot unmarshal !!str `maybe` into bool"
+ },
+ {
+  "input": "env: dev\n---\nenv: prod\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: dev\n---\n[\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "---\nenv: dev\n...\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "%YAML 1.2\n---\nenv: dev\n",
+  "error": "yaml: found incompatible YAML document"
+ },
+ {
+  "input": "--- !!map\nenv: dev\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "---\n---\nenv: dev\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "base: &b\n  default: bearer x\n  allowExec: true\nauth: *b\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "bearer x",
+    "AllowExec": true
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "x: &t 10s\ntimeout: *t\nretry: *t\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "10s",
+   "Retry": "10s",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "x: &n 5\nhistory: *n\ncookies: *n\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!int `5` into bool"
+ },
+ {
+  "input": "base: &b {default: bearer x, allowExec: true}\nauth:\n  <<: *b\n  default: mine\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "mine",
+    "AllowExec": true
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "base: &b {default: bearer x, allowExec: true}\nauth:\n  default: mine\n  <<: *b\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "mine",
+    "AllowExec": true
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "a: &a {default: one}\nb: &b {default: two, allowExec: true}\nauth:\n  <<: [*a, *b]\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "one",
+    "AllowExec": true
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "auth:\n  <<: 3\n",
+  "error": "yaml: map merge requires map or sequence of maps as the value"
+ },
+ {
+  "input": "auth:\n  <<: [1]\n",
+  "error": "yaml: map merge requires map or sequence of maps as the value"
+ },
+ {
+  "input": "auth:\n  '<<': x\n  default: y\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "y",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "auth:\n  <<: {default: [bad]}\n",
+  "error": "yaml: unmarshal errors:\n  line 2: cannot unmarshal !!seq into string"
+ },
+ {
+  "input": "h: &h {caFile: shared.pem, verifyHost: false}\ntls:\n  hosts:\n    a:\n      <<: *h\n      certFile: a.pem\n    b: *h\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": {
+     "a": {
+      "CAFile": "shared.pem",
+      "CertFile": "a.pem",
+      "KeyFile": "",
+      "VerifyHost": false
+     },
+     "b": {
+      "CAFile": "shared.pem",
+      "CertFile": "",
+      "KeyFile": "",
+      "VerifyHost": false
+     }
+    }
+   }
+  }
+ },
+ {
+  "input": "h: &h {a: {caFile: 1}, b: {caFile: 2}}\ntls:\n  hosts:\n    <<: *h\n    a: {caFile: mine}\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": {
+     "a": {
+      "CAFile": "mine",
+      "CertFile": "",
+      "KeyFile": "",
+      "VerifyHost": null
+     },
+     "b": {
+      "CAFile": "2",
+      "CertFile": "",
+      "KeyFile": "",
+      "VerifyHost": null
+     }
+    }
+   }
+  }
+ },
+ {
+  "input": "<<: {env: merged, dir: d}\nenv: own\n",
+  "config": {
+   "Env": "own",
+   "Dir": "d",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "<<: {env: merged}\n<<: {dir: d}\n",
+  "error": "yaml: unmarshal errors:\n  line 2: mapping key \"<<\" already defined at line 1"
+ },
+ {
+  "input": "auth: *nope\n",
+  "error": "yaml: unknown anchor 'nope' referenced"
+ },
+ {
+  "input": "auth:\n  <<: {default: a}\n  <<: {default: b}\n",
+  "error": "yaml: unmarshal errors:\n  line 3: mapping key \"<<\" already defined at line 2"
+ },
+ {
+  "input": "a: [\n",
+  "error": "yaml: line 1: did not find expected node content"
+ },
+ {
+  "input": "env: dev\n  dir: x\n",
+  "error": "yaml: line 2: mapping values are not allowed in this context"
+ },
+ {
+  "input": "env: \"unterminated\n",
+  "error": "yaml: line 2: found unexpected end of stream"
+ },
+ {
+  "input": "env: 'unterminated\n",
+  "error": "yaml: line 2: found unexpected end of stream"
+ },
+ {
+  "input": "env: dev\n\tdir: x\n",
+  "error": "yaml: line 2: found a tab character that violates indentation"
+ },
+ {
+  "input": "\tenv: dev\n",
+  "error": "yaml: found character that cannot start any token"
+ },
+ {
+  "input": "env: dev\ndir x\n",
+  "error": "yaml: line 2: could not find expected ':'"
+ },
+ {
+  "input": "env: {a: b\n",
+  "error": "yaml: line 1: did not find expected ',' or '}'"
+ },
+ {
+  "input": "env: [a, b\n",
+  "error": "yaml: line 1: did not find expected ',' or ']'"
+ },
+ {
+  "input": "env: a: b\n",
+  "error": "yaml: mapping values are not allowed in this context"
+ },
+ {
+  "input": "- a\nb: c\n",
+  "error": "yaml: line 1: did not find expected '-' indicator"
+ },
+ {
+  "input": "env: dev\n- a\n",
+  "error": "yaml: line 1: did not find expected key"
+ },
+ {
+  "input": "a:\n  - b\n c: d\n",
+  "error": "yaml: line 2: did not find expected key"
+ },
+ {
+  "input": "env: @dev\n",
+  "error": "yaml: found character that cannot start any token"
+ },
+ {
+  "input": "env: `dev`\n",
+  "error": "yaml: found character that cannot start any token"
+ },
+ {
+  "input": "env: %dev\n",
+  "error": "yaml: found character that cannot start any token"
+ },
+ {
+  "input": "env: *\n",
+  "error": "yaml: did not find expected alphabetic or numeric character"
+ },
+ {
+  "input": "env: &\n",
+  "error": "yaml: did not find expected alphabetic or numeric character"
+ },
+ {
+  "input": "env: !<x\n",
+  "error": "yaml: did not find the expected '>'"
+ },
+ {
+  "input": "{\n",
+  "error": "yaml: line 1: did not find expected node content"
+ },
+ {
+  "input": "]\n",
+  "error": "yaml: did not find expected node content"
+ },
+ {
+  "input": "env: dev\n...\nfoo: [\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: \"a\\qb\"\n",
+  "error": "yaml: found unknown escape character"
+ },
+ {
+  "input": "env: \"\\x\"\n",
+  "error": "yaml: did not find expected hexdecimal number"
+ },
+ {
+  "input": "key: value\n   bad: indent\n",
+  "error": "yaml: line 2: mapping values are not allowed in this context"
+ },
+ {
+  "input": "a:\n  b:\n    c: 1\n   d: 2\n",
+  "error": "yaml: line 1: did not find expected key"
+ },
+ {
+  "input": "env: dev\ndir:\n  - a\n - b\n",
+  "error": "yaml: line 3: did not find expected key"
+ },
+ {
+  "input": "? a\n? b\n: [\n",
+  "error": "yaml: line 3: did not find expected node content"
+ },
+ {
+  "input": "env: |x\n  a\n",
+  "error": "yaml: did not find expected comment or line break"
+ },
+ {
+  "input": "%YAML 3.0\n---\nenv: dev\n",
+  "error": "yaml: found incompatible YAML document"
+ },
+ {
+  "input": "%FOO bar\n---\nenv: dev\n",
+  "error": "yaml: found unknown directive name"
+ },
+ {
+  "input": "%YAML 1.2\n%YAML 1.2\n---\na: b\n",
+  "error": "yaml: found incompatible YAML document"
+ },
+ {
+  "input": "env: !e!x y\n",
+  "error": "yaml: found undefined tag handle"
+ },
+ {
+  "input": "\n\n\nenv: [a\n\n",
+  "error": "yaml: line 3: did not find expected ',' or ']'"
+ },
+ {
+  "input": "a: b: c: d\n",
+  "error": "yaml: mapping values are not allowed in this context"
+ },
+ {
+  "input": "a: 'b' c\n",
+  "error": "yaml: did not find expected key"
+ },
+ {
+  "input": "a: \"b\" c\n",
+  "error": "yaml: did not find expected key"
+ },
+ {
+  "input": "a: [b]]\n",
+  "error": "yaml: did not find expected key"
+ },
+ {
+  "input": "a: {b: c}}\n",
+  "error": "yaml: did not find expected key"
+ },
+ {
+  "input": "a: b\n  - c\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "&a\n&b x\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "a: !!binary 5\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "- - - [\n",
+  "error": "yaml: line 1: did not find expected node content"
+ },
+ {
+  "input": "a:\n- b\n-c\n",
+  "error": "yaml: line 3: could not find expected ':'"
+ },
+ {
+  "input": "'a\n\n\nb': [\n",
+  "error": "yaml: line 4: mapping values are not allowed in this context"
+ },
+ {
+  "input": "foo: bar\n\nbaz: \"\n\n\n",
+  "error": "yaml: line 3: found unexpected end of stream"
+ },
+ {
+  "input": "﻿env: dev\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: dev\r\ndir: api\r\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "api",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: dev",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env:   spaced   \n",
+  "config": {
+   "Env": "spaced",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "{env: dev, history: 3}\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 3,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "{env: dev, history: x, cookies: z}\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `x` into int\n  line 1: cannot unmarshal !!str `z` into bool"
+ },
+ {
+  "input": "env: dev # c\n#c2\ndir: 'a # not c'\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "a # not c",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "proxy: socks5://127.0.0.1:1080\nnoProxy:\n  - localhost\n  - 10.0.0.0/8\n  - '*'\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "socks5://127.0.0.1:1080",
+   "NoProxy": [
+    "localhost",
+    "10.0.0.0/8",
+    "*"
+   ],
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "timeout: 1m30s\nretry: \"5 500ms\"\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "1m30s",
+   "Retry": "5 500ms",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "auth:\n  default: \"aws service=execute-api region=eu-west-2\"\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "aws service=execute-api region=eu-west-2",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "history: 3\ntls: {caFile: a, hosts: {h: {verifyHost: false}}}\n",
+  "config": {
+   "Env": "",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 3,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "a",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": {
+     "h": {
+      "CAFile": "",
+      "CertFile": "",
+      "KeyFile": "",
+      "VerifyHost": false
+     }
+    }
+   }
+  }
+ },
+ {
+  "input": "env: 😀\n",
+  "config": {
+   "Env": "😀",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "cookies: éééééééé\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `ééé�...` into bool"
+ },
+ {
+  "input": "cookies: ééééé\n",
+  "error": "yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `ééééé` into bool"
+ },
+ {
+  "input": "dir: ../other\n",
+  "config": {
+   "Env": "",
+   "Dir": "../other",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": null
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ },
+ {
+  "input": "env: dev\ntest:\n  paths:\n    - a\n    -\n    - b\n",
+  "config": {
+   "Env": "dev",
+   "Dir": "",
+   "Timeout": "",
+   "Retry": "",
+   "Cookies": false,
+   "History": 0,
+   "Proxy": "",
+   "NoProxy": null,
+   "MaxBodyBytes": 0,
+   "Auth": {
+    "Default": "",
+    "AllowExec": false
+   },
+   "Test": {
+    "Paths": [
+     "a",
+     "b"
+    ]
+   },
+   "TLS": {
+    "CAFile": "",
+    "CertFile": "",
+    "KeyFile": "",
+    "VerifyHost": null,
+    "Hosts": null
+   }
+  }
+ }
+]
