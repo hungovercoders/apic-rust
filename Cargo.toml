@@ -28,7 +28,7 @@ publish = false
 # One place for every third-party version. Keep the list small: see
 # docs/licensing.md before adding to it.
 [workspace.dependencies]
-base64 = "0.22"
+base64 = "0.23"
 clap = { version = "4", default-features = false, features = ["std", "help", "usage", "error-context", "suggestions", "string"] }
 clap_complete = "4"
 flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
