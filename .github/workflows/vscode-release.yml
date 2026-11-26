@@ -34,7 +34,7 @@ jobs:
       # Marketplace and Open VSX tokens, and a cache restored into it could
       # have been written by any branch (setup-node's advice for privileged
       # workflows).
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: actions-rust-lang/setup-rust-toolchain@v2
         with:
           rustflags: ""
           cache: false
