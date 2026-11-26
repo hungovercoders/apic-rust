@@ -9,5 +9,16 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+apic-demoapi = { path = "../../crates/demoapi" }
+apic-gocompat = { path = "../../crates/gocompat" }
+apic-httpc = { path = "../../crates/httpc" }
+apic-httpd = { path = "../../crates/httpd" }
+apic-httpfile = { path = "../../crates/httpfile" }
+apic-output = { path = "../../crates/output" }
+apic-project = { path = "../../crates/project" }
+apic-runner = { path = "../../crates/runner" }
+apic-session = { path = "../../crates/session" }
+apic-ui = { path = "../../crates/ui" }
+tempfile.workspace = true
 
 [dev-dependencies]

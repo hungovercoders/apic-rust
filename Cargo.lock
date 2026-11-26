@@ -1399,6 +1399,19 @@ checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 [[package]]
 name = "shot"
 version = "0.0.0"
+dependencies = [
+ "apic-demoapi",
+ "apic-gocompat",
+ "apic-httpc",
+ "apic-httpd",
+ "apic-httpfile",
+ "apic-output",
+ "apic-project",
+ "apic-runner",
+ "apic-session",
+ "apic-ui",
+ "tempfile",
+]
 
 [[package]]
 name = "simd-adler32"
