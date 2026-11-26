@@ -11,6 +11,7 @@ publish.workspace = true
 [dependencies]
 apic-httpc = { path = "../httpc" }
 base64.workspace = true
+http-body-util.workspace = true
 hyper.workspace = true
 hyper-util.workspace = true
 rustls.workspace = true

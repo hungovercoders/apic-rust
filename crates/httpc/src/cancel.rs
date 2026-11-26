@@ -50,8 +50,20 @@ impl CancelToken {
         *guard
     }
 
-    /// Resolves once the token is cancelled.
-    pub(crate) async fn cancelled(&self) {
+    /// Blocks until the token is cancelled.
+    pub fn wait(&self) {
+        let guard = self.inner.cancelled.lock().unwrap_or_else(|e| e.into_inner());
+        drop(
+            self.inner
+                .cond
+                .wait_while(guard, |cancelled| !*cancelled)
+                .unwrap_or_else(|e| e.into_inner()),
+        );
+    }
+
+    /// Resolves once the token is cancelled: the same wait for
+    /// asynchronous code, which is how the client and the server watch it.
+    pub async fn cancelled(&self) {
         loop {
             let notified = self.inner.notify.notified();
             tokio::pin!(notified);

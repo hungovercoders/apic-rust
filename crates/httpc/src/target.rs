@@ -31,11 +31,6 @@ impl Target {
     pub fn host_port(&self) -> String {
         join_host_port(&self.host, self.port)
     }
-
-    /// The URL without userinfo or fragment.
-    pub fn url(&self) -> String {
-        format!("{}://{}{}", self.scheme, self.authority, self.path_and_query)
-    }
 }
 
 /// `host:port`, with an IPv6 address in brackets.
@@ -221,7 +216,6 @@ mod tests {
         assert_eq!(t.host_port(), "[::1]:8080");
         let t = parse_target("http://example.com?x=1").unwrap();
         assert_eq!((t.port, t.path_and_query.as_str()), (80, "/?x=1"));
-        assert_eq!(t.url(), "http://example.com/?x=1");
     }
 
     #[test]
