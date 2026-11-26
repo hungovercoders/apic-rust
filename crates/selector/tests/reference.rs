@@ -7,7 +7,11 @@ use apic_selector::{check, select_value, Headers, Response};
 
 #[test]
 fn reference_selections() {
-    let data = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/reference.json")).unwrap();
+    let data = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/testdata/reference.json"
+    ))
+    .unwrap();
     let rows: serde_json::Value = serde_json::from_str(&data).unwrap();
     let headers = Headers::from_iter([
         ("X", "one"),
@@ -33,11 +37,19 @@ fn reference_selections() {
             Ok(None) => (String::new(), "string".to_string(), false, String::new()),
             Err(e) => (String::new(), "string".to_string(), false, e.to_string()),
         };
-        let err = format!("{err}|{}", check(&sel).err().map(|e| e.to_string()).unwrap_or_default());
+        let err = format!(
+            "{err}|{}",
+            check(&sel).err().map(|e| e.to_string()).unwrap_or_default()
+        );
         let want_err = field("Err");
         // The reason a regex does not compile is worded by the engine.
-        let same_err = err == want_err || (want_err.contains("bad regex") && err.contains("bad regex"));
-        if text != field("Text") || kind != field("Kind") || ok != row["OK"].as_bool().unwrap() || !same_err {
+        let same_err =
+            err == want_err || (want_err.contains("bad regex") && err.contains("bad regex"));
+        if text != field("Text")
+            || kind != field("Kind")
+            || ok != row["OK"].as_bool().unwrap()
+            || !same_err
+        {
             failures.push(format!(
                 "{sel} on {body:?}:\n  got  {text:?} {kind} ok={ok} err={err:?}\n  want {:?} {} ok={} err={want_err:?}",
                 field("Text"),
@@ -46,5 +58,10 @@ fn reference_selections() {
             ));
         }
     }
-    assert!(failures.is_empty(), "{} differ:\n{}", failures.len(), failures.join("\n"));
+    assert!(
+        failures.is_empty(),
+        "{} differ:\n{}",
+        failures.len(),
+        failures.join("\n")
+    );
 }

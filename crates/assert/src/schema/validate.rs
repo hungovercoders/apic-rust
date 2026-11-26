@@ -3,8 +3,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use apic_gocompat::quote;
 use serde_json::Value;
 
-use super::gofmt::{display, display_list, display_text, display_value, quoted_list, rat_string};
 use super::resolve::{Draft, Resolved};
+use super::show::{display, display_list, display_text, display_value, quoted_list, rat_string};
 use super::Id;
 
 /// What a schema and the schemas it applied in place (`allOf`, `$ref` and

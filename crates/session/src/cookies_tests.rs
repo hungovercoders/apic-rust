@@ -346,24 +346,40 @@ fn a_damaged_cookie_file_names_itself() {
 /// request gets and the cookies the jar keeps.
 #[test]
 fn reference_scenarios() {
-    let data = fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/cookie_reference.json")).unwrap();
+    let data = fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/testdata/cookie_reference.json"
+    ))
+    .unwrap();
     let scenarios: serde_json::Value = serde_json::from_str(&data).unwrap();
     let mut failures = Vec::new();
     for (n, sc) in scenarios.as_array().unwrap().iter().enumerate() {
         let j = Jar::new_memory();
         let e = j.http("dev");
         for step in sc["Steps"].as_array().unwrap() {
-            let lines: Vec<&str> = step["Lines"].as_array().unwrap().iter().map(|l| l.as_str().unwrap()).collect();
+            let lines: Vec<&str> = step["Lines"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|l| l.as_str().unwrap())
+                .collect();
             e.set_cookie_headers(&must_url(step["URL"].as_str().unwrap()), &lines);
         }
-        for (q, want) in sc["Queries"].as_array().unwrap().iter().zip(sc["Headers"].as_array().unwrap()) {
+        for (q, want) in sc["Queries"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .zip(sc["Headers"].as_array().unwrap())
+        {
             let (q, want) = (q.as_str().unwrap(), want.as_str().unwrap());
             if want.starts_with('!') {
                 continue; // not a URL a request can be made to
             }
             let got = e.cookie_header(&must_url(q), None).unwrap_or_default();
             if got != want {
-                failures.push(format!("scenario {n}, {q}:\n  got  {got:?}\n  want {want:?}"));
+                failures.push(format!(
+                    "scenario {n}, {q}:\n  got  {got:?}\n  want {want:?}"
+                ));
             }
         }
         let stored: Vec<String> = j
@@ -376,7 +392,9 @@ fn reference_scenarios() {
                     c.value,
                     c.domain,
                     c.path,
-                    c.expires.map(|t| t.format_rfc3339_nano()).unwrap_or_default(),
+                    c.expires
+                        .map(|t| t.format_rfc3339_nano())
+                        .unwrap_or_default(),
                     c.secure,
                     c.http_only,
                     c.host_only
@@ -403,8 +421,23 @@ fn reference_scenarios() {
             })
             .collect();
         if stored != want {
-            failures.push(format!("scenario {n} stored:\n  got  {stored:#?}\n  want {want:#?}"));
+            failures.push(format!(
+                "scenario {n} stored:\n  got  {stored:#?}\n  want {want:#?}"
+            ));
         }
     }
-    assert!(failures.is_empty(), "{} differ:\n{}", failures.len(), failures.join("\n"));
+    assert!(
+        failures.is_empty(),
+        "{} differ:\n{}",
+        failures.len(),
+        failures.join("\n")
+    );
+}
+
+#[test]
+fn jars_cross_threads() {
+    fn assert_send_sync<T: Send + Sync>() {}
+    assert_send_sync::<Jar>();
+    assert_send_sync::<crate::EnvJar>();
+    assert_send_sync::<crate::Store>();
 }

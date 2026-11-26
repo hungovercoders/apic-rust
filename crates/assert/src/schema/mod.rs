@@ -3,8 +3,8 @@
 //! and a value is validated against it. A reference to another file is
 //! refused. A failure says where in the schema it happened and why.
 
-mod gofmt;
 mod resolve;
+mod show;
 mod uri;
 mod validate;
 
