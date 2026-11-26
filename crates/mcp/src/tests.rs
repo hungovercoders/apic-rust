@@ -1099,3 +1099,61 @@ fn stdio_sessions() {
         Err("JSON-RPC batching is not supported in 2025-06-18 and later (request version: 2025-06-18)".to_string())
     );
 }
+
+/// A slow call does not hold up another, and `notifications/cancelled`
+/// stops it: it answers with the cancelled error instead of waiting.
+#[test]
+fn calls_run_side_by_side_and_can_be_cancelled() {
+    let mut mux = Mux::new();
+    mux.handle_fn("GET /slow", |_| {
+        std::thread::sleep(std::time::Duration::from_secs(5));
+        Response::json(200, "{}")
+    })
+    .unwrap();
+    let srv = TestServer::new(mux.into_handler());
+    let tmp = tempfile::tempdir().unwrap();
+    write(
+        tmp.path(),
+        "api.http",
+        "### slow\n# @name slow\nGET {{baseUrl}}/slow\n",
+    );
+    write(
+        tmp.path(),
+        "http-client.env.json",
+        &format!(r#"{{"dev":{{"baseUrl":"{}"}}}}"#, srv.url()),
+    );
+    let server = new(config(tmp.path(), "dev")).unwrap();
+    let client = TestClient::connect(&server);
+    let session = Arc::new(client.session);
+
+    let started = std::time::Instant::now();
+    let slow = {
+        let session = session.clone();
+        std::thread::spawn(move || {
+            let line = r#"{"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"run_request","arguments":{"name":"slow"}}}"#;
+            session.handle(&decode_message(line).unwrap()).unwrap()
+        })
+    };
+    std::thread::sleep(std::time::Duration::from_millis(200));
+    let send = |line: &str| session.handle(&decode_message(line).unwrap());
+    assert_eq!(
+        send(r#"{"jsonrpc":"2.0","id":8,"method":"ping"}"#).unwrap(),
+        r#"{"jsonrpc":"2.0","id":8,"result":{}}"#
+    );
+    assert_eq!(
+        send(r#"{"jsonrpc":"2.0","method":"notifications/cancelled","params":{"requestId":7}}"#),
+        None
+    );
+    let response: Value = serde_json::from_str(&slow.join().unwrap()).unwrap();
+    assert!(
+        started.elapsed() < std::time::Duration::from_secs(4),
+        "{:?}",
+        started.elapsed()
+    );
+    assert_eq!(response["id"], 7);
+    assert_eq!(response["result"]["isError"], true, "{response}");
+    assert_eq!(
+        response["result"]["structuredContent"]["error"]["code"], "E305",
+        "{response}"
+    );
+}

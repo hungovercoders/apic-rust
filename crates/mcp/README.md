@@ -80,8 +80,9 @@ as recorded.
 - Calls already read when stdin ends are given two seconds to answer
   (they used to be dropped, or not, by chance).
 - The sessionless 2026-07-28 protocol (`server/discover`, requests that
-  carry their own protocol version in `_meta`) is refused rather than
-  served; every released client starts with `initialize`.
+  carry their own protocol version in `_meta`) is not served: on stdio
+  such a request is treated like any other, and over HTTP it is refused
+  as before. Every released client starts with `initialize`.
 - Lists are never paginated (the old page size was 1000 entries).
 - A payload that is not JSON is described in the JSON reader's own words
   over HTTP (`malformed payload: unmarshaling jsonrpc message: ...`), and

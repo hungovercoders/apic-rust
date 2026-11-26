@@ -9,6 +9,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
+name = "agenteval"
+version = "0.0.0"
+
+[[package]]
 name = "aho-corasick"
 version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -435,6 +439,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600"
 
 [[package]]
+name = "changelog"
+version = "0.0.0"
+
+[[package]]
+name = "clidocs"
+version = "0.0.0"
+
+[[package]]
 name = "core-foundation"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -501,10 +513,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "episodes"
+version = "0.0.0"
+
+[[package]]
 name = "equivalent"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "00d174d5400e5e8fd687ad1049e2f578285fa914201b1af7e8b112a4546bd826"
+
+[[package]]
+name = "errdocs"
+version = "0.0.0"
 
 [[package]]
 name = "errno"
@@ -878,6 +898,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "learncheck"
+version = "0.0.0"
+
+[[package]]
 name = "libc"
 version = "0.2.191"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -988,6 +1012,10 @@ name = "r-efi"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
+
+[[package]]
+name = "record"
+version = "0.0.0"
 
 [[package]]
 name = "regex"
@@ -1122,6 +1150,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "schemas"
+version = "0.0.0"
+
+[[package]]
 name = "security-framework"
 version = "3.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1218,10 +1250,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 
 [[package]]
+name = "shot"
+version = "0.0.0"
+
+[[package]]
 name = "simd-adler32"
 version = "0.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea"
+
+[[package]]
+name = "skilldocs"
+version = "0.0.0"
 
 [[package]]
 name = "slab"
@@ -1278,6 +1318,10 @@ dependencies = [
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "tapes"
+version = "0.0.0"
 
 [[package]]
 name = "tempfile"

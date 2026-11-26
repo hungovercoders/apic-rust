@@ -1,6 +1,19 @@
 [workspace]
 resolver = "2"
-members = ["crates/*"]
+members = [
+    "crates/*",
+    "scripts/agenteval",
+    "scripts/changelog",
+    "scripts/clidocs",
+    "scripts/episodes",
+    "scripts/errdocs",
+    "scripts/internal/record",
+    "scripts/learncheck",
+    "scripts/schemas",
+    "scripts/shot",
+    "scripts/skilldocs",
+    "scripts/tapes",
+]
 
 [workspace.package]
 version = "0.0.0"
@@ -20,7 +33,6 @@ clap = { version = "4", default-features = false, features = ["std", "help", "us
 clap_complete = "4"
 flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
 getrandom = "0.2"
-gherkin = { version = "0.16", default-features = false, features = ["parser"] }
 gjson = "0.8"
 hmac = "0.12"
 http-body-util = "0.1"

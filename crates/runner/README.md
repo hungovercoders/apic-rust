@@ -54,7 +54,7 @@ std::process::exit(exit_code(err.as_ref()));
 | `auth_source(&Request)` | `(raw, source)`, both empty when none |
 | `missing_error(&Arc<Request>, &[String])` | The E101 error with its hints |
 | `render(text)` | Placeholders in free text; unknown ones are `Error::Missing` (`err.missing()`) |
-| `capture`, `captured`, `set_var`, `vars`, `results`, `set_result` | The capture layer, the --var layer and the named responses (`HashMap<String, Arc<Result>>`, each as it stood when its request finished) |
+| `capture`, `captured`, `set_var`, `unset_var`, `vars`, `results`, `set_result` | The capture layer, the --var layer (`unset_var` takes back a `set_var`) and the named responses (`HashMap<String, Arc<Result>>`, each as it stood when its request finished) |
 | `project_file(rel)` | A file confined to the project root |
 | `current_time()` | The runner's clock (`now`, else the system's) |
 | `local_time(Time)` | Free function: the same instant with the machine's zone offset, for showing a time locally |
