@@ -3,7 +3,7 @@
 # port 8089, writes apic-demo and the files this lesson's runnable blocks
 # create into a scratch directory, and runs vhs on every tape there;
 # `task tapes:check` validates the syntax. Just this one:
-#   go run ./scripts/tapes -only 03
+#   cargo run -q -p tapes -- -only 03
 Output docs/learn/tapes/03.gif
 Set Shell "bash"
 Set FontSize 16

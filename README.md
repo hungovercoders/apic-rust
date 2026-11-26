@@ -7,7 +7,7 @@
 
 <div align="center">
 
-[![CI](https://github.com/hungovercoders/apic-rust/actions/workflows/ci.yml/badge.svg)](https://github.com/hungovercoders/apic-rust/actions/workflows/ci.yml) [![Docs](https://github.com/hungovercoders/apic-rust/actions/workflows/docs.yml/badge.svg)](https://apic.sh/) [![Latest release](https://img.shields.io/github/v/release/hungovercoders/apic-rust?color=7c5cff&label=release)](https://github.com/hungovercoders/apic-rust/releases/latest) ![Go 1.26+](https://img.shields.io/badge/go-1.26%2B-00ADD8) [![MIT licence](https://img.shields.io/badge/licence-MIT-7c5cff)](LICENSE)
+[![CI](https://github.com/hungovercoders/apic-rust/actions/workflows/ci.yml/badge.svg)](https://github.com/hungovercoders/apic-rust/actions/workflows/ci.yml) [![Docs](https://github.com/hungovercoders/apic-rust/actions/workflows/docs.yml/badge.svg)](https://apic.sh/) [![Latest release](https://img.shields.io/github/v/release/hungovercoders/apic-rust?color=7c5cff&label=release)](https://github.com/hungovercoders/apic-rust/releases/latest) ![Rust 1.85+](https://img.shields.io/badge/rust-1.85%2B-DEA584) [![MIT licence](https://img.shields.io/badge/licence-MIT-7c5cff)](LICENSE)
 
 </div>
 
@@ -29,7 +29,7 @@ apic mock openapi.yaml           # a mock of your own spec
 
 ```sh
 brew install hungovercoders/tap/apic                              # macOS / Linux
-go install github.com/hungovercoders/apic-rust/cmd/apic@latest         # Go 1.26+
+cargo install --git https://github.com/hungovercoders/apic-rust apic   # Rust 1.85+
 curl -fsSL https://raw.githubusercontent.com/hungovercoders/apic-rust/main/install.sh | sh
 irm https://raw.githubusercontent.com/hungovercoders/apic-rust/main/install.ps1 | iex   # Windows
 ```
@@ -89,4 +89,4 @@ Report a credential that escapes privately ([SECURITY.md](SECURITY.md)).
 ## Licence
 
 [MIT](LICENSE); every release archive, package and image ships the notices
-for Go and the modules the binary links.
+for Rust and the crates the binary links.

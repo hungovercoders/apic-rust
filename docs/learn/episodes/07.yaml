@@ -130,7 +130,7 @@ shots:
       Type "rm apic-demo/features/undefined.feature" Enter Sleep 1s
     say:
       - "A misspelt or invented step is never silently skipped. One undefined, one skipped, exit code one. An undefined step counts as a failure, and dash dash steps is where to look for the wording that exists."
-      - "There is no way to add step code, and that is the point. The vocabulary plus your phrases is the whole language, so a feature is always readable by someone who knows neither Go nor apic."
+      - "There is no way to add step code, and that is the point. The vocabulary plus your phrases is the whole language, so a feature is always readable by someone who knows neither Rust nor apic."
 
   - chapter: Reports
     clip: reports

@@ -60,7 +60,7 @@ Start with [lesson 0](00-what-is-apic.md), or jump straight to
 Nothing. Lesson 1 installs apic. If you want a head start:
 
 ```sh
-go install github.com/hungovercoders/apic-rust/cmd/apic@latest   # or see Getting started
+cargo install --git https://github.com/hungovercoders/apic-rust apic   # or see Getting started
 apic ui --demo
 ```
 

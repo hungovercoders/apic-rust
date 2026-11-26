@@ -11,7 +11,7 @@
 # from (put it in place of `main` to see that version). A knob the CLI reads
 # takes effect once the slopstopper-cli pinned in mise.toml has it.
 
-# apic is a Go CLI, but website/ is apic.sh, a Starlight site deployed by
+# apic is a Rust CLI, but website/ is apic.sh, a Starlight site deployed by
 # Cloudflare Workers Builds, so the browser checks apply: `ui`. The site
 # builds from website/ (the root package.json's `build` script) and
 # mise.toml exports SERVE_ROOT=website/dist for the bundled static server.
@@ -62,10 +62,9 @@ hygiene:
     # `task notices` generates (gitignored).
     ignore_refs: ['.apic/*', 'THIRD_PARTY_NOTICES.md']
   complexity:
-    # 30 is golangci-lint's gocyclo default, and no function in
-    # the tree is above it. Never raise it: split the function instead.
-    # lizard counts every `case`, which is why 15 never fitted a
-    # switch-driven CLI.
+    # 30 is the ceiling for a function in the tree. Never raise it:
+    # split the function instead. lizard counts every `match` arm,
+    # which is why 15 never fitted a match-driven CLI.
     max_ccn: 30
 
 # Any check you don't want, by workflow filename. A profile drops whole

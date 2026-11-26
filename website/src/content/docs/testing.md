@@ -82,7 +82,7 @@ captured values available to later steps. The phrase's parameters apply to
 that request only; they are not visible to later steps. `apic validate` reports a phrase
 that could match the same text as another phrase or as a built-in step
 (for example `# @step I run {x}`, or `I do {x}` next to `I {x} foo`, which
-both match "I do foo"), since godog would treat such steps as ambiguous.
+both match "I do foo"), since the runner would treat such steps as ambiguous.
 The check is deliberately cautious and may flag a pair that would not
 collide in practice; rephrase one of them. A phrase may declare at most six
 parameters. `apic list` and `describe`

@@ -1,6 +1,6 @@
 ---
 title: "Licence"
-description: "apic is MIT licensed; what that lets you do, and the licences of the modules it ships with."
+description: "apic is MIT licensed; what that lets you do, and the licences of the crates it ships with."
 ---
 apic is released under the **MIT Licence**. The full text lives in
 [`LICENSE`](https://github.com/hungovercoders/apic-rust/blob/main/LICENSE) in the
@@ -13,27 +13,25 @@ understand that it comes with no warranty.
 
 ## Third-party code
 
-apic is a single static binary, so the Go standard library and runtime and the
-open source modules it is built from travel inside it. Each keeps its own
-licence. All of them are permissive except three MPL-2.0 modules, whose
-copyleft is file-level:
+apic is a single static binary, so the Rust standard library and the
+open source crates it is built from travel inside it. Each keeps its own
+licence, and all of them are permissive:
 
 | Licence | What |
 |---|---|
-| MIT | most modules, including godog, gjson, lipgloss and termenv |
-| BSD-3-Clause | Go itself, `golang.org/x/...`, `github.com/google/uuid`, `spf13/pflag`, `yosida95/uritemplate` |
-| Apache-2.0 | `spf13/cobra` and `inconshreveable/mousetrap` (cobra's, in the Windows builds) |
-| MIT and Apache-2.0 | `gopkg.in/yaml.v3` (the parts ported from libyaml are MIT, the rest Apache-2.0) and `modelcontextprotocol/go-sdk` (moving from MIT to Apache-2.0, so its code is under one or the other) |
-| MPL-2.0 | the HashiCorp modules godog pulls in (`go-memdb`, `go-immutable-radix`, `golang-lru`) |
+| MIT or Apache-2.0, at your choice | Rust's standard library and most crates, including `clap`, `serde`, `regex`, `url` and `uuid` |
+| MIT | `hyper`, `tokio`, `gjson`, `serde_yaml_ng` and `include_dir`, among others |
+| ISC, or Apache-2.0 and ISC | the TLS stack's certificate verification (`rustls-webpki`, `untrusted`) and its cryptography (`ring`) |
+| BSD-3-Clause | `subtle` (constant-time comparison, under the TLS stack) |
+| Unicode-3.0 | the ICU crates `url` uses for international domain names, which carry Unicode data tables |
 
-Nothing here is copyleft in a way that reaches your use of apic or your own
-code: MPL-2.0 applies only to those modules' own files, which apic does not
-modify. It does ask that anyone who ships them in a binary says where their
-source is, which the notices file does for every module.
+Nothing here is copyleft, so none of it reaches your use of apic or your own
+code. The build enforces the list: a crate under any other licence fails CI
+before it can ship.
 
 `THIRD_PARTY_NOTICES.md` reproduces each licence in full, along with the
-`NOTICE` and `PATENTS` files some modules ship, and links each module's exact
-source on the Go module proxy. Every release archive and package contains it,
+`NOTICE` files some crates ship, and links each crate's exact version on
+crates.io, where its source is. Every release archive and package contains it,
 and the container image has it in `/usr/share/doc/apic` beside `LICENSE` and
 `CA-CERTIFICATES.md`. The image's CA bundle is Mozilla's certificate store
 (MPL-2.0) as Alpine packages it, and that file names the package and its
@@ -43,7 +41,7 @@ source. Regenerate the notices from a checkout at any time:
 task notices
 ```
 
-The generator walks the module set for **every** released platform, so the
+The generator walks the crate set for **every** released platform, so the
 notices are complete whichever archive you downloaded.
 
 The VS Code extension is MIT too. It bundles a handful of npm packages (the

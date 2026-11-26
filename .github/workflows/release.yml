@@ -65,14 +65,14 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # main's history, to find the commit to tag
-      - uses: actions/setup-go@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
+          rustflags: ""
       - name: Tag the release and start it
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag="v$(go run ./scripts/changelog -latest)"
+          tag="v$(cargo run -q --locked -p changelog -- -latest)"
           # 0: tagged already; 2: no such tag; anything else is a failed
           # lookup, which must not be read as "not tagged".
           tagged() {
@@ -120,7 +120,7 @@ jobs:
           fi
           # The first commit on main since the section was dated at which
           # the release checks pass.
-          commit="$(go run ./scripts/changelog -release-commit "$tag")"
+          commit="$(cargo run -q --locked -p changelog -- -release-commit "$tag")"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a "$tag" -m "apic ${tag#v}" "$commit"
@@ -163,9 +163,21 @@ jobs:
             echo "::error::HOMEBREW_TAP_GITHUB_TOKEN is not set: add a fine-grained PAT with contents write on hungovercoders/homebrew-tap as a repository secret"
             exit 1
           fi
-      - uses: actions/setup-go@v7
+      # The toolchain rust-toolchain.toml pins. No cache: this job signs
+      # and publishes, and a cache restored into it could have been written
+      # by any branch.
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
+          rustflags: ""
+          cache: false
+      # goreleaser cross-compiles every target with cargo-zigbuild (see
+      # .goreleaser.yaml): zig is the C compiler and the linker for the
+      # targets this runner is not. The pip package brings zig with it.
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install "cargo-zigbuild==0.24.1"
+      - run: rustup target add x86_64-unknown-linux-musl aarch64-unknown-linux-musl x86_64-apple-darwin aarch64-apple-darwin x86_64-pc-windows-gnu aarch64-pc-windows-gnullvm
       # The release notes are this version's section of CHANGELOG.md,
       # written by hand in the pull requests that made the release (see
       # docs/releasing.md). The tag must be the newest dated section, no
@@ -173,7 +185,7 @@ jobs:
       # release published before it: fail here, with nothing built, rather
       # than publish a release that says nothing or roll the docs back.
       - name: The changelog has this version's notes
-        run: go run ./scripts/changelog -release "$TAG" > "$RUNNER_TEMP/release-notes.md"
+        run: cargo run -q --locked -p changelog -- -release "$TAG" > "$RUNNER_TEMP/release-notes.md"
       # cosign signs checksums.txt; syft builds the per-archive SBOMs. Neither
       # ships with the runner or with goreleaser-action, so both are installed
       # here rather than silently skipped.
@@ -230,9 +242,9 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: main
-      - uses: actions/setup-go@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
+          rustflags: ""
       - name: Name the release in the docs
         run: |
           git config user.name "github-actions[bot]"
@@ -242,7 +254,7 @@ jobs:
           for attempt in 1 2 3; do
             git fetch -q origin main
             git reset -q --hard origin/main
-            go run ./scripts/changelog -publish "$TAG"
+            cargo run -q --locked -p changelog -- -publish "$TAG"
             if git diff --quiet; then
               echo "the docs name $TAG already"
               exit 0
@@ -254,7 +266,7 @@ jobs:
             fi
             sleep $((attempt * 5))
           done
-          echo "::error::could not push the docs for $TAG to main; run go run ./scripts/changelog -publish $TAG on main and commit the result"
+          echo "::error::could not push the docs for $TAG to main; run cargo run -q -p changelog -- -publish $TAG on main and commit the result"
           exit 1
 
   # The MCP registry (registry.modelcontextprotocol.io) lists the server the

@@ -77,7 +77,7 @@ export function stepMessage(st: StepOutcome): string {
 }
 
 /**
- * One outcome per scenario (per example row for an outline). godog emits
+ * One outcome per scenario (per example row for an outline). The cucumber-JSON report has
  * a background element before each scenario it applies to; its steps are
  * folded into that scenario.
  */

@@ -3,7 +3,7 @@
 .apic/
 http-client.private.env.json
 !examples/**/http-client.private.env.json
-coverage.out
+lcov.info
 /apic
 /apic.exe
 /THIRD_PARTY_NOTICES.md
@@ -13,7 +13,7 @@ coverage.out
 /voice/
 
 # The report tests write these beside the goldens when they differ.
-internal/report/testdata/*.got
+crates/report/testdata/*.got
 
 # lychee link-check cache (task docs:check)
 .lycheecache

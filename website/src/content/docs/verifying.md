@@ -9,7 +9,7 @@ trust it:
 |---|---|
 | `checksums.txt` | SHA-256 of every archive and every `.deb`, `.rpm` and `.apk` package in the release |
 | `checksums.txt.sig` + `checksums.txt.pem` | a [cosign](https://docs.sigstore.dev/) signature over `checksums.txt`, and the certificate it was made with |
-| `<archive>.sbom.json` | an SPDX 2.3 SBOM listing every Go module compiled into that archive |
+| `<archive>.sbom.json` | an SPDX 2.3 SBOM listing every crate compiled into that archive |
 
 `install.sh` already checks the archive against `checksums.txt` and refuses to
 install on a mismatch. That catches a corrupted or truncated download. It does
@@ -79,9 +79,9 @@ docker buildx imagetools inspect ghcr.io/hungovercoders/apic-rust:0.2.0 --format
 
 ## Read the SBOM
 
-Each archive has a matching `<archive>.sbom.json` listing the module versions
+Each archive has a matching `<archive>.sbom.json` listing the crate versions
 compiled into it, which is more reliable than reading this repository's
-`go.mod`: it describes the artifact you actually downloaded.
+`Cargo.lock`: it describes the artifact you actually downloaded.
 
 ```sh
 curl -fsSLO "$BASE/apic_0.2.0_linux_amd64.tar.gz.sbom.json"
@@ -90,8 +90,8 @@ curl -fsSLO "$BASE/apic_0.2.0_linux_amd64.tar.gz.sbom.json"
 jq -r '.packages[] | "\(.name) \(.versionInfo)"' apic_0.2.0_linux_amd64.tar.gz.sbom.json | sort
 ```
 
-The module set differs by platform — cobra pulls in `mousetrap` on Windows only
-— which is why the SBOM is per archive rather than per release.
+The crate set differs by platform — the terminal, TLS root and socket crates
+are not the same on Linux, macOS and Windows — which is why the SBOM is per archive rather than per release.
 
 Tools that consume SPDX (Grype, Trivy, Dependency-Track) can scan it directly:
 
@@ -102,7 +102,7 @@ grype sbom:apic_0.2.0_linux_amd64.tar.gz.sbom.json
 ## Licences
 
 Every archive also contains `THIRD_PARTY_NOTICES.md`, reproducing the full
-licence text of every module compiled into that binary, alongside apic's own
+licence text of every crate compiled into that binary, alongside apic's own
 `LICENSE`. Regenerate it from a checkout with `task notices`.
 
 ## If verification fails

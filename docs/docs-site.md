@@ -103,7 +103,7 @@ declares no environment `url` on purpose: the slopstopper checks that run on
   dated section do not, and `release.yml` moves the published release
   after each release. See `releasing.md`.
 - `task docs:errors`: regenerate the site's `errors.md` from
-  `runner.Catalogue` (`scripts/errdocs`; a test fails when it is stale).
+  the runner's catalogue (`scripts/errdocs`; a test fails when it is stale).
 - `task skill`: regenerate `skills/apic/references/cheatsheet.md` from the
   site's `cheatsheet.md` with absolute links (`scripts/skilldocs`; a test
   fails when it is stale). Each `SKILL.md` under `skills/` (`apic`,
@@ -135,7 +135,7 @@ declares no environment `url` on purpose: the slopstopper checks that run on
   `assets/demo.tape` in this directory) into `dist/tapes` with
   `scripts/tapes`, which serves the demo API on 8089 and gives each tape a
   scratch directory holding the files its lesson's runnable blocks create
-  (the `setup` table in `scripts/tapes/main.go` says which); needs vhs,
+  (the `setup` table in `scripts/tapes/src/main.rs` says which); needs vhs,
   ttyd, ffmpeg and jq, which the tapes pipe through. `task tapes:check`
   validates the tapes' syntax with vhs alone, as CI does; VHS strings take no
   backslash escapes, so a command that needs both quote kinds goes in
@@ -150,7 +150,7 @@ declares no environment `url` on purpose: the slopstopper checks that run on
   the title, chapters and description from `_episode-template.md`, the
   narration script and the thumbnail. Needs vhs, ttyd, ffmpeg and a
   chromium. `task episodes:check` validates the shot lists and tapes with
-  vhs alone, as CI does; `go test` checks the shot lists without it.
+  vhs alone, as CI does; `cargo test -p episodes` checks the shot lists without it.
 - The voice goes on in one of two ways. Recorded line by line (or by a
   text-to-speech tool that writes one file a line), the clips go in a
   directory under the episode's number, named by the SRT cue number with

@@ -1,0 +1,34 @@
+# cargo-deny: the permissive-only rule of docs/licensing.md, enforced.
+# `cargo deny check licenses` (task licences, and the licences job in CI)
+# fails when a crate in the dependency graph of any release target carries
+# a licence that is not listed here. Ids are SPDX (https://spdx.org/licenses/).
+[graph]
+targets = [
+    { triple = "x86_64-unknown-linux-musl" },
+    { triple = "aarch64-unknown-linux-musl" },
+    { triple = "x86_64-apple-darwin" },
+    { triple = "aarch64-apple-darwin" },
+    { triple = "x86_64-pc-windows-gnu" },
+    { triple = "aarch64-pc-windows-gnullvm" },
+]
+all-features = false
+
+[licenses]
+# A crate offered under a choice ("MIT OR Apache-2.0") passes when any one
+# of its choices is listed. Adding a licence here is a decision about what
+# apic distributes: read docs/licensing.md first.
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    # The Unicode data tables in the unicode-* and ICU crates.
+    "Unicode-3.0",
+]
+confidence-threshold = 0.8
+
+[licenses.private]
+# The workspace's own crates are apic, under LICENSE, and are not published.
+ignore = true

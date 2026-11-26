@@ -16,80 +16,82 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      # The toolchain rust-toolchain.toml pins, with the registry and
+      # target/ cached. The action would otherwise set RUSTFLAGS to deny
+      # warnings in every build; clippy in the lint job is where they fail.
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
-      - run: go build ./...
-      - run: go test ./...
-      # The race detector is slow on the Windows runner and the suite is
-      # already cross-platform, so one leg carries it.
-      - run: go test -race ./...
-        if: matrix.os == 'ubuntu-latest'
+          rustflags: ""
+      - run: cargo build --workspace --all-targets --locked
+      - run: cargo test --workspace --locked
 
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
-      - run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
-      - run: go vet ./...
+          rustflags: ""
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       # Typos in comments, strings and the docs; .codespellrc says what to skip.
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - run: pip install "codespell==2.4.3" && codespell
-      - uses: golangci/golangci-lint-action@v9
-        with:
-          version: v2.15.0
 
   licences:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
+          rustflags: ""
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deny
       - run: test -f LICENSE || (echo "LICENSE is missing" >&2; exit 1)
-      # Fails if any module compiled into a released binary has no licence file.
+      # Fails if any crate compiled into a released binary has no licence file.
       - run: sh scripts/notices.sh /tmp/THIRD_PARTY_NOTICES.md
-      # Go itself is in every binary, and each module names where its source
-      # is (MPL-2.0 section 3.2(a) requires it for the MPL ones).
+      # Rust's standard library is in every binary, and each crate names
+      # where its source is.
       - run: |
-          grep -q '^## Go standard library and runtime go' /tmp/THIRD_PARTY_NOTICES.md
+          grep -q '^## Rust standard library ' /tmp/THIRD_PARTY_NOTICES.md
           test "$(grep -c '^## ' /tmp/THIRD_PARTY_NOTICES.md)" -eq "$(grep -c '^Source: https://' /tmp/THIRD_PARTY_NOTICES.md)"
+      # Fails if any crate's licence is off the permissive list in deny.toml.
+      - run: cargo deny check licenses
 
   coverage:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
-      - run: go test -coverprofile=coverage.out ./...
-      - run: go tool cover -func=coverage.out | tail -1
+          rustflags: ""
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-llvm-cov
+      - run: cargo llvm-cov --workspace --locked --lcov --output-path lcov.info
+      - run: cargo llvm-cov report --summary-only | tail -1
       - uses: actions/upload-artifact@v7
         with:
           name: coverage
-          path: coverage.out
+          path: lcov.info
 
   vulncheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
-      # Reports known CVEs in the dependency tree, and only those the binary
-      # actually reaches, so a finding here is worth acting on.
-      # setup-go v6+ pins GOTOOLCHAIN=local; the newest govulncheck needs a
-      # newer Go than go.mod asks for, so let go fetch one to build the tool.
-      # The scan itself still runs against the Go in go.mod, which is what
-      # the release binaries are built with.
-      - run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
-        env:
-          GOTOOLCHAIN: auto
+          rustflags: ""
+      # Reports the RustSec advisories that name a crate version in
+      # Cargo.lock, which is what the release binaries are built from. The
+      # dependency list is short, so a finding here is worth acting on.
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit
+      - run: cargo audit
 
   # The course pages and the migration guides on the site (under
   # website/src/content/docs) carry runnable blocks marked with
@@ -99,10 +101,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
-      - run: go run ./scripts/learncheck
+          rustflags: ""
+      - run: cargo run -q --locked -p learncheck
 
   # The course's VHS tapes parse, the lesson tapes and the ones embedded in
   # the episodes' shot lists alike. vhs alone is enough to validate;
@@ -112,16 +114,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          rustflags: ""
+      # vhs is a Go program, installed from source: the one step in this
+      # workflow that needs Go.
       - uses: actions/setup-go@v7
         with:
-          go-version-file: go.mod
-      # vhs wants a newer Go than go.mod pins; let go fetch that toolchain
-      # for this one install rather than raising the module's floor.
+          go-version: stable
+          cache: false
       - run: go install github.com/charmbracelet/vhs@v0.12.1
-        env:
-          GOTOOLCHAIN: auto
-      - run: go run ./scripts/tapes -check
-      - run: go run ./scripts/episodes -check
+      - run: cargo run -q --locked -p tapes -- -check
+      - run: cargo run -q --locked -p episodes -- -check
 
   # The VS Code extension in editors/vscode is the one place Node lives.
   # It is linted, typechecked, bundled, tested in a real VS Code (headless
@@ -134,15 +138,18 @@ jobs:
         working-directory: editors/vscode
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
+          rustflags: ""
       - uses: actions/setup-node@v7
         with:
           node-version: 22.23.4
           cache: npm
           cache-dependency-path: editors/vscode/package-lock.json
-      - run: go build -o "$RUNNER_TEMP/bin/apic" ./cmd/apic
+      - run: |
+          cargo build --release --locked -p apic
+          mkdir -p "$RUNNER_TEMP/bin"
+          cp target/release/apic "$RUNNER_TEMP/bin/apic"
         working-directory: .
       - run: echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
       - run: npm ci
@@ -164,10 +171,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
-      - run: go run ./scripts/shot -out shots
+          rustflags: ""
+      - run: cargo run -q --locked -p shot -- -out shots
       - uses: actions/upload-artifact@v7
         with:
           name: shots
@@ -177,17 +184,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
-      - run: go run ./cmd/apic validate -C examples/httpbin
-      - run: go run ./cmd/apic validate -C examples/github
-      - run: go run ./cmd/apic validate -C examples/spotify
-      - run: go run ./cmd/apic fmt --check -C examples/httpbin
-      - run: go run ./cmd/apic fmt --check -C examples/github
-      - run: go run ./cmd/apic fmt --check -C examples/spotify
+          rustflags: ""
+      - run: cargo run -q --locked -p apic -- validate -C examples/httpbin
+      - run: cargo run -q --locked -p apic -- validate -C examples/github
+      - run: cargo run -q --locked -p apic -- validate -C examples/spotify
+      - run: cargo run -q --locked -p apic -- fmt --check -C examples/httpbin
+      - run: cargo run -q --locked -p apic -- fmt --check -C examples/github
+      - run: cargo run -q --locked -p apic -- fmt --check -C examples/spotify
       - run: |
-          go build -o /tmp/apic ./cmd/apic
+          cargo build --locked -p apic
+          cp target/debug/apic /tmp/apic
           /tmp/apic demo --out /tmp/apic-demo >/tmp/apic-demo.log 2>&1 &
           pid=$!
           trap 'kill $pid 2>/dev/null || true' EXIT
@@ -205,14 +213,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
+          rustflags: ""
+      # The image is FROM scratch, so the binary must be static: the musl
+      # target, as the release builds it. musl-tools is the C compiler the
+      # ring crate's build needs for that target.
       - run: |
+          sudo apt-get update && sudo apt-get install -y musl-tools
+          rustup target add x86_64-unknown-linux-musl
           mkdir -p ctx/linux/amd64
           cp Dockerfile LICENSE ctx/
           sh scripts/notices.sh ctx/THIRD_PARTY_NOTICES.md
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w -X github.com/hungovercoders/apic-rust/internal/cli.Version=ci" -o ctx/linux/amd64/apic ./cmd/apic
+          APIC_VERSION=ci cargo build --release --locked -p apic --target x86_64-unknown-linux-musl
+          cp target/x86_64-unknown-linux-musl/release/apic ctx/linux/amd64/apic
           docker buildx build --load --platform linux/amd64 -t apic:ci ctx
           docker run --rm apic:ci version | grep -F "apic ci"
           # Not root, and TLS roots and /tmp are there.
@@ -232,9 +246,17 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
+          rustflags: ""
+      # goreleaser cross-compiles every release target with cargo-zigbuild
+      # (see .goreleaser.yaml): zig is the C compiler and the linker for the
+      # targets this runner is not. The pip package brings zig with it.
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install "cargo-zigbuild==0.24.1"
+      - run: rustup target add x86_64-unknown-linux-musl aarch64-unknown-linux-musl x86_64-apple-darwin aarch64-apple-darwin x86_64-pc-windows-gnu aarch64-pc-windows-gnullvm
       - uses: goreleaser/goreleaser-action@v7
         with:
           version: "~> v2"

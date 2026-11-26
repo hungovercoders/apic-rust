@@ -1,6 +1,6 @@
 // A light reading of Gherkin, enough to build the Test Explorer tree:
 // feature, background, scenarios, outlines with their example rows, tags
-// and step lines. apic's own parser (godog's) runs the features; this
+// and step lines. apic's own parser (the gherkin crate) reads the features; this
 // only needs to know where things are. Pure: unit-tested under node.
 
 export interface Step {

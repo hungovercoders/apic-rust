@@ -81,7 +81,7 @@
   The generator's tests also check the file's shape (Unreleased first, a
   date on every release, newest first, a link reference for each
   version). A new place in the docs that names the current release goes
-  into `Pins` in `scripts/changelog/site.go`, not into the page by hand;
+  into `Pins` in `scripts/changelog/src/site.rs`, not into the page by hand;
   a pin whose phrase is reworded fails the test rather than keeping the old
   version. goreleaser's own commit-list changelog is left configured but
   never used: it listed every commit since the repository began.
@@ -92,18 +92,27 @@
   so one signature covers the release; verifying is a two-step chain,
   documented on the site's `verifying.md`.
 - Each archive gets an SPDX 2.3 SBOM from syft, per archive rather than per
-  release because the module set differs by platform (cobra pulls in
-  `mousetrap` on Windows only).
+  release because the crate set differs by platform (the terminal, TLS
+  root and socket crates are not the same on Linux, macOS and Windows).
+- goreleaser builds with its Rust builder (`builder: rust`), running
+  `cargo zigbuild` for six target triples on the one Linux runner: zig is
+  the C compiler and linker for the targets the runner is not, and
+  `release.yml` installs it with cargo-zigbuild and adds the targets with
+  rustup. The Linux targets are musl, so those binaries are static, which
+  the `scratch` image depends on. goreleaser maps each triple to the
+  `linux`/`darwin`/`windows` and `amd64`/`arm64` the archive names use.
+  The version reaches the binary through the `APIC_VERSION` environment
+  variable, which the cli crate reads at compile time.
 - `cosign` and `syft` are installed by `release.yml`; neither ships with the
   runner or with goreleaser-action. goreleaser tries to sign even on a
   snapshot and fails hard without cosign, so `task snapshot` passes
   `--skip=sign,sbom` — a local snapshot is a build sanity check, not a
   release.
 - Before merging a release pull request: the changelog section above,
-  `task check`, then `task snapshot` to prove archive names, contents and
-  version injection.
+  `task check`, then `task snapshot` (which needs goreleaser, zig and cargo-zigbuild on PATH)
+  to prove archive names, contents and version injection.
   `apic version` from an extracted archive must report the version, not
-  `dev` — a typo in the ldflags path fails silently.
+  `dev` — a misspelt `APIC_VERSION` in `.goreleaser.yaml` fails silently.
 - The image `ghcr.io/hungovercoders/apic-rust` is `Dockerfile` built by
   goreleaser's `dockers_v2` for linux/amd64 and linux/arm64: the binary on
   `scratch` with Alpine's CA bundle and a `/tmp`, laid out by an Alpine

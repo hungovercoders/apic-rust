@@ -298,13 +298,13 @@ You can implement step definitions for undefined steps with these snippets:
 exit 1
 ```
 
-(The snippets it offers are godog's, the Gherkin engine inside apic, and
-are not something apic can use.)
+(The snippets it offers are the kind Gherkin runners print for step code,
+and are not something apic can use.)
 
 An undefined step counts as a failure, and `--steps` is where to look for
 the wording that exists. There is no way to add step code, and that is the
 point: the vocabulary plus your phrases is the whole language, so a
-feature is always readable by someone who knows neither Go nor apic.
+feature is always readable by someone who knows neither Rust nor apic.
 
 ### 8. Reports
 

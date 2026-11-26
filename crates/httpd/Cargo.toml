@@ -1,6 +1,6 @@
 [package]
 name = "apic-httpd"
-description = "apic: the httpd package"
+description = "apic: the HTTP server and test server"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,5 +9,13 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+apic-httpc = { path = "../httpc" }
+base64.workspace = true
+hyper.workspace = true
+hyper-util.workspace = true
+rustls.workspace = true
+rustls-pemfile.workspace = true
+tokio.workspace = true
+tokio-rustls.workspace = true
 
 [dev-dependencies]

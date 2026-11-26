@@ -7,8 +7,14 @@
 
 mod duration;
 mod float;
+mod json;
+mod jsontext;
 mod quote;
+mod time;
 
 pub use duration::{format_duration, parse_duration};
 pub use float::{format_float_g, format_float_json};
+pub use json::{escape_html, escape_line_separators};
+pub use jsontext::{check_json, compact_json, indent_json, json_string};
 pub use quote::quote;
+pub use time::{days_in_month, Civil, Time};

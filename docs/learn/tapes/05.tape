@@ -3,7 +3,7 @@
 # port 8089, writes apic-demo and the files this lesson's runnable blocks
 # create into a scratch directory, and runs vhs on every tape there;
 # `task tapes:check` validates the syntax. Just this one:
-#   go run ./scripts/tapes -only 05
+#   cargo run -q -p tapes -- -only 05
 # The editor round trip (`o`, edit, `r`) is recorded by hand: it depends
 # on the editor on the recording machine.
 Output docs/learn/tapes/05.gif

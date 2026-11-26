@@ -77,13 +77,15 @@ jobs:
         shell: pwsh
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
+          rustflags: ""
       - name: A release, laid out as <base>/<tag>/<file>
         run: |
           $rel = New-Item -ItemType Directory -Force mirror\v0.0.0-ci
-          go build -ldflags "-X github.com/hungovercoders/apic-rust/internal/cli.Version=0.0.0-ci" -o apic.exe ./cmd/apic
+          $env:APIC_VERSION = "0.0.0-ci"
+          cargo build --release --locked -p apic
+          Copy-Item target\release\apic.exe apic.exe
           Compress-Archive -Path apic.exe, README.md, LICENSE -DestinationPath "$rel\apic_0.0.0-ci_windows_amd64.zip"
           $hash = (Get-FileHash -Algorithm SHA256 "$rel\apic_0.0.0-ci_windows_amd64.zip").Hash.ToLower()
           Set-Content -LiteralPath "$rel\checksums.txt" -Value "$hash  apic_0.0.0-ci_windows_amd64.zip" -NoNewline

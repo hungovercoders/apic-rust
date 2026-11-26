@@ -30,11 +30,11 @@ shots:
           command: curl -fsSL https://raw.githubusercontent.com/hungovercoders/apic-rust/main/install.sh | sh
         - label: Windows · PowerShell
           command: irm https://raw.githubusercontent.com/hungovercoders/apic-rust/main/install.ps1 | iex
-        - label: Go 1.26.11 or newer
-          command: go install github.com/hungovercoders/apic-rust/cmd/apic@latest
+        - label: Rust 1.85 or newer
+          command: cargo install --git https://github.com/hungovercoders/apic-rust apic
       foot: One static binary, no runtime · `apic.sh`
     say:
-      - One static binary, no runtime. Homebrew on macOS and Linux, an install script, PowerShell on Windows, or go install.
+      - One static binary, no runtime. Homebrew on macOS and Linux, an install script, PowerShell on Windows, or cargo install.
       - Pick yours. It is thirty seconds, whichever one it is.
 
   - chapter: Install

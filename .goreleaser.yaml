@@ -6,18 +6,43 @@ before:
     - sh scripts/notices.sh THIRD_PARTY_NOTICES.md
     # man/apic.1, man/apic-run.1 and the rest, from the command tree; the
     # packages and the Homebrew formula install them from the archive.
-    - go run ./scripts/clidocs -man man
+    - cargo run -q --locked -p clidocs -- -man man
     # Shell completions for the deb, rpm and apk packages.
-    - sh -c 'mkdir -p completions && for s in bash zsh fish; do go run ./cmd/apic completion $s > completions/apic.$s; done'
+    - sh -c 'mkdir -p completions && for s in bash zsh fish; do cargo run -q --locked -p apic -- completion $s > completions/apic.$s; done'
 
+# goreleaser's Rust builder, cross-compiling with cargo-zigbuild so one
+# Linux runner builds every target (release.yml installs zig, cargo-zigbuild
+# and the targets). The Linux binaries are musl, so they are static: the
+# image is FROM scratch and the archives run on any distribution. The
+# release profile in Cargo.toml strips the binary; the cli crate reads
+# APIC_VERSION at compile time.
+#
+# goreleaser maps each target triple to the Os and Arch the templates below
+# use: linux, darwin or windows, and amd64 (x86_64) or arm64 (aarch64). The
+# archive and package names are built from those and must not change:
+# install.sh, install.ps1 and setup-apic download them by name.
 builds:
-  - main: ./cmd/apic
+  - id: apic
+    builder: rust
     binary: apic
-    env: [CGO_ENABLED=0]
-    goos: [linux, darwin, windows]
-    goarch: [amd64, arm64]
-    ldflags:
-      - -s -w -X github.com/hungovercoders/apic-rust/internal/cli.Version={{.Version}}
+    tool: cargo
+    command: zigbuild
+    # The darwin targets link Security.framework and CoreFoundation (the
+    # system trust store, through rustls-native-certs). zig ships neither,
+    # so SDKROOT must name a macOS SDK when they are built on Linux.
+    targets:
+      - x86_64-unknown-linux-musl
+      - aarch64-unknown-linux-musl
+      - x86_64-apple-darwin
+      - aarch64-apple-darwin
+      - x86_64-pc-windows-gnu
+      - aarch64-pc-windows-gnullvm
+    flags:
+      - --release
+      - --locked
+      - --package=apic
+    env:
+      - APIC_VERSION={{ .Version }}
 
 archives:
   - formats: [tar.gz]
@@ -183,10 +208,10 @@ signs:
     output: true
 
 # One SPDX 2.3 SBOM per archive (syft's default format), so a consumer can see
-# exactly which module versions are inside the binary they downloaded without
-# trusting this repo's go.mod to still match. Per archive rather than per
-# release because the set differs by platform: cobra pulls in mousetrap on
-# Windows only.
+# exactly which crate versions are inside the binary they downloaded without
+# trusting this repo's Cargo.lock to still match. Per archive rather than per
+# release because the set differs by platform: the terminal, TLS root and
+# socket crates are not the same on Linux, macOS and Windows.
 sboms:
   - artifacts: archive
 
@@ -212,9 +237,9 @@ dockers_v2:
       org.opencontainers.image.source: https://github.com/hungovercoders/apic-rust
       org.opencontainers.image.url: https://apic.sh/
       # What the image contains, as an SPDX expression: apic is MIT, and the
-      # Go modules and the CA bundle inside it bring the rest (see
+      # crates and the CA bundle inside it bring the rest (see
       # /usr/share/doc/apic in the image).
-      org.opencontainers.image.licenses: MIT AND BSD-3-Clause AND Apache-2.0 AND MPL-2.0
+      org.opencontainers.image.licenses: MIT AND Apache-2.0 AND BSD-3-Clause AND ISC AND Unicode-3.0 AND MPL-2.0
       org.opencontainers.image.version: "{{ .Version }}"
       org.opencontainers.image.revision: "{{ .FullCommit }}"
       org.opencontainers.image.created: "{{ .Date }}"

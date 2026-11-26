@@ -1,8 +1,8 @@
 ---
 title: "Lesson 13: How apic works inside, and your first contribution"
-description: "Lesson 13: follow a request through the packages, the three contracts every change is checked against, and a first contribution end to end."
+description: "Lesson 13: follow a request through the crates, the three contracts every change is checked against, and a first contribution end to end."
 ---
-**Goal.** Follow a request through the packages, know the three contracts
+**Goal.** Follow a request through the crates, know the three contracts
 every change is checked against, and add a small directive end to end
 with `task check` green.
 
@@ -11,14 +11,14 @@ with `task check` green.
 - apic installed ([lesson 1](01-first-request.md)) and `apic demo`
   running, for the one command below that looks at the tool from
   outside
-- Go (the version in `go.mod`) and [Task](https://taskfile.dev) for
-  everything else, and a clone of the repository:
+- Rust (rustup installs the version in `rust-toolchain.toml`) and
+  [Task](https://taskfile.dev) for everything else, and a clone of the repository:
 
 ```sh
 git clone https://github.com/hungovercoders/apic-rust
 cd apic
 task build      # -> bin/apic
-task test       # no network: every test runs against httptest servers
+task test       # no network: every test runs against local servers
 ```
 
 ## Steps
@@ -26,28 +26,28 @@ task test       # no network: every test runs against httptest servers
 ### 1. The lifecycle
 
 The [architecture page](https://github.com/hungovercoders/apic-rust/blob/main/docs/architecture.md) has the diagram; this is the
-walk. A request goes through eight stages, and each is one package:
+walk. A request goes through eight stages, and each is one crate:
 
-1. **Parse** (`internal/httpfile`): the file is split on `###`, each
+1. **Parse** (`crates/httpfile`): the file is split on `###`, each
    block's `# @` comments become directives, then the request line,
    headers and body are read. Problems become diagnostics with a line, a
    column and a code; the parser never gives up on a file.
-2. **Discover** (`internal/project`): `apic.yaml`, the env files, every
-   `.http` file under the root, indexed by name. `Validate` adds the
+2. **Discover** (`crates/project`): `apic.yaml`, the env files, every
+   `.http` file under the root, indexed by name. `validate` adds the
    project-level checks you met in lesson 4.
-3. **Resolve** (`internal/runner` with `template`, `env`, `session`):
+3. **Resolve** (`crates/runner` with `template`, `env`, `session`):
    every `{{placeholder}}` looked up in the precedence order from
    lesson 2; a missing one stops here with exit 2, unless a `# @ref`
    names the request that captures it.
-4. **Apply auth** (`internal/auth`): `# @auth` becomes a header, a SigV4
+4. **Apply auth** (`crates/auth`): `# @auth` becomes a header, a SigV4
    signature, a cached OAuth2 token or a command's output.
-5. **Send** (`net/http`): one attempt per `# @retry` round, with the
+5. **Send** (`crates/httpc`): one attempt per `# @retry` round, with the
    timeout, the TLS settings and the cookie jar.
-6. **Capture and assert** (`internal/selector`, `internal/assert`): the
+6. **Capture and assert** (`crates/selector`, `crates/assert`): the
    body is read once; selectors pull values out and assertions are
    evaluated. A failure is exit 1.
-7. **Persist** (`internal/session`): captures and cookies to `.apic/`.
-8. **Render** (`internal/output`): the same `Result` becomes the
+7. **Persist** (`crates/session`): captures and cookies to `.apic/`.
+8. **Render** (`crates/output`): the same `Result` becomes the
    terminal report, the `--json` line, the UI panes and the MCP result.
 
 You can see stage 8's contract from outside, and it is the one an agent,
@@ -71,26 +71,27 @@ put a key on it.
 Three habits run through the tests, and a change that follows them is
 easy to accept:
 
-- **The parser has a golden file.** `internal/httpfile/testdata/sample.http`
-  holds one of everything the parser understands, and `TestParseSample`
-  in `parse_test.go` checks the fields it produces. A new piece of syntax
+- **The parser has a golden file.** `crates/httpfile/testdata/sample.http`
+  holds one of everything the parser understands, and the `parse_sample`
+  test checks the fields it produces. A new piece of syntax
   is a case in that file first.
-- **The runner talks to `httptest`.** `internal/runner/runner_test.go`
-  starts an `httptest.NewServer` per test with handlers that play the
+- **The runner talks to a local server.** The tests in `crates/runner`
+  start an `apic_httpd` test server each, with handlers that play the
   API, so a test can hand back a 401, a redirect or a slow body without
-  a network. The same goes for `internal/bdd` and `internal/mcp`.
-- **The UI is driven headlessly.** `internal/ui/headless.go` has `Press`
-  and `Resize`; tests and the screenshot generator (`task shots`) call
+  a network. The same goes for `crates/bdd` and `crates/mcp`.
+- **The UI is driven headlessly.** `crates/ui/src/headless.rs` has `press`
+  and `resize`; tests and the screenshot generator (`task shots`) call
   them, so a screenshot in the docs is what the UI draws.
 
 ```sh
-go test ./internal/httpfile/ -run TestParseSample -v
+cargo test -p apic-httpfile parse_sample
 ```
 
 ```
-=== RUN   TestParseSample
---- PASS: TestParseSample (0.00s)
-PASS
+running 1 test
+test parse_sample ... ok
+
+test result: ok. 1 passed; 0 failed
 ```
 
 ### 3. The three contracts
@@ -99,13 +100,12 @@ Every review asks the same three questions, and the tree enforces each:
 
 | Contract | Enforced by |
 |---|---|
-| **The dialect is REST Client's and JetBrains'.** Everything apic adds is a `# @` comment. | The golden file; `TestGrammarMatchesKnownDirectives`, which fails when the VS Code grammar and the parser disagree on the directive list; `validate` warning rather than failing on an unknown directive. |
-| **`--json` and the exit codes are stable.** Keys are only added; 0, 1, 2 and 3 keep their meanings. | `runner.ExitCode` uses `errors.As`, `errorlint` is on so a wrapped `TransportError` cannot become a 2, and `TestExitCodeUnwraps` pins it. |
+| **The dialect is REST Client's and JetBrains'.** Everything apic adds is a `# @` comment. | The golden file; `grammar_matches_known_directives`, which fails when the VS Code grammar and the parser disagree on the directive list; `validate` warning rather than failing on an unknown directive. |
+| **`--json` and the exit codes are stable.** Keys are only added; 0, 1, 2 and 3 keep their meanings. | The runner's errors are an enum and `exit_code` is a `match` on it, so a wrapped transport error cannot become a 2 and a new kind of error does not compile without a code; `exit_code_unwraps` pins it. |
 | **Every command is non-interactive.** `apic ui` is the one exception. | Every CLI test runs with no terminal; the device-code and authorization-code prompts go to stderr and never block on stdin, and the authorization-code grant refuses to start without a terminal. |
 
-`task check` is what CI runs: lint (with `errorlint`, `gosec`,
-`bodyclose` and friends), tests, the race detector, the licence check and
-the examples. A green `task check` locally is usually a green pull
+`task check` is what CI runs: lint (rustfmt, and clippy with every
+warning an error), tests, the licence check and the examples. A green `task check` locally is usually a green pull
 request.
 
 ### 4. Add a directive: `# @tag`
@@ -117,11 +117,11 @@ or a script can pick the smoke set. Five edits and a test.
 
 **Parse it.** The parser already keeps every `# @key value` on the
 request as a `Directive`; it only needs to know the name, or `validate`
-warns about it. In `internal/httpfile/parse.go`, one line in
-`KnownDirectives`:
+warns about it. In `crates/httpfile/src/parse.rs`, one line in
+`KNOWN_DIRECTIVES`:
 
-```go
-"tag": "label for filtering: `# @tag smoke`, repeatable",
+```rust
+("tag", "label for filtering: `# @tag smoke`, repeatable"),
 ```
 
 and a case in the golden file, `testdata/sample.http`, as a new block
@@ -135,37 +135,38 @@ at the end of the file:
 GET {{baseUrl}}/health
 ```
 
-At the end, not in the middle: `TestParseSample` pins line numbers and
+At the end, not in the middle: `parse_sample` pins line numbers and
 request positions throughout the file, the multipart parts among them,
 so two lines inserted in the middle would fail it. It also counts the
 requests, so the count goes from 9 to 10, and one assertion that
-`f.Requests[9]` carries two `tag` directives pins the new case.
+`f.requests[9]` carries two `tag` directives pins the new case.
 
 **Tell the grammar.** `editors/vscode/syntaxes/apic-directives.injection.json`
 lists the known directives in one alternation; add `tag` to it, or
-`TestGrammarMatchesKnownDirectives` fails on the next `go test`. That
+`grammar_matches_known_directives` fails on the next `cargo test`. That
 test is the dialect contract at work.
 
-**Surface it.** `apic list` builds its entries in `internal/cli/list.go`.
-Give `listEntry` a field and fill it from the directives:
+**Surface it.** `apic list` builds its entries in `crates/cli/src/list.rs`.
+Give `ListEntry` a field and fill it from the directives:
 
-```go
-Tags []string `json:"tags,omitempty"`
+```rust
+#[serde(skip_serializing_if = "Vec::is_empty")]
+tags: Vec<String>,
 ```
 
-```go
-for _, d := range r.Directives {
-    if d.Key == "tag" {
-        e.Tags = append(e.Tags, d.Value)
+```rust
+for d in &r.directives {
+    if d.key == "tag" {
+        e.tags.push(d.value.clone());
     }
 }
 ```
 
-`omitempty` keeps the shape identical for every request without tags,
+`skip_serializing_if` keeps the shape identical for every request without tags,
 which is what "keys are only added" means in practice.
 
-**Give it a place in the canonical order.** `directiveRank` in
-`internal/httpfile/format.go` orders the known directives for `apic fmt`;
+**Give it a place in the canonical order.** `directive_rank` in
+`crates/httpfile/src/format.rs` orders the known directives for `apic fmt`;
 a tag reads best beside `description`, so slot it there. Without a rank
 it would still work, sorted after the known ones.
 
@@ -173,7 +174,7 @@ it would still work, sorted after the known ones.
 line in its `cheatsheet.md`, and `tags` in the `list --json` note of
 its `cli.md`.
 
-**Test it.** `internal/cli/ref_test.go` shows the pattern: write a
+**Test it.** The `ref` tests in `crates/cli` show the pattern: write a
 project to a temp directory, run `list --json`, assert on the text. Add
 a request with two tags and assert on `"tags": ["smoke", "users"]`.
 Then:
@@ -183,11 +184,10 @@ task check
 ```
 
 ```
-task: [lint] golangci-lint run ./...
-0 issues.
-task: [test] go test ./...
-ok      github.com/hungovercoders/apic-rust/internal/cli
-ok      github.com/hungovercoders/apic-rust/internal/httpfile
+task: [lint] cargo clippy --workspace --all-targets -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.31s
+task: [test] cargo test --workspace
+test result: ok. 212 passed; 0 failed; 0 ignored
 …
 ```
 
@@ -242,7 +242,7 @@ first.
 
 ## Going further
 
-- [Architecture](https://github.com/hungovercoders/apic-rust/blob/main/docs/architecture.md): the diagram, the package map and
+- [Architecture](https://github.com/hungovercoders/apic-rust/blob/main/docs/architecture.md): the diagram, the crate map and
   the checklists for a directive, a Gherkin step, a command and a config
   key
 - [AGENTS.md](https://github.com/hungovercoders/apic-rust/blob/main/AGENTS.md):
@@ -256,17 +256,17 @@ first.
 **Length.** 12 minutes; a code walkthrough in an editor.
 
 **Cold open (0:00).** The lifecycle diagram, then `apic run whoami`
-with `login` running first. "Eight stages, eight packages. Here is
+with `login` running first. "Eight stages, eight crates. Here is
 where each of those lines came from."
 
 **Talking points.**
 
-1. The lifecycle, one package per stage, with the file open for each.
-2. The golden file, an `httptest` handler in a runner test, `Press`
+1. The lifecycle, one crate per stage, with the file open for each.
+2. The golden file, a test server's handler in a runner test, `press`
    in a UI test.
 3. The three contracts and the test behind each; `task check`.
-4. `# @tag` end to end: `KnownDirectives`, the golden case, the
-   grammar test going red then green, `listEntry`, `directiveRank`,
+4. `# @tag` end to end: `KNOWN_DIRECTIVES`, the golden case, the
+   grammar test going red then green, `ListEntry`, `directive_rank`,
    the docs rows, the CLI test.
 5. `task check` green; the pull request and what CONTRIBUTING asks.
 6. Checkpoint, then the `P3` exercise.

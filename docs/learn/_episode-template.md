@@ -33,7 +33,7 @@ apic, so you can follow along with nothing but the binary.
 https://apic.sh/learn/<NN-slug>/
 
 ▶ Try it in 30 seconds:
-    go install github.com/hungovercoders/apic-rust/cmd/apic@latest
+    cargo install --git https://github.com/hungovercoders/apic-rust apic
     apic ui --demo
 
 Chapters

@@ -5,13 +5,13 @@ Thanks for looking. Issues and pull requests are welcome.
 If you are an AI agent working in this repository, read
 [AGENTS.md](AGENTS.md) instead — it is the same ground in more detail, plus the
 layout and the conventions that are easy to break. How a request flows
-through the packages, and the checklists for adding a directive, a step or
+through the crates, and the checklists for adding a directive, a step or
 a command, are on the [architecture page](docs/architecture.md).
 
 ## Getting set up
 
-You need Go (the version in `go.mod`) and, for the shortcuts below,
-[Task](https://taskfile.dev).
+You need Rust (rustup installs the version in `rust-toolchain.toml` by
+itself) and, for the shortcuts below, [Task](https://taskfile.dev).
 
 ```sh
 git clone https://github.com/hungovercoders/apic-rust
@@ -21,13 +21,13 @@ task build          # -> bin/apic
 task test
 ```
 
-No network is needed: the tests run against `net/http/httptest` servers, and
+No network is needed: the tests run against local servers from `crates/httpd`, and
 `task example:demo` exercises the whole tool end to end against a fake API
 served in-process.
 
 ```sh
 task --list         # every task, with descriptions
-task check          # what CI runs: lint, test, race, licences, examples
+task check          # what CI runs: lint, test, licences, examples
 ```
 
 Run `task check` before opening a pull request. It is the same set CI runs, so
@@ -113,23 +113,22 @@ the short version:
   SDK — the AWS SigV4 signer and the OpenAPI reader are the precedents. Check
   the binary size with `task build && ls -la bin/apic` if you add one, and
   expect to justify it.
-- **Nothing with an init-time terminal query** goes in the binary. Bubble Tea
-  was tried and removed because its package `init` queries the terminal for its
-  background colour with a five-second timeout, which every apic command would
-  have paid on terminals that do not answer.
+- **Nothing that queries the terminal at start-up** goes in the binary. A
+  library that asks the terminal for its background colour and waits for the
+  answer makes every apic command pay for that wait on terminals that do not
+  reply, which is why the UI has its own terminal layer and not a framework.
 - **Credentials are the thing to be careful with.** If your change touches
   output, redaction, the session file or the MCP server, re-read
   [SECURITY.md](SECURITY.md) — the guarantees listed there are meant to hold.
 
 ## Linting
 
-`.golangci.yml` runs the standard set plus `bodyclose`, `copyloopvar`,
-`errorlint`, `gosec`, `misspell` and `unparam`. Each was measured against the
-tree before being enabled, so the config is quiet on purpose: a new finding
-usually means something.
+`task lint` runs `cargo fmt --check` and clippy's default set with warnings
+denied. No lint is switched off for the workspace, so the config is quiet on
+purpose: a new finding usually means something.
 
-A `//nolint` needs a reason on the same line saying why the call is safe. The
-existing ones are the place to look before adding another.
+An `#[allow]` needs a comment beside it saying why the code is right as
+written. The existing ones are the place to look before adding another.
 
 ## Reporting a security problem
 

@@ -41,8 +41,6 @@ allow-licenses:
   - WTFPL
   - X11
   - Zlib
-  # The patent grant that golang.org/x modules carry beside BSD-3-Clause.
-  - LicenseRef-scancode-google-patent-license-golang
   # The Unicode data licence some XML and text packages bundle.
   - LicenseRef-scancode-unicode
 
@@ -57,7 +55,7 @@ allow-licenses:
 # sharp is the image library Astro uses at build time under website/; its
 # libvips binaries are LGPL-3.0-or-later (the Windows and wasm builds also
 # carry Apache-2.0 and MIT). Nothing apic ships links them: the site is
-# static files and the binary is Go.
+# static files and the binary is Rust.
 allow-dependencies-licenses:
   - pkg:npm/@img/sharp-libvips-darwin-arm64
   - pkg:npm/@img/sharp-libvips-darwin-x64

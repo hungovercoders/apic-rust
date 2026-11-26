@@ -53,8 +53,9 @@ What is coming is tracked in the
 
 A stripped apic binary is about 16 MB, in the same range as `task` or `yq`
 and well below `gh`, `kubectl` or `terraform`. The largest pieces are the
-MCP SDK and the Gherkin runner; the OpenAPI importer, the AWS signing and
-the terminal UI's event loop are written in-tree to keep them small.
+HTTP and TLS stack; the MCP and language servers, the OpenAPI importer, the
+AWS signing and the terminal UI's event loop are written in-tree to keep
+them small.
 
 ## Against Taskfile + curl
 
@@ -184,7 +185,7 @@ So you are not surprised later:
   no GraphQL schema tooling.
 - Reports are limited to what `apic test` emits (pretty, progress, cucumber
   JSON, JUnit, HTML) and `run --json` or `run --report`.
-- Installing is Homebrew on macOS and Linux, `go install`, the install
+- Installing is Homebrew on macOS and Linux, `cargo install`, the install
   scripts for Linux, macOS and Windows, `.deb`, `.rpm` and `.apk` packages, a
   Docker image, a release archive or the
   [GitHub Action](getting-started.md#7-put-it-in-ci), each shown in

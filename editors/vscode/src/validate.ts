@@ -198,7 +198,7 @@ export function nearestDirective(name: string, known: readonly string[]): string
 /**
  * The directives the extension's own grammar lists as known: the
  * `(@(?:a|b|c))` alternation of `syntaxes/apic-directives.injection.json`,
- * which a Go test keeps equal to the parser's list.
+ * which a test in the parser crate keeps equal to the parser's list.
  */
 export function directivesFromGrammar(grammarJson: string): string[] {
   try {

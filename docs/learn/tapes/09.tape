@@ -3,7 +3,7 @@
 # port 8089, writes apic-demo and the files this lesson's runnable blocks
 # create into a scratch directory, and runs vhs on every tape there;
 # `task tapes:check` validates the syntax. Just this one:
-#   go run ./scripts/tapes -only 09
+#   cargo run -q -p tapes -- -only 09
 # The hidden `cp` below stands in for the editing the episode shows in a
 # split; the tidied files come from the lesson's step 3, written to ./tidy.
 Output docs/learn/tapes/09.gif

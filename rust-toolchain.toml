@@ -1,0 +1,6 @@
+# The Rust toolchain every build uses: rustup reads this file, so a local
+# build, CI and the release all compile with the same compiler, formatter
+# and lints. Dependabot does not move it; bump it by hand.
+[toolchain]
+channel = "1.97.0"
+components = ["rustfmt", "clippy"]

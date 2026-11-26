@@ -9,5 +9,6 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+regex.workspace = true
 
 [dev-dependencies]

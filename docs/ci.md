@@ -4,31 +4,38 @@ What the workflows run, why each linter is on, and how the slopstopper
 quality suite fits beside them. `task check` is the local equivalent of
 `ci.yml`; `task ss:hygiene:test` is what the pre-push hook runs.
 
-## The Go linters
+## The Rust linters
 
-- `.golangci.yml` runs the standard set plus `bodyclose`, `copyloopvar`,
-  `errorlint`, `gosec`, `misspell` and `unparam`. Each was measured against the
-  tree before being enabled, so the config is quiet: a new finding means
-  something. Deliberately left off: `nilerr` (its hits in `cli/test.go` are
-  correct), `predeclared` and `usestdlibvars` (pure style).
-- A `//nolint:gosec` needs a reason on the same line saying why the call is
-  safe. The existing ones mark deliberate decisions — reading the file the user
-  named, scaffolding a project directory the user then edits, `$randomInt` not
-  being a nonce — and are the place to look before adding another.
-- `errorlint` is on because exit codes are a public contract:
-  `runner.ExitCode` uses `errors.As`, so wrapping a `TransportError` cannot
-  silently turn a documented 3 into a 2. There is a test for exactly that.
+- `task lint` is `cargo fmt --all --check` and `cargo clippy --workspace
+  --all-targets -- -D warnings`: rustfmt's defaults and clippy's default
+  set, with every warning an error. There is no `rustfmt.toml` or
+  `clippy.toml`, and no lint is switched off for the workspace, so the
+  config is quiet: a new finding means something. `rust-toolchain.toml` pins
+  the compiler, so a new clippy release cannot turn CI red on its own; the
+  findings arrive with the pull request that bumps the pin.
+- An `#[allow(clippy::…)]` goes on the item it excuses, never on a crate,
+  with a comment beside it saying why the code is right as written. The
+  existing ones are the place to look before adding another.
+- Crates carry `#![forbid(unsafe_code)]` wherever they can; the terminal
+  layer in `crates/ui` is the one place that needs libc.
+- Exit codes are a public contract, and the compiler helps keep it: the
+  runner's errors are an enum and the exit code is a `match` on it, so a
+  transport error cannot silently turn a documented 3 into a 2, and a new
+  variant does not compile until it has a code. There is a test for exactly
+  that.
 
 ## The workflows
 
-- `ci.yml` runs the tests on Linux, macOS and Windows (the race detector on
-  Linux only), the lint job (gofmt, go vet, golangci-lint and `codespell` over
-  the whole tree), govulncheck, the licences check and the example projects.
-  A coverage job uploads `coverage.out` as an artifact.
+- `ci.yml` runs the tests on Linux, macOS and Windows, the lint job
+  (rustfmt, clippy and `codespell` over the whole tree), cargo-audit, the
+  licences check (the notices generator and `cargo deny check licenses`
+  against `deny.toml`) and the example projects. A coverage job uploads
+  `lcov.info`, from cargo-llvm-cov, as an artifact. Every job installs the
+  toolchain `rust-toolchain.toml` pins.
 - `docs.yml` runs codespell, Vale (errors only: British spelling, project
   terms, repeated words) and, on pull requests, lychee for external links,
   then builds the site to prove it; see `docs-site.md`.
-- CodeQL runs weekly and per pull request. Dependabot watches `gomod` and
+- CodeQL runs weekly and per pull request. Dependabot watches `cargo` and
   `github-actions` weekly.
 - Workflows declare `permissions: contents: read` at the top and widen only
   where a job needs it (`docs.yml` for Pages, `codeql.yml` for
@@ -65,7 +72,8 @@ in place, so a deliberately deleted one does not come back.
 - `.github/dependency-review-config.yml` is the licence allowlist that
   both the dependency review on new dependencies and `task
   ss:security:licences` (every resolved npm dependency that ships; dev
-  dependencies are not judged) read; the installer seeds it and never
+  dependencies are not judged) read; the crates in the binary are judged
+  by `deny.toml` instead (see `licensing.md`); the installer seeds it and never
   overwrites it, so it is the place to accept a licence the default list
   leaves out, as the sharp entries do.
 - The entry-file budgets are the reason `AGENTS.md` routes to this directory
@@ -73,8 +81,8 @@ in place, so a deliberately deleted one does not come back.
   tokens, `README.md` under 600 (badges excluded) and every doc under `docs/`
   has a trigger-first route from `AGENTS.md` or the map in `docs/README.md`.
 - The complexity check is lizard, with the CCN ceiling in `.slopstopper.yml`
-  at 30, golangci-lint's `gocyclo` default. lizard counts every `case`, so a
-  switch-driven parser reads high: split it into a handler table or one
+  at 30. lizard counts every `match` arm, so a
+  match-driven parser reads high: split it into a handler table or one
   function per section rather than raising the ceiling, which only ever
   comes down.
 - Before diagnosing a red check, read

@@ -1,4 +1,4 @@
-/* The response panel. Colours are the terminal theme's (internal/output/theme.go,
+/* The response panel. Colours are the terminal theme's (crates/output/src/theme.rs,
    ANSI 256 mapped to hex) on VS Code's own background and text colours, so the
    panel reads the same as `apic run` in both light and dark editors. */
 :root {

@@ -49,8 +49,8 @@ Out of scope:
   file the way you would treat a shell script.
 - `--insecure`, which disables TLS verification because you asked it to.
 - Vulnerabilities in a dependency with no path to reaching apic. CI runs
-  `govulncheck`, which reports only what the binary actually calls; a finding it
-  flags is in scope, one it dismisses generally is not.
+  `cargo audit` against `Cargo.lock`; an advisory in code the binary actually
+  calls is in scope, one in code it never reaches generally is not.
 
 ## Verifying a release
 

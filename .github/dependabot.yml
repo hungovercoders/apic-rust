@@ -1,8 +1,8 @@
 version: 2
 updates:
-  # Go modules. AGENTS.md asks for a small dependency list, so these come as
+  # Cargo crates. AGENTS.md asks for a small dependency list, so these come as
   # individual PRs to be judged on their merits rather than batched in.
-  - package-ecosystem: gomod
+  - package-ecosystem: cargo
     directory: /
     schedule:
       interval: weekly

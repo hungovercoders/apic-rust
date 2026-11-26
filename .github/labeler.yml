@@ -3,7 +3,7 @@
 
 cli:
   - changed-files:
-      - any-glob-to-any-file: ['cmd/**', 'internal/**', 'go.mod', 'go.sum']
+      - any-glob-to-any-file: ['crates/**', 'Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml']
 
 docs:
   - changed-files:
@@ -23,11 +23,11 @@ examples:
 
 tests:
   - changed-files:
-      - any-glob-to-any-file: ['**/*_test.go', '**/testdata/**', 'editors/vscode/src/test/**']
+      - any-glob-to-any-file: ['crates/**/tests/**', '**/*_tests.rs', '**/testdata/**', 'editors/vscode/src/test/**']
 
 ci:
   - changed-files:
-      - any-glob-to-any-file: ['.github/**', 'Taskfile*.yml', '.ss/**', '.golangci.yml', '.slopstopper.yml', 'mise.toml', '.githooks/**', 'scripts/**']
+      - any-glob-to-any-file: ['.github/**', 'Taskfile*.yml', '.ss/**', 'deny.toml', 'rust-toolchain.toml', '.slopstopper.yml', 'mise.toml', '.githooks/**', 'scripts/**']
 
 release:
   - changed-files:
@@ -35,8 +35,8 @@ release:
 
 deps:
   - changed-files:
-      - any-glob-to-any-file: ['go.mod', 'go.sum', 'package.json', 'package-lock.json', 'website/package.json', 'website/package-lock.json', 'editors/vscode/package.json', 'editors/vscode/package-lock.json']
+      - any-glob-to-any-file: ['Cargo.toml', 'Cargo.lock', 'package.json', 'package-lock.json', 'website/package.json', 'website/package-lock.json', 'editors/vscode/package.json', 'editors/vscode/package-lock.json']
 
 security:
   - changed-files:
-      - any-glob-to-any-file: ['.zap/**', 'SECURITY.md', 'internal/auth/**']
+      - any-glob-to-any-file: ['.zap/**', 'SECURITY.md', 'crates/auth/**']

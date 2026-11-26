@@ -49,14 +49,14 @@ The installer puts `apic.exe` in `%LOCALAPPDATA%\Programs\apic`,
 verifies the release checksum, and adds the directory to your user
 `PATH` (open a new terminal for other windows to see it).
 
-#### Go
+#### Cargo
 
 
 ```sh
-go install github.com/hungovercoders/apic-rust/cmd/apic@latest   # Go 1.26.11 or newer
+cargo install --git https://github.com/hungovercoders/apic-rust apic   # Rust 1.85 or newer
 ```
 
-This builds from source into `$(go env GOPATH)/bin`.
+This builds from source into `~/.cargo/bin`.
 
 In GitHub Actions, the [`setup-apic` action](../cookbook.md#a-smoke-test-in-ci-that-never-leaks-secrets) installs
 it in one step; lesson 8 uses it.
