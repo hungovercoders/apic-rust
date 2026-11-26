@@ -109,10 +109,28 @@ fn generate() -> Table {
     t.one(0x7F, GROUND, EXECUTE, GROUND);
 
     // EscapeIntermediate
-    t.range(0x00, 0x17, ESCAPE_INTERMEDIATE, EXECUTE, ESCAPE_INTERMEDIATE);
+    t.range(
+        0x00,
+        0x17,
+        ESCAPE_INTERMEDIATE,
+        EXECUTE,
+        ESCAPE_INTERMEDIATE,
+    );
     t.one(0x19, ESCAPE_INTERMEDIATE, EXECUTE, ESCAPE_INTERMEDIATE);
-    t.range(0x1C, 0x1F, ESCAPE_INTERMEDIATE, EXECUTE, ESCAPE_INTERMEDIATE);
-    t.range(0x20, 0x2F, ESCAPE_INTERMEDIATE, COLLECT, ESCAPE_INTERMEDIATE);
+    t.range(
+        0x1C,
+        0x1F,
+        ESCAPE_INTERMEDIATE,
+        EXECUTE,
+        ESCAPE_INTERMEDIATE,
+    );
+    t.range(
+        0x20,
+        0x2F,
+        ESCAPE_INTERMEDIATE,
+        COLLECT,
+        ESCAPE_INTERMEDIATE,
+    );
     t.one(0x7F, ESCAPE_INTERMEDIATE, IGNORE, ESCAPE_INTERMEDIATE);
     // EscapeIntermediate -> Ground
     t.range(0x30, 0x7E, ESCAPE_INTERMEDIATE, DISPATCH, GROUND);
@@ -167,8 +185,8 @@ fn generate() -> Table {
     t.range(0x3C, 0x3F, DCS_ENTRY, PREFIX, DCS_PARAM);
     // DcsEntry -> DcsPassThrough
     t.range(0x08, 0x0D, DCS_ENTRY, PUT, DCS_STRING); // ECMA-48 § 8.3.27
-    // XXX: allows passing ESC (not a ECMA-48 standard), so DCS sequences
-    // can be passed through.
+                                                     // ESC is let through, which the standard does not ask for, so a
+                                                     // sequence wrapped in a DCS passes whole.
     t.one(0x1B, DCS_ENTRY, PUT, DCS_STRING);
     t.range(0x40, 0x7E, DCS_ENTRY, START, DCS_STRING);
 
@@ -201,7 +219,7 @@ fn generate() -> Table {
     t.range(0x20, 0x7E, DCS_STRING, PUT, DCS_STRING);
     t.one(0x7F, DCS_STRING, PUT, DCS_STRING);
     t.range(0x80, 0xFF, DCS_STRING, PUT, DCS_STRING); // UTF-8 text
-    // ST, CAN, SUB and ESC end the string
+                                                      // ST, CAN, SUB and ESC end the string
     t.one(0x1B, DCS_STRING, DISPATCH, ESCAPE);
     t.one(0x9C, DCS_STRING, DISPATCH, GROUND);
     t.many(&[0x18, 0x1A], DCS_STRING, IGNORE, GROUND);
@@ -248,7 +266,7 @@ fn generate() -> Table {
     t.one(0x19, OSC_STRING, IGNORE, OSC_STRING);
     t.range(0x1C, 0x1F, OSC_STRING, IGNORE, OSC_STRING);
     t.range(0x20, 0xFF, OSC_STRING, PUT, OSC_STRING); // UTF-8 text
-    // ST, CAN, SUB, ESC and BEL end the string
+                                                      // ST, CAN, SUB, ESC and BEL end the string
     t.one(0x1B, OSC_STRING, DISPATCH, ESCAPE);
     t.one(0x07, OSC_STRING, DISPATCH, GROUND);
     t.one(0x9C, OSC_STRING, DISPATCH, GROUND);

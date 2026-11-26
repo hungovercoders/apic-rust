@@ -58,6 +58,7 @@ pub use body::DEFAULT_MAX_BODY_BYTES;
 pub use describe::Description;
 pub use errors::*;
 pub use jbauth::AuthConfigInfo;
+pub use localtime::local_time;
 pub use proxy::ProxyInfo;
 pub use redact::redact_expr;
 pub use result::{Body, FormPart, Iteration, Resolved, Response, Result, Timings, BASE64, MASKED};

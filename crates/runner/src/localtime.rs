@@ -3,6 +3,13 @@
 
 use std::sync::OnceLock;
 
+/// `t` in the machine's time zone: the same instant, with the offset in
+/// force there at that instant.
+pub fn local_time(t: apic_gocompat::Time) -> apic_gocompat::Time {
+    let (offset, _) = LocalZone::system().lookup(t.unix());
+    t.with_offset(offset)
+}
+
 /// A time zone's rules.
 #[derive(Debug, Default)]
 pub(crate) struct LocalZone {

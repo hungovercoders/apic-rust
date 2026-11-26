@@ -362,6 +362,12 @@ impl Runner {
         lock(&self.extra_vars).insert(name.to_string(), value.to_string());
     }
 
+    /// Takes back a variable set with [`Runner::set_var`]; one of the
+    /// options shows through again.
+    pub fn unset_var(&self, name: &str) {
+        lock(&self.extra_vars).remove(name);
+    }
+
     /// Substitutes {{placeholders}} in arbitrary text using the runner's
     /// variables (no file-level @vars, since no request is in scope).
     pub fn render(&self, s: &str) -> std::result::Result<String, Error> {

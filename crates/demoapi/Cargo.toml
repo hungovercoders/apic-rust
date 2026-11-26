@@ -9,5 +9,14 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+apic-gocompat = { path = "../gocompat" }
+apic-httpd = { path = "../httpd" }
+apic-project = { path = "../project" }
+serde_json = { workspace = true }
 
 [dev-dependencies]
+apic-bdd = { path = "../bdd" }
+apic-httpc = { path = "../httpc" }
+apic-httpfile = { path = "../httpfile" }
+apic-runner = { path = "../runner" }
+tempfile.workspace = true

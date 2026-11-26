@@ -57,6 +57,7 @@ std::process::exit(exit_code(err.as_ref()));
 | `capture`, `captured`, `set_var`, `vars`, `results`, `set_result` | The capture layer, the --var layer and the named responses (`HashMap<String, Arc<Result>>`, each as it stood when its request finished) |
 | `project_file(rel)` | A file confined to the project root |
 | `current_time()` | The runner's clock (`now`, else the system's) |
+| `local_time(Time)` | Free function: the same instant with the machine's zone offset, for showing a time locally |
 | `history_key(&Project, &Request)` | Free function: `name` or `file#name` |
 | `set_version(v)` / `version()` | The `apic/<version>` User-Agent; `dev` until set |
 | `sleep_cancel(&CancelToken, Duration)` | The default `sleep` |
