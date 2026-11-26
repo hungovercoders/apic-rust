@@ -39,7 +39,11 @@ fn main() {
                 .expect("file under its skill")
                 .to_string_lossy()
                 .replace('\\', "/");
-            let _ = writeln!(out, "        ({rel:?}, include_str!({:?})),", file.display().to_string());
+            let _ = writeln!(
+                out,
+                "        ({rel:?}, include_str!({:?})),",
+                file.display().to_string()
+            );
         }
         out.push_str("    ]),\n");
     }

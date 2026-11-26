@@ -127,6 +127,22 @@ fn commands(root: &CommandSpec) -> Vec<Chain<'_>> {
     out
 }
 
+/// The usage line the reference prints: the command's full name and
+/// arguments, with `[flags]` only when it has flags of its own. The global
+/// flags are listed once, so a command that takes nothing else is shown
+/// without them (its help page, which lists them, says `[flags]`).
+fn use_line(chain: &[&CommandSpec]) -> String {
+    let c = leaf(chain);
+    let mut line: Vec<&str> = chain[..chain.len() - 1].iter().map(|p| p.name).collect();
+    line.push(c.usage);
+    let mut line = line.join(" ");
+    let own = c.flags.iter().any(|f| !f.persistent && !f.hidden);
+    if own && !c.disable_flags_in_use_line && !line.contains("[flags]") {
+        line.push_str(" [flags]");
+    }
+    line
+}
+
 /// Replaces the generated section of page, between the markers, or appends
 /// it when the page has none yet.
 fn update(page: &str, generated: &str) -> Result<String, String> {
@@ -163,7 +179,7 @@ fn markdown(root: &CommandSpec) -> String {
             apic_cli::command_path(&chain),
             sentence(c.short)
         );
-        let _ = write!(b, "```\n{}\n```\n\n", apic_cli::use_line(&chain));
+        let _ = write!(b, "```\n{}\n```\n\n", use_line(&chain));
         if c.flags.iter().any(|f| !f.hidden) {
             flag_table(&mut b, &c.local_flags());
         } else {
@@ -284,7 +300,7 @@ fn man_page(chain: &[&CommandSpec]) -> String {
         quote(&name.to_uppercase())
     );
     let _ = writeln!(b, ".SH NAME\n{} \\- {}", roff(&name), roff(c.short));
-    let _ = writeln!(b, ".SH SYNOPSIS\n.B {}", roff(&apic_cli::use_line(chain)));
+    let _ = writeln!(b, ".SH SYNOPSIS\n.B {}", roff(&use_line(chain)));
     let desc = if c.long.is_empty() {
         c.short
     } else {

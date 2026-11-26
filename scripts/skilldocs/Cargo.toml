@@ -9,6 +9,7 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+apic-gocompat = { path = "../../crates/gocompat" }
 regex.workspace = true
 
 [dev-dependencies]

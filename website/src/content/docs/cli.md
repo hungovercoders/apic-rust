@@ -1110,12 +1110,18 @@ reports every file `unchanged`.
 
 ## apic version, apic completion
 
-`version` prints the version, commit, Go version and platform. With
-`--json`:
+`version` prints the version, commit, compiler version and platform:
+
+```text
+apic v1.2.3 · abc1234 · rustc 1.97.0 linux/amd64
+```
+
+With `--json` (the `go` key keeps its name from when apic was written in
+Go, and holds the Rust compiler that built the binary):
 
 ```json
 {"version": "v1.2.3", "commit": "abc1234", "date": "2026-02-01T10:00:00Z",
- "go": "go1.26.11", "os": "linux", "arch": "amd64"}
+ "go": "rustc 1.97.0", "os": "linux", "arch": "amd64"}
 ```
 
 `completion bash|zsh|fish|powershell` prints a shell completion script:
@@ -1125,9 +1131,9 @@ source <(apic completion bash)
 apic completion zsh > "${fpath[1]}/_apic"
 ```
 
-Completion knows the project: `run`, `describe`, `curl`, `snippet`,
-`select` and `history` complete request ids and `.http` file names, and `--env` completes the environments in
-`http-client.env.json`.
+The script is static: it completes apic's commands and their flags, not
+the request ids, file names or environments of the project you are in
+(`apic list` and `apic env` print those).
 
 ## Configuration file
 
@@ -1189,7 +1195,7 @@ and the URL above.
 | `.apic/history/` | The last responses of each named request per environment, when `history:` is set. One `0600` file per response, written by `run`, read by `history`, cleared by `history clear`. |
 | `>> file` targets | Response bodies a request saves (`>> ./out.json`, `>>! ./out.json`) or `run --output` writes. Inside the project for `>>`; `0600` when a secret went into the request. |
 
-<!-- BEGIN GENERATED: go run ./scripts/clidocs (task docs:cli) rewrites this section; edit the flags in internal/cli instead -->
+<!-- BEGIN GENERATED: cargo run -q -p clidocs (task docs:cli) rewrites this section; edit the flags in crates/cli instead -->
 
 ## Commands and flags
 

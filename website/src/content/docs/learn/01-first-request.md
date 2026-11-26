@@ -69,7 +69,7 @@ apic version
 ```
 
 ```
-apic v0.2.0 · 1a2b3c4 · go1.26.11 linux/amd64
+apic v0.2.0 · 1a2b3c4 · rustc 1.97.0 linux/amd64
 apic is epic · https://apic.sh/
 ```
 
