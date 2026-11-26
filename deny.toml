@@ -19,12 +19,13 @@ all-features = false
 # apic distributes: read docs/licensing.md first.
 allow = [
     "MIT",
+    # ring is "Apache-2.0 AND ISC".
     "Apache-2.0",
-    "BSD-2-Clause",
+    # subtle, under the TLS stack.
     "BSD-3-Clause",
+    # rustls-webpki and untrusted.
     "ISC",
-    "Zlib",
-    # The Unicode data tables in the unicode-* and ICU crates.
+    # The Unicode data tables in the ICU crates and unicode-ident.
     "Unicode-3.0",
 ]
 confidence-threshold = 0.8

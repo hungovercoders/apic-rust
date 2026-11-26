@@ -99,26 +99,11 @@ pane), `panes.rs` (the tab strip and tabs), `history.rs` (the history tab),
 `headless.rs`, `viewport.rs`, and the terminal layer: `term.rs` (keys and
 decoding them), `input.rs` and `input_unix.rs` (the key source),
 `program.rs` (the loop) and `sys/` (`unix.rs` over libc, `windows.rs` over
-windows-sys). `sys/` is the only code in apic with `unsafe`; the crate
-denies it everywhere else.
-
-## Where it differs from before
-
-- A result is told apart from the one it replaces by a counter, not by its
-  address: the pane redraws its content whenever any description, result
-  or error changes, which shows the same text.
-- The clear-session and editor messages carry the error's text, not the
-  error. An editor that cannot be started reads `exec: "name": executable
-  file not found in $PATH`; one that fails reads `exit status N`.
-- On Windows the window size is asked of the console's output when the
-  input handle cannot say, where it used to fall back to 80x24.
-- A session value whose name is wider than the pane is cut to nothing but
-  its ellipsis rather than ending the program.
-- Cancelling `run`'s token is noticed at the next tick, up to 110 ms later.
+windows-sys). The crate denies `unsafe` everywhere but `sys/`.
 
 ## Tests
 
-`src/tests/` ports every test of the original, over the demo project served
+`src/tests/` runs over the demo project served
 by `apic_demoapi`. `golden_tests.rs` replays the scripts in
 `testdata/golden/*.txt` and compares each screen byte for byte with the
 recordings beside them (`golden` without colour, `colour` under 24-bit

@@ -72,20 +72,5 @@ protocol 2026-07-28, which has no sessions, is refused with -32022.
 
 `src/tests.rs` drives every tool through a session against a local API,
 the stdio loop over in-memory pipes, and the HTTP transport through a
-test server; `testdata/` holds the `initialize` and `tools/list` responses
-as recorded.
-
-## What differs from before
-
-- Calls already read when stdin ends are given two seconds to answer
-  (they used to be dropped, or not, by chance).
-- The sessionless 2026-07-28 protocol (`server/discover`, requests that
-  carry their own protocol version in `_meta`) is not served: on stdio
-  such a request is treated like any other, and over HTTP it is refused
-  as before. Every released client starts with `initialize`.
-- Lists are never paginated (the old page size was 1000 entries).
-- A payload that is not JSON is described in the JSON reader's own words
-  over HTTP (`malformed payload: unmarshaling jsonrpc message: ...`), and
-  a `params` member of the wrong shape names the member rather than
-  quoting the decoder.
-- Over HTTP, a client that goes away does not cancel its call.
+test server; `testdata/` holds the expected `initialize` and `tools/list`
+responses.

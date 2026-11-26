@@ -150,17 +150,6 @@ pub enum Error {
   string; `CODE_*` constants name each. `CATALOGUE` / `catalogue()` is
   every `Entry { code, exit, title, hint, about }` in order; `lookup(code)`.
 
-## What differs from before
-
-- A response body that is JSON but not valid UTF-8 is reported as base64.
-- A `< file` body that is not valid UTF-8 is sent byte for byte; `body`
-  shows it with U+FFFD.
-- `results()` holds each named result as it stood when its request
-  finished, before `--output` and the history marked the caller's copy.
-- A host name that does not resolve reads `lookup HOST: no such host`
-  (the client's wording, without the resolver's address).
-- `$localDatetime` reads the zone from `TZ` or `/etc/localtime`.
-
 ## Tests
 
 `src/tests/` holds one file per area (auth, cookies, flow, graphql,

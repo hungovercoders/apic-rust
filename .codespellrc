@@ -1,8 +1,11 @@
 # Typos in the docs, the READMEs and the code's comments and strings. Run
 # from the repository root: `codespell` (task docs:check and CI do).
 [codespell]
-skip = ./.git,./node_modules,./package-lock.json,./.ss,./bin,./dist,./man,./lcov.info,./target,./THIRD_PARTY_NOTICES.md,*.svg,*.png,Cargo.lock,*.vsix,./editors/vscode/node_modules,./editors/vscode/out,./editors/vscode/dist,./editors/vscode/package-lock.json,./website/node_modules,./website/dist,./website/legacy,./website/.astro,./website/package-lock.json,./website/public/schemas,./docs/.vale/styles/write-good,.lycheecache,testdata
+skip = ./.git,./node_modules,./package-lock.json,./.ss,./bin,./dist,./man,./lcov.info,./target,./THIRD_PARTY_NOTICES.md,*.svg,*.png,Cargo.lock,*.vsix,./editors/vscode/node_modules,./editors/vscode/out,./editors/vscode/dist,./editors/vscode/package-lock.json,./website/node_modules,./website/dist,./website/legacy,./website/.astro,./website/package-lock.json,./website/public/schemas,./docs/.vale/styles/write-good,.lycheecache,testdata,./crates/bdd/src/gherkin/dialects.rs
 # Deliberate: stauts, basci, isnt, nmae, asert and instal are typos the
 # lessons and tests make on purpose; te, ue and aCount are variable names;
-# reFence is a regexp.
-ignore-words-list = te,ue,acount,stauts,basci,isnt,nmae,asert,refence,instal
+# reFence is a regexp. In the crates: ser is serde's module, checkin a
+# method of the connection pool, tru and caf test inputs, and hexdecimal a
+# word of a YAML error message apic prints as it always has. The Gherkin
+# dialect table is skipped: it is keywords in 80 languages.
+ignore-words-list = te,ue,acount,stauts,basci,isnt,nmae,asert,refence,instal,ser,checkin,tru,caf,hexdecimal

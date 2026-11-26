@@ -153,29 +153,13 @@ Limits are `i32` and may be negative (nothing fits, or no wrapping), so
 count grapheme clusters: a letter with its marks is one cell, CJK and emoji
 two, a flag or a joined emoji two.
 
-## Where it differs from before
-
-- A body that is not valid UTF-8 is shown with U+FFFD by the string
-  renderers; `body(w, res)` still writes the bytes.
-- Text is segmented by apic's own rules, the common ones of the Unicode
-  annex. Rare characters can measure a cell differently (a hundred or so
-  code points out of sixteen thousand sampled, none in what apic prints).
-- A style with a width that wraps text already carrying sequences switches
-  the style off and on again around the break with the usual parameters,
-  not with every variant of underline or an underline colour.
-- `place*` pads with spaces only, and a style has no value of its own, no
-  transform and no inheritance: nothing used them.
-- On Windows a terminal is taken to show 24-bit colour, whatever its
-  build.
-
 ## Tests
 
 `testdata/style_golden.json` holds about 600 styles with their output under
-each profile, and 2,600 calls of the text and layout functions, recorded
-from the libraries apic used to draw with; `src/style/tests.rs` replays
-them byte for byte. `testdata/golden.go` rewrites the outputs from the
-cases in the file (it needs a Go module with lipgloss v1.1.0 and x/ansi
-v0.11.9). `testdata/render_golden.json` holds results as `apic run --json`
+each profile, and 2,600 calls of the text and layout functions with their expected
+results; `src/style/tests.rs` replays them byte for byte
+(`testdata/golden.go` is the program that produced the expected outputs).
+`testdata/render_golden.json` holds results as `apic run --json`
 printed them, descriptions, history entries and what every renderer made
 of them under three profiles; `src/output_tests.rs` replays it. After a
 deliberate change to a renderer, `UPDATE_GOLDEN=1 cargo test -p

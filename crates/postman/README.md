@@ -40,7 +40,7 @@ pub struct Unsupported {
 pub struct Error;          // Display is the message; message() -> &str
 ```
 
-`ImportResult` is the Rust name of the summary `apic import --json`
+`ImportResult` is the summary `apic import --json`
 prints; its JSON is part of the output contract, field order included.
 
 `import` reports a file it cannot read as `open PATH: reason`, a

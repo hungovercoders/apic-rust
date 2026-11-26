@@ -1,6 +1,6 @@
 [package]
 name = "apic-gocompat"
-description = "apic: the gocompat package"
+description = "apic: the text formats of the output contract"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

@@ -81,7 +81,7 @@
   The generator's tests also check the file's shape (Unreleased first, a
   date on every release, newest first, a link reference for each
   version). A new place in the docs that names the current release goes
-  into `Pins` in `scripts/changelog/src/site.rs`, not into the page by hand;
+  into `PINS` in `scripts/changelog/src/site.rs`, not into the page by hand;
   a pin whose phrase is reworded fails the test rather than keeping the old
   version. goreleaser's own commit-list changelog is left configured but
   never used: it listed every commit since the repository began.
@@ -102,7 +102,7 @@
   the `scratch` image depends on. goreleaser maps each triple to the
   `linux`/`darwin`/`windows` and `amd64`/`arm64` the archive names use.
   The version reaches the binary through the `APIC_VERSION` environment
-  variable, which the cli crate reads at compile time.
+  variable, which the cli crate reads at compile time (`option_env!` in `crates/cli/src/root.rs`; its `build.rs` records the compiler, and the commit and its date from git or from `APIC_COMMIT` and `APIC_DATE`).
 - `cosign` and `syft` are installed by `release.yml`; neither ships with the
   runner or with goreleaser-action. goreleaser tries to sign even on a
   snapshot and fails hard without cosign, so `task snapshot` passes

@@ -95,8 +95,8 @@ to install by hand.
 docker run --rm -v "$PWD:/work" ghcr.io/hungovercoders/apic-rust version
 ```
 
-The image is the binary on `scratch`, about 16 MB (about 7 MB to pull),
-for amd64 and arm64.
+The image is the binary on `scratch`, little more than the binary's own
+8 MB, for amd64 and arm64.
 The project directory is mounted at `/work`; see
 [the cookbook](cookbook.md#in-a-container) for CI systems that run
 containers.

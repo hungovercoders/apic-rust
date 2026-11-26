@@ -8,35 +8,43 @@ quality suite fits beside them. `task check` is the local equivalent of
 
 - `task lint` is `cargo fmt --all --check` and `cargo clippy --workspace
   --all-targets -- -D warnings`: rustfmt's defaults and clippy's default
-  set, with every warning an error. There is no `rustfmt.toml` or
-  `clippy.toml`, and no lint is switched off for the workspace, so the
+  set, with every warning an error. Neither tool has a configuration
+  file, and no lint is switched off for the workspace, so the
   config is quiet: a new finding means something. `rust-toolchain.toml` pins
   the compiler, so a new clippy release cannot turn CI red on its own; the
   findings arrive with the pull request that bumps the pin.
 - An `#[allow(clippy::…)]` goes on the item it excuses, never on a crate,
   with a comment beside it saying why the code is right as written. The
   existing ones are the place to look before adding another.
-- Crates carry `#![forbid(unsafe_code)]` wherever they can; the terminal
-  layer in `crates/ui` is the one place that needs libc.
-- Exit codes are a public contract, and the compiler helps keep it: the
-  runner's errors are an enum and the exit code is a `match` on it, so a
-  transport error cannot silently turn a documented 3 into a 2, and a new
-  variant does not compile until it has a code. There is a test for exactly
-  that.
+- Crates carry `#![forbid(unsafe_code)]` wherever they can. `unsafe` is
+  confined to four files, each of which allows it for itself: the terminal
+  layer's `crates/ui/src/sys/unix.rs` and `windows.rs`, the signal handler
+  in `crates/cli/src/signal.rs`, and `crates/openapi/src/yaml.rs`, which
+  drives the `unsafe-libyaml` parser.
+- Exit codes are a public contract: the runner's `exit_code` looks through
+  whatever wraps an error for the transport failure inside it, so putting
+  words in front of a transport error cannot silently turn a documented 3
+  into a 2. `exit_code_unwraps` is the test for exactly that.
 
 ## The workflows
 
-- `ci.yml` runs the tests on Linux, macOS and Windows, the lint job
-  (rustfmt, clippy and `codespell` over the whole tree), cargo-audit, the
-  licences check (the notices generator and `cargo deny check licenses`
-  against `deny.toml`) and the example projects. A coverage job uploads
-  `lcov.info`, from cargo-llvm-cov, as an artifact. Every job installs the
+- `ci.yml` runs the tests on Linux, macOS and Windows (`cargo test
+  --workspace`, about 800 tests), the lint job (rustfmt, clippy and
+  `codespell` over the whole tree), cargo-audit, the licences check (the
+  notices generator and `cargo deny check licenses` against `deny.toml`)
+  and the example projects. A coverage job uploads `lcov.info`, from
+  cargo-llvm-cov, as an artifact. The `learn` job runs the course's marked
+  blocks, `tapes` validates the VHS tapes and the episodes' shot lists (vhs
+  is installed with `go install`, the one step that needs Go), `vscode`
+  builds and tests the extension, `shots` regenerates the screenshots, and
+  `image` and `packages` build the container image and the release
+  packages without publishing. Every job installs the
   toolchain `rust-toolchain.toml` pins.
 - `docs.yml` runs codespell, Vale (errors only: British spelling, project
   terms, repeated words) and, on pull requests, lychee for external links,
   then builds the site to prove it; see `docs-site.md`.
-- CodeQL runs weekly and per pull request. Dependabot watches `cargo` and
-  `github-actions` weekly.
+- CodeQL runs weekly and per pull request. Dependabot watches `cargo`,
+  `npm` (the root and `website/`) and `github-actions` weekly.
 - Workflows declare `permissions: contents: read` at the top and widen only
   where a job needs it (`docs.yml` for Pages, `codeql.yml` for
   security-events, `release.yml` for the release upload, the tag it

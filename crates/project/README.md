@@ -122,12 +122,12 @@ configuration.
 - A syntax error reads `yaml: line 2: did not find expected node content`.
 
 `testdata/yaml_reference.json` holds 282 files with the configuration or
-the error each has always produced; `tests/yaml_reference.rs` replays
+the error each must produce; `tests/yaml_reference.rs` replays
 them. The parsing is `serde_yaml_ng`'s; `src/yaml.rs` turns its values back
 into a tree of nodes with their text, tags and lines, and `src/config.rs`
 decodes that.
 
-Known differences from the recorded behaviour, all in files nobody is
+Two corners, in files nobody is
 likely to write: a scalar under an explicit core tag that it does not fit
 (`cookies: !!bool yes`) and an anchor that contains itself are reported in
 the parser's words; a file in UTF-16 is decoded, but its quoted numbers may

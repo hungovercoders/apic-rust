@@ -51,9 +51,10 @@ What is coming is tracked in the
 
 ## Size
 
-A stripped apic binary is about 16 MB, in the same range as `task` or `yq`
+A stripped apic binary is about 8 MB on Linux, below `task` or `yq`
 and well below `gh`, `kubectl` or `terraform`. The largest pieces are the
-HTTP and TLS stack; the MCP and language servers, the OpenAPI importer, the
+HTTP and TLS stack; the MCP and language servers, the Gherkin reader and
+runner, the JSON path and JSON Schema code, the OpenAPI importer, the
 AWS signing and the terminal UI's event loop are written in-tree to keep
 them small.
 

@@ -78,16 +78,4 @@ let (code, err) = apic_bdd::run(&CancelToken::new(), &opts);  // exit code, type
   (`steps.go:75 -> …stepStatus`, `phrases.go:69 -> …handlerFor.func1`):
   report text that tools already compare, so it stays as it is.
 - `crates/demoapi/testdata/extra.*` holds one feature and its four
-  reports as recorded; `crates/demoapi` replays them.
-
-## What differs from before
-
-- A step function given the wrong kind of argument (a doc string where it
-  reads a table, or the other way round) fails with `runtime error:
-  invalid memory address or nil pointer dereference` and no stack trace
-  after it.
-- A line of a feature file may be any length.
-- Snippets for more than twelve undefined steps whose function names
-  collide are listed in a stable order.
-- A cucumber report that cannot be parsed back is reported in the JSON
-  reader's words.
+  expected reports; `crates/demoapi` replays them.

@@ -5,7 +5,7 @@ before:
   hooks:
     - sh scripts/notices.sh THIRD_PARTY_NOTICES.md
     # man/apic.1, man/apic-run.1 and the rest, from the command tree; the
-    # packages and the Homebrew formula install them from the archive.
+    # packages and the Homebrew cask install them from the archive.
     - cargo run -q --locked -p clidocs -- -man man
     # Shell completions for the deb, rpm and apk packages.
     - sh -c 'mkdir -p completions && for s in bash zsh fish; do cargo run -q --locked -p apic -- completion $s > completions/apic.$s; done'
@@ -194,7 +194,7 @@ homebrew_casks:
 #
 # Only checksums.txt is signed. It names every archive with its SHA-256, so one
 # signature covers the whole release: verify the signature, then verify an
-# archive against the file it vouches for. docs/verifying.md walks through it.
+# archive against the file it vouches for. The site's verifying page walks through it.
 signs:
   - cmd: cosign
     certificate: "${artifact}.pem"
@@ -250,7 +250,7 @@ dockers_v2:
 
 # The image is signed keylessly like checksums.txt: the signature is bound to
 # the release workflow's identity and recorded in the transparency log, and
-# docs/verifying.md has the `cosign verify` command.
+# the site's verifying page has the `cosign verify` command.
 docker_signs:
   - args: ["sign", "${artifact}@${digest}", "--yes"]
 

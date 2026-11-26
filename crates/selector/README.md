@@ -44,11 +44,11 @@ line must be its own entry (never joined with commas).
 - A selected object or array keeps the server's text byte for byte; a set of
   matches is `[a,b,c]` of the raw values. `body.$` on an object or array
   includes any white space after it.
-- The JSON reader is the crate's own (`src/json.rs`); the `gjson` crate is
-  not used.
+- The JSON reader is the crate's own (`src/json.rs`), and so is the path
+  language (`src/path.rs`); no JSON path library is used.
 - A body that is not valid UTF-8 is read with U+FFFD in place of the bad
   bytes.
 - The reason a regex does not compile is worded by the `regex` crate
   (`error parsing regexp: <reason>: `<pattern>``).
-- `testdata/reference.json` holds about 1,500 selections recorded from the
-  original implementation; `tests/reference.rs` replays them.
+- `testdata/reference.json` holds about 1,500 selections with their expected
+  results; `tests/reference.rs` replays them.

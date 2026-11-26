@@ -25,7 +25,7 @@ same instant).
 
 ## Notes
 
-- A result is stored compacted then re-indented, with `<>&` escaped, exactly
-  as before. An entry file that is not a whole entry is passed over.
+- A result is stored compacted then re-indented, with `<>&` escaped.
+  An entry file that is not a whole entry is passed over.
 - Numbers are compared as written: `1.50` and `1.5` differ.
 - `serde_json`'s `raw_value` feature is enabled by this crate.

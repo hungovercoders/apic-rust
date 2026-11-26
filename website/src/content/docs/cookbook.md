@@ -168,7 +168,7 @@ at the exact line and column:
 ### In a container
 
 `ghcr.io/hungovercoders/apic-rust` is the same binary on `scratch`, with the CA
-bundle it needs for TLS: about 16 MB (about 7 MB to pull), for amd64 and
+bundle it needs for TLS: little more than the binary's own 8 MB, for amd64 and
 arm64, tagged with the version (`0.2.0` and `v0.2.0`), the minor (`v0.2`)
 and `latest`. Mount the
 project at `/work` and pass secrets as `APIC_VAR_*` variables:

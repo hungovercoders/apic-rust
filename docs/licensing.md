@@ -25,7 +25,8 @@
   Apache-2.0" crate) and each `NOTICE` (required by Apache-2.0 4(d)), and
   exits non-zero if a crate has no licence file at all. A crate known to
   publish none goes in the script's `NO_LICENCE_FILE` table, with where its
-  licence text is, only after someone has read that text.
+  licence text is, only after someone has read that text; the table is
+  empty today, since every crate in the binary ships its licence.
 - `deny.toml` is the permissive list in SPDX ids, and `cargo deny check
   licenses` (part of `task licences` and of CI's `licences` job) fails on a
   crate whose licence is not on it, for any release target.
@@ -34,8 +35,10 @@
   `npm run package` runs `editors/vscode/notices.mjs` first, which writes the
   extension's own notices file (generated, gitignored) and fails on a package
   with no licence file. The same permissive-only rule applies there.
-- Keep new dependencies permissive (MIT, BSD, Apache-2.0, ISC, Zlib and
-  Unicode-3.0 for Unicode data tables: the list in `deny.toml`). Third-party
+- Keep new dependencies permissive. `deny.toml` lists exactly the licences
+  the tree needs today: MIT, Apache-2.0, BSD-3-Clause, ISC and Unicode-3.0
+  (for Unicode data tables). Another permissive licence, a BSD-2-Clause or
+  Zlib crate say, is added there with the dependency that needs it. Third-party
   versions live in one place, `[workspace.dependencies]` in the root
   `Cargo.toml`. Anything reciprocal —
   GPL or LGPL — would change apic's own terms, so it is off the table for a

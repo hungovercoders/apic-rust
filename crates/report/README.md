@@ -53,13 +53,6 @@ Pipelines, variables, `with` and trim markers are not there: the page does
 not use them. A new field for the page goes into the record `view` (or
 `features`) builds in `src/html.rs`, under the name the template reads.
 
-## Where it differs from before
-
-- The message after `parse cucumber report:` is the JSON parser's own
-  wording.
-- A page is rendered whole, then written: a failure leaves nothing
-  half-written in `w`.
-
 ## Tests
 
 `testdata/*.golden.html` are compared after the server's port, the dates

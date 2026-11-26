@@ -34,18 +34,18 @@ let result = apic_assert::eval_with(&expr, &expected, &response, opts);
 `src/schema/` is a validator for draft 2020-12 and draft-07 written for this
 crate: every validation keyword, `$ref`/`$anchor`/`$dynamicRef` within the
 one file, `$id` scopes. A `$ref` to another file is refused (`loading ...:
-cannot resolve remote schemas`). Failures read as they always have
+cannot resolve remote schemas`). Failures read
 (`validating root: validating /properties/id: type: 1 has type "string",
-want "integer"`); `testdata/schema_reference.json` holds 280 recorded
-outcomes that `schema_tests.rs` replays.
+want "integer"`); `testdata/schema_reference.json` holds 280 schemas and instances with their
+outcomes, which `schema_tests.rs` replays.
 
 ## Notes
 
-- Where several properties fail at once, the first in key order is reported
-  (the original picked one at random); `unexpected additional properties`
+- Where several properties fail at once, the first in key order is reported;
+  `unexpected additional properties`
   lists them sorted.
 - A keyword of the wrong type in a schema is reported as `... of type
-  jsonschema.Schema` where the original printed a very long type name.
+  jsonschema.Schema`.
 - A schema that refers to itself without consuming the instance fails with
   `the schema refers to itself without end` instead of overflowing the
   stack. Validation runs on a thread of its own with a large stack.

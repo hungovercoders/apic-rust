@@ -15,7 +15,7 @@ itself) and, for the shortcuts below, [Task](https://taskfile.dev).
 
 ```sh
 git clone https://github.com/hungovercoders/apic-rust
-cd apic
+cd apic-rust
 git config core.hooksPath .githooks   # the pre-push hygiene gate (task ss:hygiene:test)
 task build          # -> bin/apic
 task test

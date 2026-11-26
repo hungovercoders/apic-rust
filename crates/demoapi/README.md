@@ -50,9 +50,5 @@ follows the first JSON value is ignored.
 `src/tests.rs` covers the routes, runs every request of the embedded
 project and its `features/` against a live instance, checks the project is
 already in `apic fmt`'s form, and replays `testdata/extra.feature` through
-`apic_bdd` in all four report formats against the reports recorded in
+`apic_bdd` in all four report formats against the expected reports in
 `testdata/`.
-
-## What differs from before
-
-- `GET /slow` sleeps for the whole time even when its client has gone.

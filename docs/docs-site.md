@@ -26,7 +26,7 @@ the prose checks. The site's content is not reference for working on apic;
   URLs the site serves. `scripts/skilldocs` relies on the `.md` form, so keep
   writing links that way.
 - The page paths and heading anchors are a public contract: the binary
-  (`runner.DocsURL`, the SARIF `helpUri`, the LSP code description, the
+  (`DOCS_URL` in `crates/runner/src/errors.rs`, the SARIF `helpUri`, the LSP code description, the
   `apic init` schema modeline), the VS Code extension, the schema `$id`s and
   the Homebrew cask link to them. Renaming a page or a heading needs the same
   care as renaming a flag. `starlight-links-validator` fails the build on a

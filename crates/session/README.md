@@ -2,7 +2,7 @@
 
 The state apic keeps between runs under `.apic/`: captured values
 (`session.json`) and the cookie jar (`cookies.json`). Files are written
-0600 in a 0700 directory with a `.gitignore`, in the same bytes as before:
+0600 in a 0700 directory with a `.gitignore`, in a fixed form:
 two-space indentation, sorted keys, `<>&` as `<` and so on, a trailing
 newline.
 
@@ -20,7 +20,7 @@ newline.
 | `save()` | Writes the file (no-op for a memory store) |
 | `ensure_dir(dir)` | Creates a `.apic` directory and its `.gitignore`; the history uses it too |
 | `DIR`, `FILE`, `COOKIE_FILE`, `DEFAULT_ENV` | `.apic`, `session.json`, `cookies.json`, `default` |
-| `Error(String)` | The message, worded as before (`open /p/.apic/session.json: permission denied`) |
+| `Error(String)` | The message (`open /p/.apic/session.json: permission denied`) |
 
 Writes are plain create-truncate-write, as they always were: no lock file
 and no rename.
@@ -60,9 +60,9 @@ pub struct SetCookie { name, value, quoted, path, domain,
 
 - One clock (`set_now`) decides both what is sent and what is stored.
 - `cookies.json` lists an environment's cookies in the order they were
-  first set (the original's order was arbitrary).
-- A new `expires` is written in UTC (`...Z`). The original wrote the local
-  offset; both read either form, and a time read from the file is written
+  first set.
+- A new `expires` is written in UTC (`...Z`). A time with a local offset
+  is read too, and a time read from the file is written
   back with the offset it had.
-- `testdata/cookie_reference.json` holds scenarios recorded from the
-  original jar; `cookies_tests.rs` replays them.
+- `testdata/cookie_reference.json` holds jar scenarios with their
+  expected outcomes; `cookies_tests.rs` replays them.

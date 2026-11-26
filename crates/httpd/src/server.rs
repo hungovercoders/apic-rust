@@ -523,7 +523,7 @@ fn into_hyper(mut response: Response, is_head: bool, is_h2: bool) -> hyper::Resp
         } else if body.len() <= buffered && !(is_head && body.is_empty()) {
             // The whole body fitted the write buffer, so its length is
             // known before the headers go out. A HEAD answered with no
-            // body at all says nothing about the GET's length.
+            // body at all says nothing about the length a GET would have.
             response
                 .headers
                 .set("Content-Length", &body.len().to_string());

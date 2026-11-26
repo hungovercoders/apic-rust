@@ -30,8 +30,8 @@ a project root.
 - `.env` follows the dotenv rules: comments, `export`, `KEY: value`, single
   quotes (literal), double quotes (`\n`, `\r`, `$VAR`/`${VAR}` expansion,
   `\$`), inline ` # comments`, multi-line quoted values.
-  `testdata/dotenv_reference.json` holds recorded inputs and outcomes.
+  `testdata/dotenv_reference.json` holds inputs with their expected outcomes.
 - A `.env` that is not valid UTF-8 is read with U+FFFD in place of the bad
-  bytes (the original worked on bytes).
-- JSON syntax errors read as before (`http-client.env.json: invalid
+  bytes.
+- JSON syntax errors name the file and the byte (`http-client.env.json: invalid
   character '}' looking for beginning of value`).

@@ -77,7 +77,7 @@ shots:
       heading: The three contracts
       table:
         - ["The dialect is REST Client's and JetBrains'", "Everything apic adds is a `# @` comment. Enforced by the golden file, by `grammar_matches_known_directives`, which fails when the VS Code grammar and the parser disagree, and by `validate` warning rather than failing on an unknown directive"]
-        - ["`--json` and the exit codes are stable", "Keys are only added; 0, 1, 2 and 3 keep their meanings. The runner's errors are an enum and `exit_code` is a `match` on it, so a wrapped transport error cannot become a 2, and `exit_code_unwraps` pins it"]
+        - ["`--json` and the exit codes are stable", "Keys are only added; 0, 1, 2 and 3 keep their meanings. The runner's `exit_code` looks through whatever wraps an error for the transport failure inside it, so a wrapped transport error cannot become a 2, and `exit_code_unwraps` pins it"]
         - ["Every command is non-interactive", "`apic ui` is the one exception. Every CLI test runs with no terminal; the device-code and authorization-code prompts never block on stdin"]
       foot: "`task check` is what CI runs: lint, tests, the licence check and the examples"
     say:
@@ -90,14 +90,14 @@ shots:
       table:
         - ["Parse it", "One line in `KNOWN_DIRECTIVES` in `crates/httpfile/src/parse.rs`, and a tagged request at the end of the golden file, where it moves no line numbers"]
         - ["Tell the grammar", "`tag` in the alternation in `editors/vscode/syntaxes/apic-directives.injection.json`, or the grammar test fails"]
-        - ["Surface it", "`tags: Vec<String>` with `skip_serializing_if` on `ListEntry` in `crates/cli/src/list.rs`, filled from the directives; skipping the empty list keeps the shape identical for every request without tags"]
-        - ["Rank it", "A slot beside `description` in `directive_rank` in `crates/httpfile/src/format.rs`, so `apic fmt` knows where it reads best"]
+        - ["Surface it", "`tags: Vec<String>` with `skip_serializing_if` on `ListEntry` in `crates/cli/src/list.rs`, filled from the directives where `run` builds each entry; skipping the empty list keeps the shape identical for every request without tags"]
+        - ["Rank it", "A line after `description` in `DIRECTIVE_RANK` in `crates/httpfile/src/format.rs`, so `apic fmt` knows where it reads best"]
         - ["Document it", "A row in the site's `format.md`, a line in `cheatsheet.md`, and `tags` in the `list --json` note of `cli.md`"]
         - ["Test it", "The pattern of the `ref` tests in `crates/cli`: a project in a temp directory, `list --json`, an assertion on `\"tags\": [\"smoke\", \"users\"]`"]
       foot: The checklist · `docs/architecture.md#how-to-add-things`
     say:
       - "Walk the checklist with a small, real directive. tag smoke labels a request, repeatable, and list with json surfaces the tags so an agent or a script can pick the smoke set. Five edits and a test."
-      - "Parse it: one line in the known directives, and a case at the end of the golden file, where it moves no line numbers. Tell the grammar, or its test fails: that is the dialect contract at work. Surface it on the list entry with omitempty, so the shape is identical for every request without tags. Rank it for apic fmt. Document it. Test it, with the pattern the ref test shows."
+      - "Parse it: one line in the known directives, and a case at the end of the golden file, where it moves no line numbers. Tell the grammar, or its test fails: that is the dialect contract at work. Surface it on the list entry, left out when it is empty, so the shape is identical for every request without tags. Rank it for apic fmt. Document it. Test it, with the pattern the ref test shows."
 
   - chapter: "Add # @tag"
     clip: where
@@ -116,7 +116,7 @@ shots:
         task: [lint] cargo clippy --workspace --all-targets -- -D warnings
             Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.31s
         task: [test] cargo test --workspace
-        test result: ok. 212 passed; 0 failed; 0 ignored
+        test result: ok. 119 passed; 0 failed; 0 ignored
         …
         task: [validate-examples] apic validate -C examples/httpbin
       foot: lint, test, licences and the examples, as CI runs them

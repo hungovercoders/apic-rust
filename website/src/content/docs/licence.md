@@ -19,11 +19,16 @@ licence, and all of them are permissive:
 
 | Licence | What |
 |---|---|
-| MIT or Apache-2.0, at your choice | Rust's standard library and most crates, including `clap`, `serde`, `regex`, `url` and `uuid` |
-| MIT | `hyper`, `tokio`, `gjson`, `serde_yaml_ng` and `include_dir`, among others |
+| MIT or Apache-2.0, at your choice | Rust's standard library and most crates, including `clap`, `serde`, `serde_json`, `regex`, `url`, `uuid`, `base64`, `flate2` and the hashes (`sha2`, `md-5`, `hmac`) |
+| MIT | `hyper`, `tokio`, `h2`, `serde_yaml_ng` and `unsafe-libyaml`, among others |
+| Apache-2.0, ISC or MIT, at your choice | the TLS stack itself: `rustls`, `rustls-native-certs` and `rustls-pemfile` |
 | ISC, or Apache-2.0 and ISC | the TLS stack's certificate verification (`rustls-webpki`, `untrusted`) and its cryptography (`ring`) |
 | BSD-3-Clause | `subtle` (constant-time comparison, under the TLS stack) |
 | Unicode-3.0 | the ICU crates `url` uses for international domain names, which carry Unicode data tables |
+
+A few crates add a further choice to MIT or Apache-2.0 (the Unlicense for
+`memchr` and `aho-corasick`, Zlib for `miniz_oxide`, 0BSD for `adler2`,
+BSL-1.0 for `ryu`); apic takes each under MIT or Apache-2.0.
 
 Nothing here is copyleft, so none of it reaches your use of apic or your own
 code. The build enforces the list: a crate under any other licence fails CI

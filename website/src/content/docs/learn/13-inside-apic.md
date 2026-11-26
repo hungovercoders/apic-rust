@@ -16,7 +16,7 @@ with `task check` green.
 
 ```sh
 git clone https://github.com/hungovercoders/apic-rust
-cd apic
+cd apic-rust
 task build      # -> bin/apic
 task test       # no network: every test runs against local servers
 ```
@@ -84,14 +84,14 @@ easy to accept:
   them, so a screenshot in the docs is what the UI draws.
 
 ```sh
-cargo test -p apic-httpfile parse_sample
+cargo test -p apic-httpfile --test parse parse_sample
 ```
 
 ```
 running 1 test
 test parse_sample ... ok
 
-test result: ok. 1 passed; 0 failed
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out
 ```
 
 ### 3. The three contracts
@@ -101,7 +101,7 @@ Every review asks the same three questions, and the tree enforces each:
 | Contract | Enforced by |
 |---|---|
 | **The dialect is REST Client's and JetBrains'.** Everything apic adds is a `# @` comment. | The golden file; `grammar_matches_known_directives`, which fails when the VS Code grammar and the parser disagree on the directive list; `validate` warning rather than failing on an unknown directive. |
-| **`--json` and the exit codes are stable.** Keys are only added; 0, 1, 2 and 3 keep their meanings. | The runner's errors are an enum and `exit_code` is a `match` on it, so a wrapped transport error cannot become a 2 and a new kind of error does not compile without a code; `exit_code_unwraps` pins it. |
+| **`--json` and the exit codes are stable.** Keys are only added; 0, 1, 2 and 3 keep their meanings. | The runner's `exit_code` looks through whatever wraps an error for the transport failure inside it, so a wrapped transport error cannot become a 2; `exit_code_unwraps` pins it. Every error code is in the runner's `CATALOGUE`, and `every_code_is_produced` runs a real command for each. |
 | **Every command is non-interactive.** `apic ui` is the one exception. | Every CLI test runs with no terminal; the device-code and authorization-code prompts go to stderr and never block on stdin, and the authorization-code grant refuses to start without a terminal. |
 
 `task check` is what CI runs: lint (rustfmt, and clippy with every
@@ -138,7 +138,7 @@ GET {{baseUrl}}/health
 At the end, not in the middle: `parse_sample` pins line numbers and
 request positions throughout the file, the multipart parts among them,
 so two lines inserted in the middle would fail it. It also counts the
-requests, so the count goes from 9 to 10, and one assertion that
+requests, so the count goes from 9 to 10 (`parse_file_reads_from_disk` counts them too), and one assertion that
 `f.requests[9]` carries two `tag` directives pins the new case.
 
 **Tell the grammar.** `editors/vscode/syntaxes/apic-directives.injection.json`
@@ -147,7 +147,8 @@ lists the known directives in one alternation; add `tag` to it, or
 test is the dialect contract at work.
 
 **Surface it.** `apic list` builds its entries in `crates/cli/src/list.rs`.
-Give `ListEntry` a field and fill it from the directives:
+Give `ListEntry` a field, and fill it from the directives where `run`
+builds each entry:
 
 ```rust
 #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -155,20 +156,22 @@ tags: Vec<String>,
 ```
 
 ```rust
-for d in &r.directives {
-    if d.key == "tag" {
-        e.tags.push(d.value.clone());
-    }
-}
+tags: r
+    .directives
+    .iter()
+    .filter(|d| d.key == "tag")
+    .map(|d| d.value.clone())
+    .collect(),
 ```
 
 `skip_serializing_if` keeps the shape identical for every request without tags,
 which is what "keys are only added" means in practice.
 
-**Give it a place in the canonical order.** `directive_rank` in
-`crates/httpfile/src/format.rs` orders the known directives for `apic fmt`;
-a tag reads best beside `description`, so slot it there. Without a rank
-it would still work, sorted after the known ones.
+**Give it a place in the canonical order.** `DIRECTIVE_RANK` in
+`crates/httpfile/src/format.rs` lists the known directives in the order
+`apic fmt` writes them; a tag reads best beside `description`, so add it
+after that line. Without a place it would still work, written after the
+known ones.
 
 **Document it.** A row in the directive table of the site's `format.md`, a
 line in its `cheatsheet.md`, and `tags` in the `list --json` note of
@@ -187,11 +190,11 @@ task check
 task: [lint] cargo clippy --workspace --all-targets -- -D warnings
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.31s
 task: [test] cargo test --workspace
-test result: ok. 212 passed; 0 failed; 0 ignored
+test result: ok. 119 passed; 0 failed; 0 ignored
 …
 ```
 
-The whole change is under fifty lines, and every one of them has a test
+(`cargo test` prints one `test result` line per crate.) The whole change is under fifty lines, and every one of them has a test
 or a check that would have caught its absence: that is what the
 checklist is for.
 
@@ -266,7 +269,7 @@ where each of those lines came from."
    in a UI test.
 3. The three contracts and the test behind each; `task check`.
 4. `# @tag` end to end: `KNOWN_DIRECTIVES`, the golden case, the
-   grammar test going red then green, `ListEntry`, `directive_rank`,
+   grammar test going red then green, `ListEntry`, `DIRECTIVE_RANK`,
    the docs rows, the CLI test.
 5. `task check` green; the pull request and what CONTRIBUTING asks.
 6. Checkpoint, then the `P3` exercise.

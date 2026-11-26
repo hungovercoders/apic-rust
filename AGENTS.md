@@ -29,15 +29,15 @@ under `src/content/docs/learn/`; `docs/` is reference for working on apic
 rather than using it; and the generators are under `scripts/`, each a
 crate of its own.
 
-Two things worth knowing: the OpenAPI and Postman readers are hand-written
-walkers, not libraries (the OpenAPI one also serves `apic mock`, from
+Two things worth knowing: the OpenAPI, Postman and Gherkin readers are
+hand-written, not libraries (the OpenAPI one also serves `apic mock`, from
 `crates/openapi/src/mock.rs`), and the VS Code extension never parses `.http`
 files itself (it reads `--json`).
 
 ## Commands
 
 - `task build` / `cargo build --release -p apic` (the task copies the binary to `bin/apic`)
-- `task test` / `cargo test --workspace`: tests use local `apic_httpd` servers, no network needed
+- `task test` / `cargo test --workspace`: about 800 tests on local `apic_httpd` servers, no network needed
 - `task lint`: `cargo fmt --check` and clippy with warnings denied; `task fmt` actually formats the tree (`lint` only checks)
 - `task cover`, `task vuln`: `lcov.info` with a per-file summary (cargo-llvm-cov), cargo-audit
 - `task validate-examples`: the example projects, as CI checks them
@@ -51,13 +51,13 @@ files itself (it reads `--json`).
 - The `--json` output shape and exit codes are a public contract; change them only with a note on the site's `agents.md` page.
 - A change a user would notice gets a line under Unreleased in `CHANGELOG.md`: the release's notes are that section. A line under Unreleased, or dating a release, needs nothing else (the site moves after the release); editing the intro or a published section needs `task docs:changelog`.
 - Every command must work non-interactively (no prompts) and respect `--json`. `apic ui` is the single, deliberate exception: it is interactive, has no `--json`, and exits 2 when stdout is not a terminal. `apic mcp` and `apic lsp` are servers that speak their own JSON protocol on stdout, so `--json` has nothing to change for them.
-- A new error gets a code from the catalogue in `crates/runner/src/errors.rs`: a usage error built with its code, never a bare message; a new code needs an entry in the catalogue and a case in the `crates/cli` errors test, which runs a real command for every code.
-- New commands need a section in the site's `cli.md` and a line in its `cheatsheet.md`; a new or changed flag needs `task docs:cli`.
+- A new error gets a code from the catalogue in `crates/runner/src/errors.rs`: `usage(Code::X, msg)`, never a bare message; a new code needs an entry in `CATALOGUE` and a case in `crates/cli/src/tests/errors.rs`, which runs a real command for every code.
+- New commands need a section in the site's `cli.md` and a line in its `cheatsheet.md`; a new or changed flag needs `task docs:cli`. The command tree is `App::spec()` in `crates/cli/src/root.rs`. The first backticked word of a flag's usage text is read as its value's name (a test checks).
 - The UI is tested through `update` and `view`, and driven headlessly by `press`/`resize` in `crates/ui/src/headless.rs`; the screenshot generator uses the same entry points, so a screenshot cannot drift from what the UI draws.
 - The UI has its own terminal layer rather than a TUI framework, and its styles are apic's own small ANSI module. Keep anything that queries the terminal at start-up (for its background colour, say) out of the binary: every apic command would pay for the wait on terminals that do not answer.
-- Keep the dependency list small: prefer a few hundred lines of code over a large SDK (the AWS signer and the OpenAPI reader are the precedents), written from the spec rather than copied from another project. Permissive licences only (MIT, BSD, Apache-2.0, ISC, Unicode-3.0; `deny.toml` is the list and `task licences` enforces it). Check the stripped binary size with `task build && ls -la bin/apic` when adding a dependency.
+- Keep the dependency list small: prefer a few hundred lines of code over a large SDK (the AWS signer and the OpenAPI reader are the precedents), written from the spec rather than copied from another project. Permissive licences only (MIT, Apache-2.0, BSD, ISC, Unicode-3.0; `deny.toml` is the list and `task licences` enforces it). Check the stripped binary size with `task build && ls -la bin/apic` when adding a dependency.
 - Add a test next to any parser or runner change; parser cases go in `crates/httpfile/testdata/sample.http`.
-- A new step in the vocabulary needs: its regex and shapes in `crates/phrase/src/builtin.rs`, a handler bound by name in `crates/bdd/src/steps.rs`, a row in the `bdd` crate's vocabulary, a scenario in its tests, and the table in the site's `testing.md`.
+- A new step in the vocabulary needs: its regex and shapes in `crates/phrase/src/builtin.rs` (`BUILTIN`), a handler bound by name in `crates/bdd/src/steps.rs`, a row in `VOCABULARY` there, a scenario in the crate's tests, and the table in the site's `testing.md`.
 - Prose is British English: Vale fails on `color` or `behavior` outside code spans, and codespell runs over the whole tree in CI. Keep `LICENSE` at the root: CI's `licences` job fails without it.
 
 ## Routes: read before you act

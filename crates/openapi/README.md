@@ -50,7 +50,7 @@ pub struct Route {
 pub struct Error;               // Display is the message; message() -> &str
 ```
 
-`ImportResult` is the Rust name of the summary `apic import --json`
+`ImportResult` is the summary `apic import --json`
 prints; its JSON is part of the output contract, field order included.
 The paths in it are `out_dir` joined with the file name the way
 `apic_project::path::join` joins (`./out/../x` is cleaned to `x`).

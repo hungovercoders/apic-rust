@@ -62,7 +62,8 @@ match serve(&cancel, std::io::stdin(), std::io::stdout(), opts) {
 - Errors a request fails with carry code -32803 and the error's message;
   parameters of the wrong type are -32602 and name the field (`json: cannot
   unmarshal number into Go struct field textDocumentIdentifier.textDocument.uri
-  of type string`), as clients have always been told.
+  of type string`): that wording is part of what clients are told, so it
+  stays.
 
 ## Threads and ordering
 

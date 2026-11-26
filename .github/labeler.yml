@@ -23,7 +23,7 @@ examples:
 
 tests:
   - changed-files:
-      - any-glob-to-any-file: ['crates/**/tests/**', '**/*_tests.rs', '**/testdata/**', 'editors/vscode/src/test/**']
+      - any-glob-to-any-file: ['crates/**/tests/**', '**/*_tests.rs', '**/tests.rs', '**/testdata/**', 'editors/vscode/src/test/**']
 
 ci:
   - changed-files:
