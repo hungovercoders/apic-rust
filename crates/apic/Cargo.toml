@@ -14,3 +14,4 @@ name = "apic"
 path = "src/main.rs"
 
 [dependencies]
+apic-cli = { path = "../cli" }

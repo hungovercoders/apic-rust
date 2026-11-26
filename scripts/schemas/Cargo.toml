@@ -9,5 +9,10 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+apic-gocompat = { path = "../../crates/gocompat" }
+apic-project = { path = "../../crates/project" }
+serde_json.workspace = true
 
 [dev-dependencies]
+regex.workspace = true
+serde_yaml_ng.workspace = true

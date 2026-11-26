@@ -9,5 +9,10 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+apic-demoapi = { path = "../../../crates/demoapi" }
+apic-gocompat = { path = "../../../crates/gocompat" }
+apic-httpd = { path = "../../../crates/httpd" }
+apic-lessons = { path = "../../../crates/lessons" }
+serde_json.workspace = true
 
 [dev-dependencies]

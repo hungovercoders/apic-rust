@@ -9,5 +9,13 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+apic-gocompat = { path = "../../crates/gocompat" }
+apic-httpc = { path = "../../crates/httpc" }
+apic-skills = { path = "../../crates/skills" }
+record = { path = "../internal/record" }
+serde.workspace = true
+serde_json = { workspace = true, features = ["raw_value"] }
+sha2.workspace = true
+tempfile.workspace = true
 
 [dev-dependencies]

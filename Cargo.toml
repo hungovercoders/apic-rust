@@ -58,6 +58,7 @@ unicode-width = "0.2"
 unsafe-libyaml = "0.2"
 url = "2"
 uuid = { version = "1", features = ["v4"] }
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_System_Console"] }
 
 [profile.release]
 opt-level = "s"

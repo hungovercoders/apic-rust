@@ -6,6 +6,7 @@
 //! Add a new helper in its own module file and re-export it here.
 
 mod duration;
+mod flag;
 mod float;
 mod ioerror;
 mod json;
@@ -16,6 +17,7 @@ mod time;
 mod timeformat;
 
 pub use duration::{format_duration, parse_duration};
+pub use flag::{FlagError, FlagSet};
 pub use float::{format_float_g, format_float_json};
 pub use ioerror::{io_error_text, path_error};
 pub use json::{escape_html, escape_line_separators};

@@ -9,5 +9,8 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+apic-gocompat = { path = "../../crates/gocompat" }
+apic-httpfile = { path = "../../crates/httpfile" }
+apic-runner = { path = "../../crates/runner" }
 
 [dev-dependencies]

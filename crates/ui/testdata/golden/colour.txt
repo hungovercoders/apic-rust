@@ -1,0 +1,27 @@
+# A shorter walk under a colour profile, where every style shows.
+size 100 30
+key 2
+key 5
+key enter
+key H
+key c
+key esc
+key 3
+key 4
+key x
+key n
+key ?
+key esc
+key /
+type todo
+key enter
+key f
+key esc
+key 1
+watch a
+key G
+key 2
+key 3
+size 70 16
+key g
+key 2

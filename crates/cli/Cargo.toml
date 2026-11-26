@@ -7,7 +7,42 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 publish.workspace = true
+build = "build.rs"
 
 [dependencies]
+apic-assert = { path = "../assert" }
+apic-auth = { path = "../auth" }
+apic-bdd = { path = "../bdd" }
+apic-curlimport = { path = "../curlimport" }
+apic-datafile = { path = "../datafile" }
+apic-demoapi = { path = "../demoapi" }
+apic-env = { path = "../env" }
+apic-gocompat = { path = "../gocompat" }
+apic-history = { path = "../history" }
+apic-httpc = { path = "../httpc" }
+apic-httpd = { path = "../httpd" }
+apic-httpfile = { path = "../httpfile" }
+apic-lsp = { path = "../lsp" }
+apic-mcp = { path = "../mcp" }
+apic-openapi = { path = "../openapi" }
+apic-output = { path = "../output" }
+apic-postman = { path = "../postman" }
+apic-project = { path = "../project" }
+apic-report = { path = "../report" }
+apic-runner = { path = "../runner" }
+apic-selector = { path = "../selector" }
+apic-session = { path = "../session" }
+apic-skills = { path = "../skills" }
+apic-snippet = { path = "../snippet" }
+apic-suggest = { path = "../suggest" }
+clap.workspace = true
+clap_complete.workspace = true
+regex.workspace = true
+serde.workspace = true
+serde_json = { workspace = true, features = ["raw_value"] }
+
+[target.'cfg(unix)'.dependencies]
+libc.workspace = true
 
 [dev-dependencies]
+tempfile.workspace = true

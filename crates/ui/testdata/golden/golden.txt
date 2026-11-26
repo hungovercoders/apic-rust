@@ -1,0 +1,62 @@
+# The walk the golden test replays: the list, every tab, a run, a flow
+# landing request by request, the filter, the overlays, and every request
+# after a run of everything, at a small size and a wide one.
+size 120 40
+key j
+key 2
+key 3
+key 4
+key 5
+key 1
+key G
+key g
+key enter
+key H
+key c
+key c c
+key esc
+key j
+key enter
+key 3
+key 4
+key x
+key n
+key x
+key y
+key ?
+key esc
+key 1
+key /
+type todo
+key down
+key enter
+key f
+key esc
+key G
+watch a
+size 80 24
+tour
+size 70 16
+key g
+key 2
+key J
+key ctrl+d
+key ctrl+d ctrl+d ctrl+d ctrl+d ctrl+d ctrl+d
+key G
+size 69 16
+size 200 60
+key g
+key 2
+key e
+key 4
+key E
+key r
+key /
+type graphql
+key enter
+key enter
+key esc
+key /
+type zzzz
+key esc
+key q

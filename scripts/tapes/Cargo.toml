@@ -9,5 +9,11 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+apic-demoapi = { path = "../../crates/demoapi" }
+apic-gocompat = { path = "../../crates/gocompat" }
+record = { path = "../internal/record" }
+tempfile.workspace = true
 
 [dev-dependencies]
+apic-lessons = { path = "../../crates/lessons" }
+regex.workspace = true
