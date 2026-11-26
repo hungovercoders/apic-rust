@@ -9,5 +9,10 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+apic-auth = { path = "../auth" }
+apic-gocompat = { path = "../gocompat" }
+apic-httpfile = { path = "../httpfile" }
+apic-runner = { path = "../runner" }
 
 [dev-dependencies]
+tempfile.workspace = true

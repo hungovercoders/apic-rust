@@ -273,6 +273,13 @@ version = "0.0.0"
 [[package]]
 name = "apic-snippet"
 version = "0.0.0"
+dependencies = [
+ "apic-auth",
+ "apic-gocompat",
+ "apic-httpfile",
+ "apic-runner",
+ "tempfile",
+]
 
 [[package]]
 name = "apic-suggest"
