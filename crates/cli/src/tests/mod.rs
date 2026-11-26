@@ -54,12 +54,6 @@ pub(crate) fn execute_with(cancel: &CancelToken, stdin: Option<&str>, args: &[&s
     (code, out.string(), err.string())
 }
 
-/// The same with the arguments owned, for lists built at run time.
-pub(crate) fn execute_vec(args: &[String]) -> (i32, String, String) {
-    let args: Vec<&str> = args.iter().map(String::as_str).collect();
-    execute(&args)
-}
-
 pub(crate) fn tmp() -> TempDir {
     tempfile::tempdir().expect("a temporary directory")
 }
@@ -134,4 +128,46 @@ pub(crate) fn cancel_after(cancel: &CancelToken, after: std::time::Duration) {
         std::thread::sleep(after);
         cancel.cancel();
     });
+}
+
+/// Serialises the tests that change the working directory or the
+/// environment, and puts both back when the test ends.
+pub(crate) struct ProcessGuard {
+    cwd: std::path::PathBuf,
+    env: Vec<(String, Option<std::ffi::OsString>)>,
+    _lock: std::sync::MutexGuard<'static, ()>,
+}
+
+static PROCESS: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+impl ProcessGuard {
+    pub(crate) fn new() -> ProcessGuard {
+        let lock = PROCESS.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        ProcessGuard {
+            cwd: std::env::current_dir().expect("a working directory"),
+            env: Vec::new(),
+            _lock: lock,
+        }
+    }
+
+    pub(crate) fn chdir(&self, dir: impl AsRef<Path>) {
+        std::env::set_current_dir(dir).expect("change directory");
+    }
+
+    pub(crate) fn set_env(&mut self, name: &str, value: &str) {
+        self.env.push((name.to_string(), std::env::var_os(name)));
+        std::env::set_var(name, value);
+    }
+}
+
+impl Drop for ProcessGuard {
+    fn drop(&mut self) {
+        let _ = std::env::set_current_dir(&self.cwd);
+        for (name, value) in self.env.drain(..).rev() {
+            match value {
+                Some(v) => std::env::set_var(&name, v),
+                None => std::env::remove_var(&name),
+            }
+        }
+    }
 }

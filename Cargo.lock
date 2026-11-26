@@ -119,6 +119,7 @@ dependencies = [
  "apic-skills",
  "apic-snippet",
  "apic-suggest",
+ "apic-ui",
  "clap",
  "clap_complete",
  "libc",

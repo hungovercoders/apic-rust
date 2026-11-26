@@ -35,6 +35,7 @@ apic-session = { path = "../session" }
 apic-skills = { path = "../skills" }
 apic-snippet = { path = "../snippet" }
 apic-suggest = { path = "../suggest" }
+apic-ui = { path = "../ui" }
 clap.workspace = true
 clap_complete.workspace = true
 regex.workspace = true

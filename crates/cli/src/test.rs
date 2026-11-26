@@ -120,7 +120,7 @@ fn run(a: &mut App, inv: &Invocation) -> CliResult {
         output_overlaps_sources(&output, &p, &features)?;
         // Created on first write, which happens only after the features
         // have been read, so a report path can never truncate its input.
-        let lf = Arc::new(Mutex::new(LazyFile { path: output.clone(), f: None, err: None }));
+        let lf = Arc::new(Mutex::new(LazyFile::new(&output)));
         opts.output = Some(lf.clone());
         lazy = Some(lf);
     }
@@ -203,7 +203,7 @@ pub(crate) fn describe_outcome(err: Option<&CliError>) -> String {
 /// Returns path in absolute, symlink-free, canonical form even when it
 /// (or some of its parent directories) does not exist yet: the nearest
 /// existing ancestor is resolved and the remainder appended.
-fn real_path(path: &str) -> String {
+pub(crate) fn real_path(path: &str) -> String {
     match fp::abs(path) {
         Ok(abs) => apic_project::real_prefix(&abs),
         Err(_) => path.to_string(),
@@ -338,19 +338,23 @@ fn walk_finds(dir: &str, hit: &dyn Fn(&str) -> bool) -> bool {
 
 /// Opens its path on the first write. The first create or write error is
 /// kept and reported by close, since formatters may ignore it.
-struct LazyFile {
+pub(crate) struct LazyFile {
     path: String,
     f: Option<std::fs::File>,
     err: Option<String>,
 }
 
 impl LazyFile {
+    pub(crate) fn new(path: &str) -> LazyFile {
+        LazyFile { path: path.to_string(), f: None, err: None }
+    }
+
     fn fail(&mut self, e: std::io::Error, what: &str) -> std::io::Error {
         self.err = Some(apic_gocompat::path_error(what, std::path::Path::new(&self.path), &e));
         e
     }
 
-    fn close(&mut self) -> Result<(), String> {
+    pub(crate) fn close(&mut self) -> Result<(), String> {
         if let Some(f) = self.f.take() {
             drop(f);
         }
