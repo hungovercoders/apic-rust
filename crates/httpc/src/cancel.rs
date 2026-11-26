@@ -28,20 +28,32 @@ impl CancelToken {
     /// Cancels: every request holding the token fails with
     /// `ErrorKind::Cancelled`, and every `wait_timeout` returns.
     pub fn cancel(&self) {
-        *self.inner.cancelled.lock().unwrap_or_else(|e| e.into_inner()) = true;
+        *self
+            .inner
+            .cancelled
+            .lock()
+            .unwrap_or_else(|e| e.into_inner()) = true;
         self.inner.cond.notify_all();
         self.inner.notify.notify_waiters();
     }
 
     /// Reports whether the token has been cancelled.
     pub fn is_cancelled(&self) -> bool {
-        *self.inner.cancelled.lock().unwrap_or_else(|e| e.into_inner())
+        *self
+            .inner
+            .cancelled
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
     }
 
     /// Blocks for `d` or until the token is cancelled, whichever is first,
     /// and reports whether it was cancelled: a sleep that Ctrl-C ends.
     pub fn wait_timeout(&self, d: Duration) -> bool {
-        let guard = self.inner.cancelled.lock().unwrap_or_else(|e| e.into_inner());
+        let guard = self
+            .inner
+            .cancelled
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         let (guard, _) = self
             .inner
             .cond
@@ -52,7 +64,11 @@ impl CancelToken {
 
     /// Blocks until the token is cancelled.
     pub fn wait(&self) {
-        let guard = self.inner.cancelled.lock().unwrap_or_else(|e| e.into_inner());
+        let guard = self
+            .inner
+            .cancelled
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         drop(
             self.inner
                 .cond

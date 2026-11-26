@@ -1,0 +1,103 @@
+GET /|example.com => 200|||GET /{$} id= rest= x= y= v=
+GET /|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+POST /|example.com => 200|||/ id= rest= x= y= v=
+POST /|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /todos|example.com => 200|||GET /todos id= rest= x= y= v=
+GET /todos|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+POST /todos|example.com => 200|||POST /todos id= rest= x= y= v=
+POST /todos|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+PUT /todos|example.com => 200|||/ id= rest= x= y= v=
+PUT /todos|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /todos/42|example.com => 200|||GET /todos/{id} id=42 rest= x= y= v=
+GET /todos/42|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /todos/a%2Fb|example.com => 200|||GET /todos/{id} id=a/b rest= x= y= v=
+GET /todos/a%2Fb|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /todos/latest|example.com => 200|||GET /todos/latest id= rest= x= y= v=
+GET /todos/latest|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+HEAD /todos/7|example.com => 200|||GET /todos/{id} id=7 rest= x= y= v=
+HEAD /todos/7|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+DELETE /todos/7|example.com => 200|||DELETE /todos/{id} id=7 rest= x= y= v=
+DELETE /todos/7|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+PATCH /todos/7|example.com => 200|||/ id= rest= x= y= v=
+PATCH /todos/7|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /todos/|example.com => 200|||/ id= rest= x= y= v=
+GET /todos/|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /todos/1/2|example.com => 200|||/ id= rest= x= y= v=
+GET /todos/1/2|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /static/css/site.css|example.com => 200|||/static/{rest...} id= rest=css/site.css x= y= v=
+GET /static/css/site.css|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /static|example.com => 301|/static/||<a href="/static/">Moved Permanently</a>.\n\n
+GET /static|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /static/|example.com => 200|||/static/{rest...} id= rest= x= y= v=
+GET /static/|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /files|example.com => 301|/files/||<a href="/files/">Moved Permanently</a>.\n\n
+GET /files|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /files?x=1|example.com => 301|/files/?x=1||<a href="/files/?x=1">Moved Permanently</a>.\n\n
+GET /files?x=1|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /files/a/b|example.com => 200|||/files/ id= rest= x= y= v=
+GET /files/a/b|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+POST /files/a|example.com => 200|||/files/ id= rest= x= y= v=
+POST /files/a|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /exact|example.com => 301|/exact/||<a href="/exact/">Moved Permanently</a>.\n\n
+GET /exact|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /exact/|example.com => 200|||GET /exact/{$} id= rest= x= y= v=
+GET /exact/|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /exact/more|example.com => 200|||/ id= rest= x= y= v=
+GET /exact/more|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+PATCH /any|example.com => 200|||/any id= rest= x= y= v=
+PATCH /any|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /any/|example.com => 200|||/ id= rest= x= y= v=
+GET /any/|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /nothing/here|example.com => 200|||/ id= rest= x= y= v=
+GET /nothing/here|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET //todos//42|example.com => 301|/todos/42||<a href="/todos/42">Moved Permanently</a>.\n\n
+GET //todos//42|api.example.com:8443 => 301|/todos/42||<a href="/todos/42">Moved Permanently</a>.\n\n
+GET /todos/../todos/42|example.com => 301|/todos/42||<a href="/todos/42">Moved Permanently</a>.\n\n
+GET /todos/../todos/42|api.example.com:8443 => 301|/todos/42||<a href="/todos/42">Moved Permanently</a>.\n\n
+GET /todos/./42?q=1|example.com => 301|/todos/42?q=1||<a href="/todos/42?q=1">Moved Permanently</a>.\n\n
+GET /todos/./42?q=1|api.example.com:8443 => 301|/todos/42?q=1||<a href="/todos/42?q=1">Moved Permanently</a>.\n\n
+GET /basic-auth/a/b|example.com => 200|||GET /basic-auth/{user}/{password} id= rest= x= y= v=
+GET /basic-auth/a/b|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /basic-auth/a|example.com => 200|||/ id= rest= x= y= v=
+GET /basic-auth/a|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+POST /basic-auth/a/b|example.com => 200|||/ id= rest= x= y= v=
+POST /basic-auth/a/b|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /a/b/c|example.com => 200|||GET /a/b/c id= rest= x= y= v=
+GET /a/b/c|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /a/q/c|example.com => 200|||GET /a/{x}/c id= rest= x=q y= v=
+GET /a/q/c|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /a/b/z|example.com => 200|||/ id= rest= x= y= v=
+GET /a/b/z|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /only|example.com => 200|||/ id= rest= x= y= v=
+GET /only|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+PUT /only|example.com => 301|/only/||
+PUT /only|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+PUT /only/x|example.com => 200|||PUT /only/ id= rest= x= y= v=
+PUT /only/x|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /only/x|example.com => 200|||/ id= rest= x= y= v=
+GET /only/x|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /headonly|example.com => 200|||/ id= rest= x= y= v=
+GET /headonly|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+HEAD /headonly|example.com => 200|||HEAD /headonly id= rest= x= y= v=
+HEAD /headonly|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /sp%20ace/v%20v|example.com => 200|||GET /sp%20ace/{v} id= rest= x= y= v=v v
+GET /sp%20ace/v%20v|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /sp ace/x|example.com => 200|||GET /sp%20ace/{v} id= rest= x= y= v=x
+GET /sp ace/x|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+OPTIONS /todos|example.com => 200|||/ id= rest= x= y= v=
+OPTIONS /todos|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+GET /a/b/c/|example.com => 200|||/ id= rest= x= y= v=
+GET /a/b/c/|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+DELETE /todos|example.com => 200|||/ id= rest= x= y= v=
+DELETE /todos|api.example.com:8443 => 200|||api.example.com/ id= rest= x= y= v=
+CONFLICT GET /a/{x} || GET /a/{y} => conflict
+CONFLICT /a/{x}/b || /{x}/a/b => conflict
+CONFLICT GET /a/{x} || /a/b => conflict
+CONFLICT /a/ || /a/{x...} => conflict
+CONFLICT GET /x || HEAD /x => ok
+CONFLICT /x/{$} || /x/ => ok
+CONFLICT /x/{a} || /x/{$} => ok
+CONFLICT GET / || /index.html => conflict
+CONFLICT example.com/a || /a => ok
+CONFLICT GET /p/{a}/q || GET /p/r/{b} => conflict
+CONFLICT POST /a/b/ || /a/{x}/c => conflict

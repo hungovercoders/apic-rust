@@ -1,0 +1,1730 @@
+[
+ {
+  "Schema": "true",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "true",
+  "Instance": "1",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "true",
+  "Instance": "null",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "null",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "null",
+  "Instance": "1",
+  "Err": "validating root: not: validated against \u003canonymous schema\u003e",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$defs\":{\"a\":{\"$id\":\"sub/x\"}}}",
+  "Instance": "",
+  "Err": "$id sub/x does not resolve to an absolute URI (base is \"\")",
+  "Load": true
+ },
+ {
+  "Schema": "{\"dependencies\":{\"a\":null}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"dependencies\":{\"a\":null}}",
+  "Instance": "{\"a\":1}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"dependencies\":{\"a\":null}}",
+  "Instance": "{}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "false",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "false",
+  "Instance": "1",
+  "Err": "validating root: not: validated against \u003canonymous schema\u003e",
+  "Load": false
+ },
+ {
+  "Schema": "{}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{}",
+  "Instance": "{\"a\":1}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"string\"}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"type\":\"string\"}",
+  "Instance": "\"a\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"string\"}",
+  "Instance": "1",
+  "Err": "validating root: type: 1 has type \"integer\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"string\"}",
+  "Instance": "1.5",
+  "Err": "validating root: type: 1.5 has type \"number\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"string\"}",
+  "Instance": "null",
+  "Err": "validating root: type: \u003cinvalid reflect.Value\u003e has type \"null\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"string\"}",
+  "Instance": "true",
+  "Err": "validating root: type: true has type \"boolean\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"string\"}",
+  "Instance": "[1,\"a\",null,{\"k\":[1.5e30]}]",
+  "Err": "validating root: type: [1 a \u003cnil\u003e map[k:[1.5e+30]]] has type \"array\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"string\"}",
+  "Instance": "{\"b\":1,\"a\":\"x\"}",
+  "Err": "validating root: type: map[a:x b:1] has type \"object\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"number\"}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"type\":\"number\"}",
+  "Instance": "1",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"number\"}",
+  "Instance": "1.5",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"number\"}",
+  "Instance": "\"a\"",
+  "Err": "validating root: type: a has type \"string\", want \"number\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"integer\"}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"type\":\"integer\"}",
+  "Instance": "1",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"integer\"}",
+  "Instance": "1.0",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"integer\"}",
+  "Instance": "1.5",
+  "Err": "validating root: type: 1.5 has type \"number\", want \"integer\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"integer\"}",
+  "Instance": "1e3",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":[\"string\",\"null\"]}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"type\":[\"string\",\"null\"]}",
+  "Instance": "\"a\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":[\"string\",\"null\"]}",
+  "Instance": "null",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":[\"string\",\"null\"]}",
+  "Instance": "1",
+  "Err": "validating root: type: 1 has type \"integer\", want one of \"string, null\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":[\"number\",\"boolean\"]}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"type\":[\"number\",\"boolean\"]}",
+  "Instance": "3",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":[\"number\",\"boolean\"]}",
+  "Instance": "false",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":[\"number\",\"boolean\"]}",
+  "Instance": "\"x\"",
+  "Err": "validating root: type: x has type \"string\", want one of \"number, boolean\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"enum\":[\"a\",1,null,[1,2],{\"k\":true}]}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"enum\":[\"a\",1,null,[1,2],{\"k\":true}]}",
+  "Instance": "\"a\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"enum\":[\"a\",1,null,[1,2],{\"k\":true}]}",
+  "Instance": "1.0",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"enum\":[\"a\",1,null,[1,2],{\"k\":true}]}",
+  "Instance": "null",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"enum\":[\"a\",1,null,[1,2],{\"k\":true}]}",
+  "Instance": "[1,2]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"enum\":[\"a\",1,null,[1,2],{\"k\":true}]}",
+  "Instance": "{\"k\":true}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"enum\":[\"a\",1,null,[1,2],{\"k\":true}]}",
+  "Instance": "\"b\"",
+  "Err": "validating root: enum: b does not equal any of: [a 1 \u003cnil\u003e [1 2] map[k:true]]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"enum\":[\"a\",1,null,[1,2],{\"k\":true}]}",
+  "Instance": "[2,1]",
+  "Err": "validating root: enum: [2 1] does not equal any of: [a 1 \u003cnil\u003e [1 2] map[k:true]]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"enum\":[\"a\",1,null,[1,2],{\"k\":true}]}",
+  "Instance": "2",
+  "Err": "validating root: enum: 2 does not equal any of: [a 1 \u003cnil\u003e [1 2] map[k:true]]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"const\":{\"a\":[1,2]}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"const\":{\"a\":[1,2]}}",
+  "Instance": "{\"a\":[1,2]}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"const\":{\"a\":[1,2]}}",
+  "Instance": "{\"a\":[1,3]}",
+  "Err": "validating root: const: map[a:[1 3]] does not equal map[a:[1 2]]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"const\":null}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"const\":null}",
+  "Instance": "null",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"const\":null}",
+  "Instance": "0",
+  "Err": "validating root: const: 0 does not equal \u003cnil\u003e",
+  "Load": false
+ },
+ {
+  "Schema": "{\"const\":5}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"const\":5}",
+  "Instance": "5.0",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"const\":5}",
+  "Instance": "\"5\"",
+  "Err": "validating root: const: 5 does not equal 5",
+  "Load": false
+ },
+ {
+  "Schema": "{\"multipleOf\":0.5}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"multipleOf\":0.5}",
+  "Instance": "1.5",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"multipleOf\":0.5}",
+  "Instance": "1.25",
+  "Err": "validating root: multipleOf: 5/4 is not a multiple of 0.500000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"multipleOf\":0.5}",
+  "Instance": "\"x\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"multipleOf\":3}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"multipleOf\":3}",
+  "Instance": "9",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"multipleOf\":3}",
+  "Instance": "10",
+  "Err": "validating root: multipleOf: 10/1 is not a multiple of 3.000000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minimum\":1.5}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"minimum\":1.5}",
+  "Instance": "1.5",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minimum\":1.5}",
+  "Instance": "1.25",
+  "Err": "validating root: minimum: 5/4 is less than 1.500000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minimum\":1.5}",
+  "Instance": "-1e21",
+  "Err": "validating root: minimum: -1000000000000000000000/1 is less than 1.500000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minimum\":1.5}",
+  "Instance": "0.1",
+  "Err": "validating root: minimum: 3602879701896397/36028797018963968 is less than 1.500000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"maximum\":10}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"maximum\":10}",
+  "Instance": "10",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"maximum\":10}",
+  "Instance": "10.5",
+  "Err": "validating root: maximum: 21/2 is greater than 10.000000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"maximum\":10}",
+  "Instance": "1e300",
+  "Err": "validating root: maximum: 1000000000000000052504760255204420248704468581108159154915854115511802457988908195786371375080447864043704443832883878176942523235360430575644792184786706982848387200926575803737830233794788090059368953234970799945081119038967640880074652742780142494579258788820056842838115669472196386865459400540160/1 is greater than 10.000000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"exclusiveMinimum\":0}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"exclusiveMinimum\":0}",
+  "Instance": "1",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"exclusiveMinimum\":0}",
+  "Instance": "0",
+  "Err": "validating root: exclusiveMinimum: 0/1 is less than or equal to 0.000000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"exclusiveMinimum\":0}",
+  "Instance": "-3",
+  "Err": "validating root: exclusiveMinimum: -3/1 is less than or equal to 0.000000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"exclusiveMaximum\":0}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"exclusiveMaximum\":0}",
+  "Instance": "-1",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"exclusiveMaximum\":0}",
+  "Instance": "0",
+  "Err": "validating root: exclusiveMaximum: 0/1 is greater than or equal to 0.000000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minLength\":2,\"maxLength\":3}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"minLength\":2,\"maxLength\":3}",
+  "Instance": "\"ab\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minLength\":2,\"maxLength\":3}",
+  "Instance": "\"a\"",
+  "Err": "validating root: minLength: \"a\" contains 1 Unicode code points, fewer than 2",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minLength\":2,\"maxLength\":3}",
+  "Instance": "\"abcd\"",
+  "Err": "validating root: maxLength: \"abcd\" contains 4 Unicode code points, more than 3",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minLength\":2,\"maxLength\":3}",
+  "Instance": "\"zoë\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minLength\":2,\"maxLength\":3}",
+  "Instance": "\"\\\"q\\\"\\n\"",
+  "Err": "validating root: maxLength: \"\\\"q\\\"\\n\" contains 4 Unicode code points, more than 3",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minLength\":2,\"maxLength\":3}",
+  "Instance": "5",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"pattern\":\"^a\\\\d+$\"}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"pattern\":\"^a\\\\d+$\"}",
+  "Instance": "\"a12\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"pattern\":\"^a\\\\d+$\"}",
+  "Instance": "\"b\"",
+  "Err": "validating root: pattern: \"b\" does not match regular expression \"^a\\\\d+$\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"pattern\":\"^a\\\\d+$\"}",
+  "Instance": "7",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"allOf\":[{\"type\":\"object\"},{\"required\":[\"a\"]}]}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"allOf\":[{\"type\":\"object\"},{\"required\":[\"a\"]}]}",
+  "Instance": "{\"a\":1}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"allOf\":[{\"type\":\"object\"},{\"required\":[\"a\"]}]}",
+  "Instance": "{}",
+  "Err": "validating root: validating /allOf/1: required: missing properties: [\"a\"]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"allOf\":[{\"type\":\"object\"},{\"required\":[\"a\"]}]}",
+  "Instance": "1",
+  "Err": "validating root: validating /allOf/0: type: 1 has type \"integer\", want \"object\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"anyOf\":[{\"type\":\"string\"},{\"minimum\":5}]}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"anyOf\":[{\"type\":\"string\"},{\"minimum\":5}]}",
+  "Instance": "\"a\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"anyOf\":[{\"type\":\"string\"},{\"minimum\":5}]}",
+  "Instance": "7",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"anyOf\":[{\"type\":\"string\"},{\"minimum\":5}]}",
+  "Instance": "3",
+  "Err": "validating root: anyOf: did not validate against any of [\u003canonymous schema\u003e \u003canonymous schema\u003e]:\nvalidating /anyOf/0: type: 3 has type \"integer\", want \"string\"\nvalidating /anyOf/1: minimum: 3/1 is less than 5.000000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"anyOf\":[{\"type\":\"string\"},{\"minimum\":5}]}",
+  "Instance": "null",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"anyOf\":[{\"$id\":\"http://x/one\",\"type\":\"string\"},{\"$anchor\":\"two\",\"type\":\"null\"}]}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"anyOf\":[{\"$id\":\"http://x/one\",\"type\":\"string\"},{\"$anchor\":\"two\",\"type\":\"null\"}]}",
+  "Instance": "3",
+  "Err": "validating root: anyOf: did not validate against any of [http://x/one anchor two]:\nvalidating http://x/one: type: 3 has type \"integer\", want \"string\"\nvalidating /anyOf/1: type: 3 has type \"integer\", want \"null\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"oneOf\":[{\"type\":\"integer\"},{\"minimum\":5}]}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"oneOf\":[{\"type\":\"integer\"},{\"minimum\":5}]}",
+  "Instance": "3",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"oneOf\":[{\"type\":\"integer\"},{\"minimum\":5}]}",
+  "Instance": "5.5",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"oneOf\":[{\"type\":\"integer\"},{\"minimum\":5}]}",
+  "Instance": "7",
+  "Err": "validating root: oneOf: validated against both \u003canonymous schema\u003e and \u003canonymous schema\u003e",
+  "Load": false
+ },
+ {
+  "Schema": "{\"oneOf\":[{\"type\":\"integer\"},{\"minimum\":5}]}",
+  "Instance": "\"a\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"oneOf\":[{\"type\":\"integer\"},{\"minimum\":5}]}",
+  "Instance": "1.5",
+  "Err": "validating root: oneOf: did not validate against any of [\u003canonymous schema\u003e \u003canonymous schema\u003e]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"not\":{\"type\":\"string\"}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"not\":{\"type\":\"string\"}}",
+  "Instance": "1",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"not\":{\"type\":\"string\"}}",
+  "Instance": "\"a\"",
+  "Err": "validating root: not: validated against \u003canonymous schema\u003e",
+  "Load": false
+ },
+ {
+  "Schema": "{\"if\":{\"type\":\"string\"},\"then\":{\"minLength\":3},\"else\":{\"minimum\":10}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"if\":{\"type\":\"string\"},\"then\":{\"minLength\":3},\"else\":{\"minimum\":10}}",
+  "Instance": "\"abc\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"if\":{\"type\":\"string\"},\"then\":{\"minLength\":3},\"else\":{\"minimum\":10}}",
+  "Instance": "\"a\"",
+  "Err": "validating root: validating /then: minLength: \"a\" contains 1 Unicode code points, fewer than 3",
+  "Load": false
+ },
+ {
+  "Schema": "{\"if\":{\"type\":\"string\"},\"then\":{\"minLength\":3},\"else\":{\"minimum\":10}}",
+  "Instance": "11",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"if\":{\"type\":\"string\"},\"then\":{\"minLength\":3},\"else\":{\"minimum\":10}}",
+  "Instance": "3",
+  "Err": "validating root: validating /else: minimum: 3/1 is less than 10.000000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"items\":{\"type\":\"integer\"}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"items\":{\"type\":\"integer\"}}",
+  "Instance": "[1,2]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"items\":{\"type\":\"integer\"}}",
+  "Instance": "[1,\"a\"]",
+  "Err": "validating root: validating /items: type: a has type \"string\", want \"integer\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"items\":{\"type\":\"integer\"}}",
+  "Instance": "[]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"items\":{\"type\":\"integer\"}}",
+  "Instance": "\"x\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"prefixItems\":[{\"type\":\"string\"},{\"type\":\"integer\"}],\"items\":{\"type\":\"boolean\"}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"prefixItems\":[{\"type\":\"string\"},{\"type\":\"integer\"}],\"items\":{\"type\":\"boolean\"}}",
+  "Instance": "[\"a\",1,true]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"prefixItems\":[{\"type\":\"string\"},{\"type\":\"integer\"}],\"items\":{\"type\":\"boolean\"}}",
+  "Instance": "[\"a\"]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"prefixItems\":[{\"type\":\"string\"},{\"type\":\"integer\"}],\"items\":{\"type\":\"boolean\"}}",
+  "Instance": "[1]",
+  "Err": "validating root: validating /prefixItems/0: type: 1 has type \"integer\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"prefixItems\":[{\"type\":\"string\"},{\"type\":\"integer\"}],\"items\":{\"type\":\"boolean\"}}",
+  "Instance": "[\"a\",\"b\"]",
+  "Err": "validating root: validating /prefixItems/1: type: b has type \"string\", want \"integer\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"prefixItems\":[{\"type\":\"string\"},{\"type\":\"integer\"}],\"items\":{\"type\":\"boolean\"}}",
+  "Instance": "[\"a\",1,2]",
+  "Err": "validating root: validating /items: type: 2 has type \"integer\", want \"boolean\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"prefixItems\":[{\"type\":\"string\"}],\"items\":false}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"prefixItems\":[{\"type\":\"string\"}],\"items\":false}",
+  "Instance": "[\"a\"]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"prefixItems\":[{\"type\":\"string\"}],\"items\":false}",
+  "Instance": "[\"a\",1]",
+  "Err": "validating root: validating /items: not: validated against \u003canonymous schema\u003e",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"items\":[{\"type\":\"string\"},{\"type\":\"integer\"}],\"additionalItems\":{\"type\":\"boolean\"}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"items\":[{\"type\":\"string\"},{\"type\":\"integer\"}],\"additionalItems\":{\"type\":\"boolean\"}}",
+  "Instance": "[\"a\",1,true]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"items\":[{\"type\":\"string\"},{\"type\":\"integer\"}],\"additionalItems\":{\"type\":\"boolean\"}}",
+  "Instance": "[\"a\",1,2]",
+  "Err": "validating root: validating /additionalItems: type: 2 has type \"integer\", want \"boolean\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"items\":[{\"type\":\"string\"},{\"type\":\"integer\"}],\"additionalItems\":{\"type\":\"boolean\"}}",
+  "Instance": "[1]",
+  "Err": "validating root: validating /items/0: type: 1 has type \"integer\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"items\":{\"type\":\"string\"},\"additionalItems\":false}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"items\":{\"type\":\"string\"},\"additionalItems\":false}",
+  "Instance": "[\"a\",\"b\"]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"items\":{\"type\":\"string\"},\"additionalItems\":false}",
+  "Instance": "[1]",
+  "Err": "validating root: validating /items: type: 1 has type \"integer\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"contains\":{\"type\":\"integer\"}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"contains\":{\"type\":\"integer\"}}",
+  "Instance": "[\"a\",1]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"contains\":{\"type\":\"integer\"}}",
+  "Instance": "[\"a\",1.5,true,null,{\"k\":\"v\"}]",
+  "Err": "validating root: contains: [a %!s(float64=1.5) %!s(bool=true) \u003cnil\u003e map[k:v]] does not have an item matching \u003canonymous schema\u003e",
+  "Load": false
+ },
+ {
+  "Schema": "{\"contains\":{\"type\":\"integer\"}}",
+  "Instance": "[]",
+  "Err": "validating root: contains: [] does not have an item matching \u003canonymous schema\u003e",
+  "Load": false
+ },
+ {
+  "Schema": "{\"contains\":{\"type\":\"integer\"},\"minContains\":2,\"maxContains\":3}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"contains\":{\"type\":\"integer\"},\"minContains\":2,\"maxContains\":3}",
+  "Instance": "[1,2]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"contains\":{\"type\":\"integer\"},\"minContains\":2,\"maxContains\":3}",
+  "Instance": "[1]",
+  "Err": "validating root: minContains: contains validated 1 items, less than 2",
+  "Load": false
+ },
+ {
+  "Schema": "{\"contains\":{\"type\":\"integer\"},\"minContains\":2,\"maxContains\":3}",
+  "Instance": "[1,2,3,4]",
+  "Err": "validating root: maxContains: contains validated 4 items, greater than 3",
+  "Load": false
+ },
+ {
+  "Schema": "{\"contains\":{\"type\":\"integer\"},\"minContains\":2,\"maxContains\":3}",
+  "Instance": "[\"a\"]",
+  "Err": "validating root: contains: [a] does not have an item matching \u003canonymous schema\u003e",
+  "Load": false
+ },
+ {
+  "Schema": "{\"contains\":{\"type\":\"integer\"},\"minContains\":0}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"contains\":{\"type\":\"integer\"},\"minContains\":0}",
+  "Instance": "[\"a\"]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minItems\":1,\"maxItems\":2}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"minItems\":1,\"maxItems\":2}",
+  "Instance": "[1]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minItems\":1,\"maxItems\":2}",
+  "Instance": "[]",
+  "Err": "validating root: minItems: array length 0 is less than 1",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minItems\":1,\"maxItems\":2}",
+  "Instance": "[1,2,3]",
+  "Err": "validating root: maxItems: array length 3 is greater than 2",
+  "Load": false
+ },
+ {
+  "Schema": "{\"uniqueItems\":true}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"uniqueItems\":true}",
+  "Instance": "[1,2,3]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"uniqueItems\":true}",
+  "Instance": "[1,2,1.0]",
+  "Err": "validating root: uniqueItems: array items 2 and 0 are equal",
+  "Load": false
+ },
+ {
+  "Schema": "{\"uniqueItems\":true}",
+  "Instance": "[{\"a\":1,\"b\":2},{\"b\":2,\"a\":1}]",
+  "Err": "validating root: uniqueItems: array items 1 and 0 are equal",
+  "Load": false
+ },
+ {
+  "Schema": "{\"uniqueItems\":true}",
+  "Instance": "[\"a\",\"b\",\"c\",\"b\",\"a\"]",
+  "Err": "validating root: uniqueItems: array items 3 and 1 are equal",
+  "Load": false
+ },
+ {
+  "Schema": "{\"uniqueItems\":true}",
+  "Instance": "[[1],[1]]",
+  "Err": "validating root: uniqueItems: array items 1 and 0 are equal",
+  "Load": false
+ },
+ {
+  "Schema": "{\"uniqueItems\":true}",
+  "Instance": "[1,\"1\",true,null]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"uniqueItems\":true}",
+  "Instance": "[null,null]",
+  "Err": "validating root: uniqueItems: array items 1 and 0 are equal",
+  "Load": false
+ },
+ {
+  "Schema": "{\"unevaluatedItems\":false,\"prefixItems\":[{\"type\":\"integer\"}]}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"unevaluatedItems\":false,\"prefixItems\":[{\"type\":\"integer\"}]}",
+  "Instance": "[1]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"unevaluatedItems\":false,\"prefixItems\":[{\"type\":\"integer\"}]}",
+  "Instance": "[1,2]",
+  "Err": "validating root: validating /unevaluatedItems: not: validated against \u003canonymous schema\u003e",
+  "Load": false
+ },
+ {
+  "Schema": "{\"unevaluatedItems\":{\"type\":\"string\"},\"allOf\":[{\"prefixItems\":[true]}],\"contains\":{\"type\":\"integer\"}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"unevaluatedItems\":{\"type\":\"string\"},\"allOf\":[{\"prefixItems\":[true]}],\"contains\":{\"type\":\"integer\"}}",
+  "Instance": "[true,1,\"a\",2]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"unevaluatedItems\":{\"type\":\"string\"},\"allOf\":[{\"prefixItems\":[true]}],\"contains\":{\"type\":\"integer\"}}",
+  "Instance": "[true,1,\"a\",null]",
+  "Err": "validating root: validating /unevaluatedItems: type: \u003cinvalid reflect.Value\u003e has type \"null\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"properties\":{\"a\":{\"type\":\"integer\"}},\"additionalProperties\":false}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"properties\":{\"a\":{\"type\":\"integer\"}},\"additionalProperties\":false}",
+  "Instance": "{\"a\":1}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"properties\":{\"a\":{\"type\":\"integer\"}},\"additionalProperties\":false}",
+  "Instance": "{\"a\":\"x\"}",
+  "Err": "validating root: validating /properties/a: type: x has type \"string\", want \"integer\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"properties\":{\"a\":{\"type\":\"integer\"}},\"additionalProperties\":false}",
+  "Instance": "{\"a\":1,\"z\":2}",
+  "Err": "validating root: unexpected additional properties [\"z\"]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"properties\":{\"a\":{\"type\":\"integer\"}},\"additionalProperties\":false}",
+  "Instance": "{}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"properties\":{\"a\":true},\"additionalProperties\":{\"type\":\"string\"}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"properties\":{\"a\":true},\"additionalProperties\":{\"type\":\"string\"}}",
+  "Instance": "{\"a\":1,\"b\":\"x\"}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"properties\":{\"a\":true},\"additionalProperties\":{\"type\":\"string\"}}",
+  "Instance": "{\"b\":1}",
+  "Err": "validating root: validating /additionalProperties: type: 1 has type \"integer\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"patternProperties\":{\"^x-\":{\"type\":\"integer\"}},\"additionalProperties\":false}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"patternProperties\":{\"^x-\":{\"type\":\"integer\"}},\"additionalProperties\":false}",
+  "Instance": "{\"x-a\":1}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"patternProperties\":{\"^x-\":{\"type\":\"integer\"}},\"additionalProperties\":false}",
+  "Instance": "{\"x-a\":\"s\"}",
+  "Err": "validating root: validating /patternProperties/^x-: type: s has type \"string\", want \"integer\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"patternProperties\":{\"^x-\":{\"type\":\"integer\"}},\"additionalProperties\":false}",
+  "Instance": "{\"y\":1}",
+  "Err": "validating root: unexpected additional properties [\"y\"]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"propertyNames\":{\"maxLength\":2}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"propertyNames\":{\"maxLength\":2}}",
+  "Instance": "{\"ab\":1}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"propertyNames\":{\"maxLength\":2}}",
+  "Instance": "{\"abc\":1}",
+  "Err": "validating root: validating /propertyNames: maxLength: \"abc\" contains 3 Unicode code points, more than 2",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minProperties\":1,\"maxProperties\":2}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"minProperties\":1,\"maxProperties\":2}",
+  "Instance": "{\"a\":1}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minProperties\":1,\"maxProperties\":2}",
+  "Instance": "{}",
+  "Err": "validating root: minProperties: object has 0 properties, less than 1",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minProperties\":1,\"maxProperties\":2}",
+  "Instance": "{\"a\":1,\"b\":2,\"c\":3}",
+  "Err": "validating root: maxProperties: object has 3 properties, greater than 2",
+  "Load": false
+ },
+ {
+  "Schema": "{\"required\":[\"a\",\"b\",\"c\"]}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"required\":[\"a\",\"b\",\"c\"]}",
+  "Instance": "{\"a\":1,\"b\":2,\"c\":3}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"required\":[\"a\",\"b\",\"c\"]}",
+  "Instance": "{\"b\":2}",
+  "Err": "validating root: required: missing properties: [\"a\" \"c\"]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"required\":[\"a\",\"b\",\"c\"]}",
+  "Instance": "[]",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"dependentRequired\":{\"a\":[\"b\",\"c\"]}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"dependentRequired\":{\"a\":[\"b\",\"c\"]}}",
+  "Instance": "{\"a\":1,\"b\":2,\"c\":3}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"dependentRequired\":{\"a\":[\"b\",\"c\"]}}",
+  "Instance": "{\"a\":1}",
+  "Err": "validating root: dependentRequired[\"a\"]: missing properties [\"b\" \"c\"]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"dependentRequired\":{\"a\":[\"b\",\"c\"]}}",
+  "Instance": "{\"z\":1}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"dependentSchemas\":{\"a\":{\"required\":[\"b\"]}}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"dependentSchemas\":{\"a\":{\"required\":[\"b\"]}}}",
+  "Instance": "{\"a\":1,\"b\":2}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"dependentSchemas\":{\"a\":{\"required\":[\"b\"]}}}",
+  "Instance": "{\"a\":1}",
+  "Err": "validating root: validating /dependentSchemas/a: required: missing properties: [\"b\"]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"dependencies\":{\"a\":[\"b\"],\"c\":{\"required\":[\"d\"]}}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"dependencies\":{\"a\":[\"b\"],\"c\":{\"required\":[\"d\"]}}}",
+  "Instance": "{\"a\":1,\"b\":1}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"dependencies\":{\"a\":[\"b\"],\"c\":{\"required\":[\"d\"]}}}",
+  "Instance": "{\"a\":1}",
+  "Err": "validating root: dependentRequired[\"a\"]: missing properties [\"b\"]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"dependencies\":{\"a\":[\"b\"],\"c\":{\"required\":[\"d\"]}}}",
+  "Instance": "{\"c\":1}",
+  "Err": "validating root: validating /dependencies/c: required: missing properties: [\"d\"]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"dependencies\":{\"a\":[\"b\"],\"c\":{\"required\":[\"d\"]}}}",
+  "Instance": "{\"c\":1,\"d\":2}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"unevaluatedProperties\":false,\"allOf\":[{\"properties\":{\"a\":true}}],\"properties\":{\"b\":true}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"unevaluatedProperties\":false,\"allOf\":[{\"properties\":{\"a\":true}}],\"properties\":{\"b\":true}}",
+  "Instance": "{\"a\":1,\"b\":2}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"unevaluatedProperties\":false,\"allOf\":[{\"properties\":{\"a\":true}}],\"properties\":{\"b\":true}}",
+  "Instance": "{\"a\":1,\"c\":2}",
+  "Err": "validating root: validating /unevaluatedProperties: not: validated against \u003canonymous schema\u003e",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$ref\":\"#/$defs/pos\",\"$defs\":{\"pos\":{\"type\":\"integer\",\"minimum\":0}},\"maximum\":5}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"#/$defs/pos\",\"$defs\":{\"pos\":{\"type\":\"integer\",\"minimum\":0}},\"maximum\":5}",
+  "Instance": "3",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$ref\":\"#/$defs/pos\",\"$defs\":{\"pos\":{\"type\":\"integer\",\"minimum\":0}},\"maximum\":5}",
+  "Instance": "-1",
+  "Err": "validating root: validating /$defs/pos: minimum: -1/1 is less than 0.000000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$ref\":\"#/$defs/pos\",\"$defs\":{\"pos\":{\"type\":\"integer\",\"minimum\":0}},\"maximum\":5}",
+  "Instance": "7",
+  "Err": "validating root: maximum: 7/1 is greater than 5.000000",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$ref\":\"#/$defs/pos\",\"$defs\":{\"pos\":{\"type\":\"integer\",\"minimum\":0}},\"maximum\":5}",
+  "Instance": "\"a\"",
+  "Err": "validating root: validating /$defs/pos: type: a has type \"string\", want \"integer\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"$ref\":\"#/definitions/pos\",\"definitions\":{\"pos\":{\"type\":\"integer\"}},\"maximum\":5}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"$ref\":\"#/definitions/pos\",\"definitions\":{\"pos\":{\"type\":\"integer\"}},\"maximum\":5}",
+  "Instance": "3",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"$ref\":\"#/definitions/pos\",\"definitions\":{\"pos\":{\"type\":\"integer\"}},\"maximum\":5}",
+  "Instance": "7",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"$ref\":\"#/definitions/pos\",\"definitions\":{\"pos\":{\"type\":\"integer\"}},\"maximum\":5}",
+  "Instance": "\"a\"",
+  "Err": "validating root: validating /definitions/pos: type: a has type \"string\", want \"integer\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$id\":\"http://example.com/root.json\",\"properties\":{\"a\":{\"$ref\":\"#/$defs/s\"},\"b\":{\"$ref\":\"http://example.com/root.json#/$defs/s\"},\"c\":{\"$ref\":\"other.json\"},\"d\":{\"$ref\":\"#named\"}},\"$defs\":{\"s\":{\"type\":\"string\"},\"o\":{\"$id\":\"other.json\",\"type\":\"integer\"},\"n\":{\"$anchor\":\"named\",\"type\":\"boolean\"}}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$id\":\"http://example.com/root.json\",\"properties\":{\"a\":{\"$ref\":\"#/$defs/s\"},\"b\":{\"$ref\":\"http://example.com/root.json#/$defs/s\"},\"c\":{\"$ref\":\"other.json\"},\"d\":{\"$ref\":\"#named\"}},\"$defs\":{\"s\":{\"type\":\"string\"},\"o\":{\"$id\":\"other.json\",\"type\":\"integer\"},\"n\":{\"$anchor\":\"named\",\"type\":\"boolean\"}}}",
+  "Instance": "{\"a\":\"x\",\"b\":\"y\",\"c\":1,\"d\":true}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$id\":\"http://example.com/root.json\",\"properties\":{\"a\":{\"$ref\":\"#/$defs/s\"},\"b\":{\"$ref\":\"http://example.com/root.json#/$defs/s\"},\"c\":{\"$ref\":\"other.json\"},\"d\":{\"$ref\":\"#named\"}},\"$defs\":{\"s\":{\"type\":\"string\"},\"o\":{\"$id\":\"other.json\",\"type\":\"integer\"},\"n\":{\"$anchor\":\"named\",\"type\":\"boolean\"}}}",
+  "Instance": "{\"a\":1}",
+  "Err": "validating http://example.com/root.json: validating /properties/a: validating /$defs/s: type: 1 has type \"integer\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$id\":\"http://example.com/root.json\",\"properties\":{\"a\":{\"$ref\":\"#/$defs/s\"},\"b\":{\"$ref\":\"http://example.com/root.json#/$defs/s\"},\"c\":{\"$ref\":\"other.json\"},\"d\":{\"$ref\":\"#named\"}},\"$defs\":{\"s\":{\"type\":\"string\"},\"o\":{\"$id\":\"other.json\",\"type\":\"integer\"},\"n\":{\"$anchor\":\"named\",\"type\":\"boolean\"}}}",
+  "Instance": "{\"b\":1}",
+  "Err": "validating http://example.com/root.json: validating /properties/b: validating /$defs/s: type: 1 has type \"integer\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$id\":\"http://example.com/root.json\",\"properties\":{\"a\":{\"$ref\":\"#/$defs/s\"},\"b\":{\"$ref\":\"http://example.com/root.json#/$defs/s\"},\"c\":{\"$ref\":\"other.json\"},\"d\":{\"$ref\":\"#named\"}},\"$defs\":{\"s\":{\"type\":\"string\"},\"o\":{\"$id\":\"other.json\",\"type\":\"integer\"},\"n\":{\"$anchor\":\"named\",\"type\":\"boolean\"}}}",
+  "Instance": "{\"c\":\"x\"}",
+  "Err": "validating http://example.com/root.json: validating /properties/c: validating other.json: type: x has type \"string\", want \"integer\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$id\":\"http://example.com/root.json\",\"properties\":{\"a\":{\"$ref\":\"#/$defs/s\"},\"b\":{\"$ref\":\"http://example.com/root.json#/$defs/s\"},\"c\":{\"$ref\":\"other.json\"},\"d\":{\"$ref\":\"#named\"}},\"$defs\":{\"s\":{\"type\":\"string\"},\"o\":{\"$id\":\"other.json\",\"type\":\"integer\"},\"n\":{\"$anchor\":\"named\",\"type\":\"boolean\"}}}",
+  "Instance": "{\"d\":\"x\"}",
+  "Err": "validating http://example.com/root.json: validating /properties/d: validating /$defs/n: type: x has type \"string\", want \"boolean\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$ref\":\"#/properties/a~1b/items/0\",\"properties\":{\"a/b\":{\"prefixItems\":[{\"type\":\"null\"}],\"items\":[]}}}",
+  "Instance": "",
+  "Err": "JSON Pointer \"/properties/a~1b/items/0\": index 0 is out of bounds for array of length 0",
+  "Load": true
+ },
+ {
+  "Schema": "{\"properties\":{\"a/b~c\":{\"type\":\"null\"},\"list\":{\"allOf\":[{\"type\":\"array\"},{\"items\":{\"properties\":{\"deep\":{\"const\":1}}}}]}}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"properties\":{\"a/b~c\":{\"type\":\"null\"},\"list\":{\"allOf\":[{\"type\":\"array\"},{\"items\":{\"properties\":{\"deep\":{\"const\":1}}}}]}}}",
+  "Instance": "{\"a/b~c\":1}",
+  "Err": "validating root: validating /properties/a~1b~0c: type: 1 has type \"integer\", want \"null\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"properties\":{\"a/b~c\":{\"type\":\"null\"},\"list\":{\"allOf\":[{\"type\":\"array\"},{\"items\":{\"properties\":{\"deep\":{\"const\":1}}}}]}}}",
+  "Instance": "{\"list\":[{\"deep\":2}]}",
+  "Err": "validating root: validating /properties/list: validating /properties/list/allOf/1: validating /properties/list/allOf/1/items: validating /properties/list/allOf/1/items/properties/deep: const: 2 does not equal 1",
+  "Load": false
+ },
+ {
+  "Schema": "{\"properties\":{\"a/b~c\":{\"type\":\"null\"},\"list\":{\"allOf\":[{\"type\":\"array\"},{\"items\":{\"properties\":{\"deep\":{\"const\":1}}}}]}}}",
+  "Instance": "{\"list\":5}",
+  "Err": "validating root: validating /properties/list: validating /properties/list/allOf/0: type: 5 has type \"integer\", want \"array\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$dynamicAnchor\":\"node\",\"type\":\"object\",\"properties\":{\"child\":{\"$dynamicRef\":\"#node\"}}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$dynamicAnchor\":\"node\",\"type\":\"object\",\"properties\":{\"child\":{\"$dynamicRef\":\"#node\"}}}",
+  "Instance": "{\"child\":{\"child\":{}}}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$dynamicAnchor\":\"node\",\"type\":\"object\",\"properties\":{\"child\":{\"$dynamicRef\":\"#node\"}}}",
+  "Instance": "{\"child\":{\"child\":1}}",
+  "Err": "validating root: validating /properties/child: validating root: validating /properties/child: validating root: type: 1 has type \"integer\", want \"object\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"string\"}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"string\"}",
+  "Instance": "\"a\"",
+  "Err": "cannot validate version http://json-schema.org/draft-04/schema#, supported versions: draft-07 and draft 2020-12",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"n\":{\"type\":[\"integer\",\"null\"]},\"e\":{\"enum\":[\"x\",\"y\"]}},\"required\":[\"n\"]}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"n\":{\"type\":[\"integer\",\"null\"]},\"e\":{\"enum\":[\"x\",\"y\"]}},\"required\":[\"n\"]}",
+  "Instance": "{\"n\":null,\"e\":\"x\"}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"n\":{\"type\":[\"integer\",\"null\"]},\"e\":{\"enum\":[\"x\",\"y\"]}},\"required\":[\"n\"]}",
+  "Instance": "{\"n\":1.5}",
+  "Err": "validating root: validating /properties/n: type: 1.5 has type \"number\", want one of \"integer, null\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"n\":{\"type\":[\"integer\",\"null\"]},\"e\":{\"enum\":[\"x\",\"y\"]}},\"required\":[\"n\"]}",
+  "Instance": "{\"n\":1,\"e\":\"z\"}",
+  "Err": "validating root: validating /properties/e: enum: z does not equal any of: [x y]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"n\":{\"type\":[\"integer\",\"null\"]},\"e\":{\"enum\":[\"x\",\"y\"]}},\"required\":[\"n\"]}",
+  "Instance": "{\"e\":\"x\"}",
+  "Err": "validating root: required: missing properties: [\"n\"]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"object\",\"title\":\"T\",\"description\":\"D\",\"default\":{\"a\":1},\"examples\":[1],\"format\":\"email\",\"x-extra\":1,\"deprecated\":true,\"$comment\":\"c\"}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"type\":\"object\",\"title\":\"T\",\"description\":\"D\",\"default\":{\"a\":1},\"examples\":[1],\"format\":\"email\",\"x-extra\":1,\"deprecated\":true,\"$comment\":\"c\"}",
+  "Instance": "{}",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"type\":\"object\",\"title\":\"T\",\"description\":\"D\",\"default\":{\"a\":1},\"examples\":[1],\"format\":\"email\",\"x-extra\":1,\"deprecated\":true,\"$comment\":\"c\"}",
+  "Instance": "1",
+  "Err": "validating root: type: 1 has type \"integer\", want \"object\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"additionalProperties\":{\"not\":{}}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"additionalProperties\":{\"not\":{}}}",
+  "Instance": "{\"a\":1}",
+  "Err": "validating root: unexpected additional properties [\"a\"]",
+  "Load": false
+ },
+ {
+  "Schema": "{\"additionalProperties\":{\"not\":{\"title\":\"t\"}}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"additionalProperties\":{\"not\":{\"title\":\"t\"}}}",
+  "Instance": "{\"a\":1}",
+  "Err": "validating root: validating /additionalProperties: not: validated against \u003canonymous schema\u003e",
+  "Load": false
+ },
+ {
+  "Schema": "{\"items\":null}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"items\":null}",
+  "Instance": "[1]",
+  "Err": "validating root: validating /items: not: validated against \u003canonymous schema\u003e",
+  "Load": false
+ },
+ {
+  "Schema": "{\"properties\":{\"a\":null}}",
+  "Instance": "",
+  "Err": "jsonschema: schema at /properties/a is nil",
+  "Load": true
+ },
+ {
+  "Schema": "{\"type\":5}",
+  "Instance": "",
+  "Err": "invalid value for \"type\": \"5\"",
+  "Load": true
+ },
+ {
+  "Schema": "{\"minLength\":1.5}",
+  "Instance": "",
+  "Err": "not an integer value",
+  "Load": true
+ },
+ {
+  "Schema": "{\"minLength\":2.0}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"minLength\":2.0}",
+  "Instance": "\"a\"",
+  "Err": "validating root: minLength: \"a\" contains 1 Unicode code points, fewer than 2",
+  "Load": false
+ },
+ {
+  "Schema": "{\"minLength\":\"x\"}",
+  "Instance": "",
+  "Err": "cannot be unmarshaled into an int",
+  "Load": true
+ },
+ {
+  "Schema": "{\"required\":\"a\"}",
+  "Instance": "",
+  "Err": "json: cannot unmarshal string into Go struct field .schemaWithoutMethods.required of type []string",
+  "Load": true
+ },
+ {
+  "Schema": "{\"required\":[1]}",
+  "Instance": "",
+  "Err": "json: cannot unmarshal number into Go struct field .schemaWithoutMethods.required of type string",
+  "Load": true
+ },
+ {
+  "Schema": "{\"title\":5}",
+  "Instance": "",
+  "Err": "json: cannot unmarshal number into Go struct field .schemaWithoutMethods.title of type string",
+  "Load": true
+ },
+ {
+  "Schema": "{\"minimum\":\"1\"}",
+  "Instance": "",
+  "Err": "json: cannot unmarshal string into Go struct field .schemaWithoutMethods.minimum of type float64",
+  "Load": true
+ },
+ {
+  "Schema": "{\"enum\":5}",
+  "Instance": "",
+  "Err": "json: cannot unmarshal number into Go struct field .schemaWithoutMethods.enum of type []interface {}",
+  "Load": true
+ },
+ {
+  "Schema": "{\"pattern\":\"(\"}",
+  "Instance": "",
+  "Err": "jsonschema.Schema: \u003canonymous schema\u003e: pattern: error parsing regexp: missing closing ): `(`",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"#/nope\"}",
+  "Instance": "",
+  "Err": "JSON Pointer \"/nope\": no schema field \"nope\"",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"other.json\"}",
+  "Instance": "",
+  "Err": "loading /other.json: cannot resolve remote schemas: no loader passed to Schema.Resolve",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"#foo\"}",
+  "Instance": "",
+  "Err": "no anchor \"foo\" in \u003canonymous schema\u003e",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$id\":\"x#y\"}",
+  "Instance": "",
+  "Err": "$id x#y must not have a fragment",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"#/properties\"}",
+  "Instance": "",
+  "Err": "JSON Pointer \"/properties\": does not refer to a schema, but to a map[string]*jsonschema.Schema",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"#/allOf/1\",\"allOf\":[{}]}",
+  "Instance": "",
+  "Err": "JSON Pointer \"/allOf/1\": index 1 is out of bounds for array of length 1",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"#/allOf/01\",\"allOf\":[{}]}",
+  "Instance": "",
+  "Err": "JSON Pointer \"/allOf/01\": segment \"01\" has leading zeroes",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"#/allOf/x\",\"allOf\":[{}]}",
+  "Instance": "",
+  "Err": "JSON Pointer \"/allOf/x\": invalid int: \"x\"",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"#/allOf/-\",\"allOf\":[{}]}",
+  "Instance": "",
+  "Err": "JSON Pointer \"/allOf/-\": the JSON Pointer array segment '-' is not supported",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"#/type\",\"type\":\"string\"}",
+  "Instance": "",
+  "Err": "JSON Pointer \"/type\": does not refer to a schema, but to a string",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"#/$defs/a/b\",\"$defs\":{\"a\":{}}}",
+  "Instance": "",
+  "Err": "JSON Pointer \"/$defs/a/b\": no schema field \"b\"",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"#/$defs/zz\",\"$defs\":{\"a\":{}}}",
+  "Instance": "",
+  "Err": "JSON Pointer \"/$defs/zz\": no key \"zz\" in map",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"#/title\"}",
+  "Instance": "",
+  "Err": "JSON Pointer \"/title\": does not refer to a schema, but to a string",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$ref\":\"%zz\"}",
+  "Instance": "",
+  "Err": "parse \"%zz\": invalid URL escape \"%zz\"",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$vocabulary\":{\"x\":true}}",
+  "Instance": "",
+  "Err": "jsonschema.Schema: \u003canonymous schema\u003e: cannot validate a schema with $vocabulary",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$id\":\"http://x/y\",\"$ref\":\"z\"}",
+  "Instance": "",
+  "Err": "loading http://x/z: cannot resolve remote schemas: no loader passed to Schema.Resolve",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$dynamicRef\":\"#nope\"}",
+  "Instance": "",
+  "Err": "no anchor \"nope\" in \u003canonymous schema\u003e",
+  "Load": true
+ },
+ {
+  "Schema": "{\"definitions\":{},\"$defs\":{}}",
+  "Instance": "",
+  "Err": "both Defs and Definitions are set; at most one should be",
+  "Load": true
+ },
+ {
+  "Schema": "{\"uniqueItems\":1}",
+  "Instance": "",
+  "Err": "json: cannot unmarshal number into Go struct field .schemaWithoutMethods.uniqueItems of type bool",
+  "Load": true
+ },
+ {
+  "Schema": "{\"type\":[\"a\",1]}",
+  "Instance": "",
+  "Err": "json: cannot unmarshal number into Go value of type string",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$id\":\"rel/path\"}",
+  "Instance": "",
+  "Err": "$id rel/path does not resolve to an absolute URI (base is \"/rel/path\")",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$id\":\"urn:example:root\",\"$ref\":\"#/$defs/a\",\"$defs\":{\"a\":{\"type\":\"null\"}}}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$id\":\"urn:example:root\",\"$ref\":\"#/$defs/a\",\"$defs\":{\"a\":{\"type\":\"null\"}}}",
+  "Instance": "1",
+  "Err": "validating urn:example:root: validating /$defs/a: type: 1 has type \"integer\", want \"null\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$defs\":{\"a\":{\"pattern\":\"(\"},\"b\":{\"patternProperties\":{\"[\":{}}}}}",
+  "Instance": "",
+  "Err": "jsonschema.Schema: \u003canonymous schema\u003e: pattern: error parsing regexp: missing closing ): `(`\njsonschema.Schema: \u003canonymous schema\u003e: patternProperties[\"[\"]: error parsing regexp: missing closing ]: `[`",
+  "Load": true
+ },
+ {
+  "Schema": "{\"properties\":{\"a\":{\"type\":\"string\",\"type2\":1}},\"allOf\":[null]}",
+  "Instance": "",
+  "Err": "jsonschema: schema at /allOf/0 is nil",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$defs\":{\"a\":{\"$anchor\":\"x\",\"type\":\"string\"},\"b\":{\"$anchor\":\"x\",\"type\":\"null\"}},\"$ref\":\"#x\"}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$defs\":{\"a\":{\"$anchor\":\"x\",\"type\":\"string\"},\"b\":{\"$anchor\":\"x\",\"type\":\"null\"}},\"$ref\":\"#x\"}",
+  "Instance": "\"s\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$defs\":{\"a\":{\"$anchor\":\"x\",\"type\":\"string\"},\"b\":{\"$anchor\":\"x\",\"type\":\"null\"}},\"$ref\":\"#x\"}",
+  "Instance": "null",
+  "Err": "validating root: validating /$defs/a: type: \u003cinvalid reflect.Value\u003e has type \"null\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"$defs\":{\"a\":{\"$id\":\"#frag\",\"type\":\"string\"}},\"$ref\":\"#frag\"}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"$defs\":{\"a\":{\"$id\":\"#frag\",\"type\":\"string\"}},\"$ref\":\"#frag\"}",
+  "Instance": "\"s\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"$defs\":{\"a\":{\"$id\":\"#frag\",\"type\":\"string\"}},\"$ref\":\"#frag\"}",
+  "Instance": "1",
+  "Err": "validating root: validating #frag: type: 1 has type \"integer\", want \"string\"",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"a\":{\"$id\":\"http://x/a\",\"$ref\":\"#/definitions/b\"},\"b\":{\"type\":\"string\"}},\"$ref\":\"#/definitions/a\"}",
+  "Instance": "",
+  "Err": "",
+  "Load": true
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"a\":{\"$id\":\"http://x/a\",\"$ref\":\"#/definitions/b\"},\"b\":{\"type\":\"string\"}},\"$ref\":\"#/definitions/a\"}",
+  "Instance": "\"s\"",
+  "Err": "",
+  "Load": false
+ },
+ {
+  "Schema": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"a\":{\"$id\":\"http://x/a\",\"$ref\":\"#/definitions/b\"},\"b\":{\"type\":\"string\"}},\"$ref\":\"#/definitions/a\"}",
+  "Instance": "1",
+  "Err": "validating root: validating http://x/a: validating /definitions/b: type: 1 has type \"integer\", want \"string\"",
+  "Load": false
+ }
+]

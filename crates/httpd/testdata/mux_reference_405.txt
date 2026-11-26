@@ -1,0 +1,24 @@
+PUT /todos/1|example.com => 405||DELETE, GET, HEAD|Method Not Allowed\n
+PUT /todos/1|h.test => 405||DELETE, GET, HEAD, POST|Method Not Allowed\n
+GET /todos|example.com => 405||POST|Method Not Allowed\n
+GET /todos|h.test => 405||POST|Method Not Allowed\n
+GET /dir|example.com => 405||PUT|Method Not Allowed\n
+GET /dir|h.test => 405||PUT|Method Not Allowed\n
+PUT /dir|example.com => 301|/dir/||
+PUT /dir|h.test => 301|/dir/||
+HEAD /todos|example.com => 405||POST|Method Not Allowed\n
+HEAD /todos|h.test => 405||POST|Method Not Allowed\n
+GET /nope|example.com => 404|||404 page not found\n
+GET /nope|h.test => 404|||404 page not found\n
+HEAD /todos/1|example.com => 200|||GET /todos/{id} id=1 rest= x= y= v=
+HEAD /todos/1|h.test => 200|||GET /todos/{id} id=1 rest= x= y= v=
+POST /todos/1|example.com => 405||DELETE, GET, HEAD|Method Not Allowed\n
+POST /todos/1|h.test => 200|||POST h.test/todos/{id} id=1 rest= x= y= v=
+GET /dir/x|example.com => 405||PUT|Method Not Allowed\n
+GET /dir/x|h.test => 405||PUT|Method Not Allowed\n
+GET /hosted|example.com => 404|||404 page not found\n
+GET /hosted|h.test => 200|||h.test/hosted id= rest= x= y= v=
+OPTIONS /free|example.com => 200|||/free id= rest= x= y= v=
+OPTIONS /free|h.test => 200|||/free id= rest= x= y= v=
+GET /todos/1/|example.com => 404|||404 page not found\n
+GET /todos/1/|h.test => 404|||404 page not found\n

@@ -1,0 +1,418 @@
+[
+ {
+  "In": "A=1\nB=2\n",
+  "Out": {
+   "A": "1",
+   "B": "2"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=1",
+  "Out": {
+   "A": "1"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=",
+  "Out": {
+   "A": ""
+  },
+  "Err": ""
+ },
+ {
+  "In": "A",
+  "Out": {
+   "": "A"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A\n",
+  "Out": null,
+  "Err": "unexpected character \"\\n\" in variable name near \"A\\n\""
+ },
+ {
+  "In": "=x",
+  "Out": {
+   "": "x"
+  },
+  "Err": ""
+ },
+ {
+  "In": " A = 1 ",
+  "Out": {
+   "A": "1"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A:1\nB : 2\nC:\n",
+  "Out": {
+   "A": "1",
+   "B": "2",
+   "C": ""
+  },
+  "Err": ""
+ },
+ {
+  "In": "export A=1\nexport  B=2\nexportC=3\nexport=4\n",
+  "Out": {
+   "A": "1",
+   "B": "2",
+   "export": "4",
+   "exportC": "3"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=1 # c\nB=1#c\nC=# c\nD= #c\nE=a # b # c\nF=#\n",
+  "Out": {
+   "A": "1",
+   "B": "1#c",
+   "C": "# c",
+   "D": "#c",
+   "E": "a # b",
+   "F": "#"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A='x y' # c\nB=\"x y\" # c\n",
+  "Out": {
+   "A": "x y",
+   "B": "x y"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A='it\\'s'\nB=\"say \\\"hi\\\"\"\n",
+  "Out": {
+   "A": "it\\'s",
+   "B": "say \"hi\\"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=\"a\\nb\\rc\\td\\\\e\\$F\"\n",
+  "Out": {
+   "A": "a\nb\rctd\\e$F"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A='a\\nb'\n",
+  "Out": {
+   "A": "a\\nb"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=1\nB=$A\nC=${A}\nD=\"$A ${A} $(A) \\$A\"\nE='$A'\nF=$NOPE-x\nG=${A\nH=$A}\nI=$a\nJ=$\nK=a$A$A\n",
+  "Out": {
+   "A": "1",
+   "B": "1",
+   "C": "1",
+   "D": "1 1 1) $A",
+   "E": "$A",
+   "F": "-x",
+   "G": "1",
+   "H": "1",
+   "I": "$a",
+   "J": "$",
+   "K": "a11"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=\"multi\nline\"\nB=2\n",
+  "Out": {
+   "A": "multi\nline",
+   "B": "2"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A='multi\nline'\n",
+  "Out": {
+   "A": "multi\nline"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=\"unterminated\nB=2",
+  "Out": null,
+  "Err": "unterminated quoted value \"unterminated"
+ },
+ {
+  "In": "A='x",
+  "Out": null,
+  "Err": "unterminated quoted value 'x"
+ },
+ {
+  "In": "\n\n# only comments\n   # more\n",
+  "Out": {},
+  "Err": ""
+ },
+ {
+  "In": "",
+  "Out": {},
+  "Err": ""
+ },
+ {
+  "In": "   ",
+  "Out": {},
+  "Err": ""
+ },
+ {
+  "In": "#",
+  "Out": {},
+  "Err": ""
+ },
+ {
+  "In": "A=1\r\nB=2\r\n",
+  "Out": {
+   "A": "1",
+   "B": "2"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=1\rB=2\r",
+  "Out": {
+   "A": "1",
+   "B": "2"
+  },
+  "Err": ""
+ },
+ {
+  "In": "\tA\t=\tv\t\n",
+  "Out": {
+   "A": "v"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A.B=1\nA_B=2\nA1=3\n1A=4\n",
+  "Out": {
+   "1A": "4",
+   "A.B": "1",
+   "A1": "3",
+   "A_B": "2"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A-B=1\n",
+  "Out": null,
+  "Err": "unexpected character \"-\" in variable name near \"A-B=1\\n\""
+ },
+ {
+  "In": "A B=1\n",
+  "Out": {
+   "A B": "1"
+  },
+  "Err": ""
+ },
+ {
+  "In": "é=1\n",
+  "Out": null,
+  "Err": "unexpected character \"©\" in variable name near \"é=1\\n\""
+ },
+ {
+  "In": "A=é ü\n",
+  "Out": {
+   "A": "é ü"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=\"é\\é\"\n",
+  "Out": {
+   "A": "éé"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=x\n\n\nB=y",
+  "Out": {
+   "A": "x",
+   "B": "y"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=1\nA=2\n",
+  "Out": {
+   "A": "2"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=a=b:c\n",
+  "Out": {
+   "A": "a=b:c"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A: a: b\n",
+  "Out": {
+   "A": "a: b"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=\"\"\nB=''\nC=\"\"\"\nD='''\n",
+  "Out": null,
+  "Err": "unexpected character \"\\\"\" in variable name near \"\\\"\\nD='''\\n\""
+ },
+ {
+  "In": "A=\"x\"y\n",
+  "Out": null,
+  "Err": "unexpected character \"\\n\" in variable name near \"y\\n\""
+ },
+ {
+  "In": "A=\"x\" B=1\n",
+  "Out": {
+   "A": "x",
+   "B": "1"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=x\\ny\n",
+  "Out": {
+   "A": "x\\ny"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=\\$B\nB=\\\\\n",
+  "Out": {
+   "A": "$B",
+   "B": "\\\\"
+  },
+  "Err": ""
+ },
+ {
+  "In": "export A\n",
+  "Out": null,
+  "Err": "unexpected character \"\\n\" in variable name near \"A\\n\""
+ },
+ {
+  "In": "A= 'q' \n",
+  "Out": {
+   "A": "q"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A='x'#c\nB=1\n",
+  "Out": {
+   "A": "x",
+   "B": "1"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=\"a # b\"\n",
+  "Out": {
+   "A": "a # b"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=a\tb \t# c\n",
+  "Out": {
+   "A": "a\tb"
+  },
+  "Err": ""
+ },
+ {
+  "In": "a=1\nB=$a${a}\n",
+  "Out": {
+   "B": "$a${a}",
+   "a": "1"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=1\nB=\"\\${A}\"\n",
+  "Out": {
+   "A": "1",
+   "B": "${A}"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=${}x$\n",
+  "Out": {
+   "A": "${}x$"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=1 \n# c\n\nB = \" sp \" \n",
+  "Out": {
+   "A": "1",
+   "B": " sp "
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=`cmd`\n",
+  "Out": {
+   "A": "`cmd`"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A = 'a'\"b\"\n",
+  "Out": null,
+  "Err": "unexpected character \"\\\"\" in variable name near \"\\\"b\\\"\\n\""
+ },
+ {
+  "In": "A=\"a\\\"\"\nB=2\n",
+  "Out": {
+   "A": "a\\",
+   "B": "2"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=1;B=2\n",
+  "Out": {
+   "A": "1;B=2"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=\u0000x\n",
+  "Out": {
+   "A": "\u0000x"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=\"x\\\\\"\nB=1\n",
+  "Out": null,
+  "Err": "unterminated quoted value \"x\\\\\""
+ },
+ {
+  "In": "YAML: {a: 1}\n",
+  "Out": {
+   "YAML": "{a: 1}"
+  },
+  "Err": ""
+ },
+ {
+  "In": "A=1\n  \n\tB=2\n",
+  "Out": {
+   "A": "1",
+   "B": "2"
+  },
+  "Err": ""
+ }
+]

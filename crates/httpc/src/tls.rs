@@ -94,8 +94,9 @@ impl TlsParts {
         let mut client = None;
         if let Some(cert_pem) = &cfg.cert_pem {
             let bad = |m: &str| TlsConfigError::ClientCertificate(m.to_string());
-            let chain: Vec<CertificateDer<'static>> =
-                rustls_pemfile::certs(&mut &cert_pem[..]).flatten().collect();
+            let chain: Vec<CertificateDer<'static>> = rustls_pemfile::certs(&mut &cert_pem[..])
+                .flatten()
+                .collect();
             if chain.is_empty() {
                 return Err(bad("tls: failed to find any PEM data in certificate input"));
             }
@@ -126,7 +127,8 @@ impl TlsParts {
 
     /// Builds the rustls configuration offering the given ALPN protocols.
     pub fn client_config(&self, alpn: &[&str]) -> Result<ClientConfig, Fail> {
-        let fail = |e: rustls::Error| Fail::new(ErrorKind::Tls(TlsFailure::Other), format!("tls: {e}"));
+        let fail =
+            |e: rustls::Error| Fail::new(ErrorKind::Tls(TlsFailure::Other), format!("tls: {e}"));
         let builder = ClientConfig::builder_with_provider(provider())
             .with_safe_default_protocol_versions()
             .map_err(fail)?;
@@ -204,7 +206,8 @@ impl ServerCertVerifier for NoVerify {
 
 /// Finds the TLS error inside an I/O error, if that is what it carries.
 pub(crate) fn tls_error_in(err: &io::Error) -> Option<&rustls::Error> {
-    err.get_ref().and_then(|e| e.downcast_ref::<rustls::Error>())
+    err.get_ref()
+        .and_then(|e| e.downcast_ref::<rustls::Error>())
 }
 
 /// The failure for an I/O error from a TLS stream: a TLS failure when it
@@ -216,7 +219,30 @@ pub(crate) fn io_fail(err: &io::Error, host: &str) -> Fail {
     if err.kind() == io::ErrorKind::UnexpectedEof {
         return Fail::other("EOF");
     }
+    let text = err.to_string();
+    if let Some(fail) = alert_in_text(&text) {
+        return fail;
+    }
     Fail::new(ErrorKind::Connect, io_message(err))
+}
+
+/// Finds a TLS alert in the text of an error. An HTTP/2 connection keeps
+/// only the text of the I/O error that broke it, so that is where an
+/// alert that arrived mid-connection has to be read from.
+pub(crate) fn alert_in_text(text: &str) -> Option<Fail> {
+    const MARK: &str = "received fatal alert: ";
+    let name = text[text.find(MARK)? + MARK.len()..].trim();
+    let alert = (0..=255u8)
+        .map(AlertDescription::from)
+        .find(|a| format!("{a:?}") == name);
+    let message = match alert {
+        Some(a) => alert_text(a),
+        None => lower_first(name),
+    };
+    Some(Fail::new(
+        ErrorKind::Tls(TlsFailure::Other),
+        format!("remote error: tls: {message}"),
+    ))
 }
 
 /// The failure for a TLS error, worded as apic's output has always had it.
@@ -252,7 +278,10 @@ pub(crate) fn tls_fail(err: &rustls::Error, host: &str) -> Fail {
             TlsFailure::Other,
             format!("remote error: tls: {}", alert_text(*alert)),
         ),
-        other => (TlsFailure::Other, format!("tls: {}", lower_first(&other.to_string()))),
+        other => (
+            TlsFailure::Other,
+            format!("tls: {}", lower_first(&other.to_string())),
+        ),
     };
     Fail::new(ErrorKind::Tls(failure), message)
 }
@@ -267,13 +296,17 @@ fn name_mismatch(presented: &[String], host: &str) -> String {
         let (kind, rest) = p.split_once('(').unwrap_or(("", p));
         let value = rest.trim_end_matches(')').trim_matches('"');
         if kind.starts_with("Ip") == is_ip {
-            names.push(value.to_string());
+            // An address in its usual short form: `::1`, not `0::1`.
+            names.push(match value.parse::<std::net::IpAddr>() {
+                Ok(ip) => ip.to_string(),
+                Err(_) => value.to_string(),
+            });
         }
     }
     match (names.is_empty(), is_ip) {
-        (true, true) => format!(
-            "cannot validate certificate for {host} because it doesn't contain any IP SANs"
-        ),
+        (true, true) => {
+            format!("cannot validate certificate for {host} because it doesn't contain any IP SANs")
+        }
         (true, false) => {
             format!("certificate is not valid for any names, but wanted to match {host}")
         }
@@ -349,6 +382,10 @@ mod tests {
             name_mismatch(&presented, "127.0.0.2"),
             "certificate is valid for 127.0.0.1, not 127.0.0.2"
         );
+        let alert =
+            alert_in_text("connection error: received fatal alert: CertificateRequired").unwrap();
+        assert_eq!(alert.message, "remote error: tls: certificate required");
+        assert!(alert_in_text("broken pipe").is_none());
         assert_eq!(
             name_mismatch(&presented[..2], "10.0.0.1"),
             "cannot validate certificate for 10.0.0.1 because it doesn't contain any IP SANs"
@@ -361,7 +398,10 @@ mod tests {
             ca_pem: Some(b"not pem".to_vec()),
             ..TlsConfig::default()
         };
-        assert_eq!(TlsParts::new(&cfg).err(), Some(TlsConfigError::NoCaCertificates));
+        assert_eq!(
+            TlsParts::new(&cfg).err(),
+            Some(TlsConfigError::NoCaCertificates)
+        );
         let cfg = TlsConfig {
             cert_pem: Some(b"nothing".to_vec()),
             ..TlsConfig::default()

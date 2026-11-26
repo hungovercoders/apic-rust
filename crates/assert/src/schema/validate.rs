@@ -33,6 +33,12 @@ impl Annotations {
     }
 }
 
+/// How many schemas may be applied inside one another.
+const MAX_DEPTH: usize = 1024;
+
+/// The stack validation runs on: room for MAX_DEPTH nested schemas.
+const STACK_SIZE: usize = 128 << 20;
+
 /// The state of one validation: the schemas being validated against,
 /// outermost first. These are the scopes a dynamic reference looks in.
 struct State<'a> {
@@ -69,7 +75,9 @@ fn json_type(v: &Value) -> &'static str {
 fn equal(x: &Value, y: &Value) -> bool {
     match (x, y) {
         (Value::Number(_), Value::Number(_)) => number(x) == number(y),
-        (Value::Array(a), Value::Array(b)) => a.len() == b.len() && a.iter().zip(b).all(|(x, y)| equal(x, y)),
+        (Value::Array(a), Value::Array(b)) => {
+            a.len() == b.len() && a.iter().zip(b).all(|(x, y)| equal(x, y))
+        }
         (Value::Object(a), Value::Object(b)) => {
             a.len() == b.len() && a.iter().all(|(k, x)| b.get(k).is_some_and(|y| equal(x, y)))
         }
@@ -90,13 +98,42 @@ impl Resolved {
                 self.version()
             ));
         }
-        let mut st = State { rs: self, stack: Vec::new() };
-        st.validate(instance, 0, None)
+        // Schemas nest and refer to one another, so validating recurses;
+        // a thread with a stack sized for the deepest nesting allowed
+        // keeps that off the caller's stack.
+        let run = || {
+            let mut st = State {
+                rs: self,
+                stack: Vec::new(),
+            };
+            st.validate(instance, 0, None)
+        };
+        std::thread::scope(|scope| {
+            match std::thread::Builder::new()
+                .stack_size(STACK_SIZE)
+                .spawn_scoped(scope, run)
+            {
+                Ok(handle) => handle
+                    .join()
+                    .unwrap_or_else(|_| Err("the schema could not be validated".to_string())),
+                Err(e) => Err(format!("the schema could not be validated: {e}")),
+            }
+        })
     }
 }
 
 impl State<'_> {
-    fn validate(&mut self, instance: &Value, schema: Id, caller: Option<&mut Annotations>) -> Result<(), String> {
+    fn validate(
+        &mut self,
+        instance: &Value,
+        schema: Id,
+        caller: Option<&mut Annotations>,
+    ) -> Result<(), String> {
+        // A schema that refers to itself without consuming any of the
+        // instance would never finish.
+        if self.stack.len() >= MAX_DEPTH {
+            return Err("the schema refers to itself without end".to_string());
+        }
         self.stack.push(schema);
         let result = self.check(instance, schema, caller);
         self.stack.pop();
@@ -112,7 +149,12 @@ impl State<'_> {
         format!("[{}]", names.join(" "))
     }
 
-    fn check(&mut self, instance: &Value, id: Id, caller: Option<&mut Annotations>) -> Result<(), String> {
+    fn check(
+        &mut self,
+        instance: &Value,
+        id: Id,
+        caller: Option<&mut Annotations>,
+    ) -> Result<(), String> {
         let rs = self.rs;
         let schema = &rs.schemas[id];
         let info = &rs.infos[id];
@@ -158,13 +200,21 @@ impl State<'_> {
         // enum
         if let Some(values) = &schema.enum_ {
             if !values.iter().any(|e| equal(e, instance)) {
-                return Err(format!("enum: {} does not equal any of: {}", shown(), display_list(values)));
+                return Err(format!(
+                    "enum: {} does not equal any of: {}",
+                    shown(),
+                    display_list(values)
+                ));
             }
         }
         // const
         if let Some(want) = &schema.const_ {
             if !equal(want, instance) {
-                return Err(format!("const: {} does not equal {}", shown(), display_value(want)));
+                return Err(format!(
+                    "const: {} does not equal {}",
+                    shown(),
+                    display_value(want)
+                ));
             }
         }
 
@@ -172,14 +222,22 @@ impl State<'_> {
         if let Some(n) = number(instance) {
             if let Some(m) = schema.multiple_of {
                 if (n / m).fract() != 0.0 {
-                    return Err(format!("multipleOf: {} is not a multiple of {:.6}", rat_string(n), m));
+                    return Err(format!(
+                        "multipleOf: {} is not a multiple of {:.6}",
+                        rat_string(n),
+                        m
+                    ));
                 }
             }
             if let Some(m) = schema.minimum.filter(|&m| n < m) {
                 return Err(format!("minimum: {} is less than {:.6}", rat_string(n), m));
             }
             if let Some(m) = schema.maximum.filter(|&m| n > m) {
-                return Err(format!("maximum: {} is greater than {:.6}", rat_string(n), m));
+                return Err(format!(
+                    "maximum: {} is greater than {:.6}",
+                    rat_string(n),
+                    m
+                ));
             }
             if let Some(m) = schema.exclusive_minimum.filter(|&m| n <= m) {
                 return Err(format!(
@@ -246,7 +304,10 @@ impl State<'_> {
                         .map(|a| a.schema)
                 });
                 let Some(target) = target else {
-                    return Err(format!("missing dynamic anchor {}", quote(&info.dynamic_ref_anchor)));
+                    return Err(format!(
+                        "missing dynamic anchor {}",
+                        quote(&info.dynamic_ref_anchor)
+                    ));
                 };
                 self.validate(instance, target, Some(&mut anns))?;
             }
@@ -292,7 +353,10 @@ impl State<'_> {
                 }
             }
             if ok.is_none() {
-                return Err(format!("oneOf: did not validate against any of {}", self.names(one)));
+                return Err(format!(
+                    "oneOf: did not validate against any of {}",
+                    self.names(one)
+                ));
             }
         }
         if let Some(not) = schema.not {
@@ -302,7 +366,11 @@ impl State<'_> {
             }
         }
         if let Some(cond) = schema.if_ {
-            let branch = if self.valid(instance, cond, Some(&mut anns)) { schema.then } else { schema.else_ };
+            let branch = if self.valid(instance, cond, Some(&mut anns)) {
+                schema.then
+            } else {
+                schema.else_
+            };
             if let Some(ss) = branch {
                 self.validate(instance, ss, Some(&mut anns))?;
             }
@@ -337,7 +405,9 @@ impl State<'_> {
                 for (item, &ischema) in items.iter().zip(&schema.prefix_items) {
                     self.validate(item, ischema, None)?;
                 }
-                anns.end_index = anns.end_index.max(schema.prefix_items.len().min(items.len()));
+                anns.end_index = anns
+                    .end_index
+                    .max(schema.prefix_items.len().min(items.len()));
                 if let Some(ischema) = schema.items {
                     for item in items.iter().skip(schema.prefix_items.len()) {
                         self.validate(item, ischema, None)?;
@@ -406,7 +476,9 @@ impl State<'_> {
             let mut eval_props: BTreeSet<String> = BTreeSet::new();
             for (prop, &sub) in schema.properties.iter().flatten() {
                 // A property the instance does not have is fine.
-                let Some(val) = object.get(prop) else { continue };
+                let Some(val) = object.get(prop) else {
+                    continue;
+                };
                 self.validate(val, sub, None)?;
                 eval_props.insert(prop.clone());
             }
@@ -425,10 +497,16 @@ impl State<'_> {
                 if rs.is_false(additional) {
                     // One message naming every property that is not
                     // allowed reads better than the first one's failure.
-                    let disallowed: Vec<String> =
-                        object.keys().filter(|k| !eval_props.contains(*k)).cloned().collect();
+                    let disallowed: Vec<String> = object
+                        .keys()
+                        .filter(|k| !eval_props.contains(*k))
+                        .cloned()
+                        .collect();
                     if !disallowed.is_empty() {
-                        return Err(format!("unexpected additional properties {}", quoted_list(&disallowed)));
+                        return Err(format!(
+                            "unexpected additional properties {}",
+                            quoted_list(&disallowed)
+                        ));
                     }
                 } else {
                     for (prop, val) in object {
@@ -448,14 +526,22 @@ impl State<'_> {
 
             let n = object.len() as i64;
             if let Some(m) = schema.min_properties.filter(|&m| n < m) {
-                return Err(format!("minProperties: object has {n} properties, less than {m}"));
+                return Err(format!(
+                    "minProperties: object has {n} properties, less than {m}"
+                ));
             }
             if let Some(m) = schema.max_properties.filter(|&m| n > m) {
-                return Err(format!("maxProperties: object has {n} properties, greater than {m}"));
+                return Err(format!(
+                    "maxProperties: object has {n} properties, greater than {m}"
+                ));
             }
 
             let missing = |props: &[String]| -> Vec<String> {
-                props.iter().filter(|p| !object.contains_key(*p)).cloned().collect()
+                props
+                    .iter()
+                    .filter(|p| !object.contains_key(*p))
+                    .cloned()
+                    .collect()
             };
             if let Some(required) = &schema.required {
                 let m = missing(required);

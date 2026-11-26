@@ -84,7 +84,11 @@ impl Schema {
         if !self.id.is_empty() {
             return self.id.clone();
         }
-        let anchor = if self.anchor.is_empty() { &self.dynamic_anchor } else { &self.anchor };
+        let anchor = if self.anchor.is_empty() {
+            &self.dynamic_anchor
+        } else {
+            &self.anchor
+        };
         if !anchor.is_empty() {
             return format!("anchor {anchor}");
         }
@@ -129,8 +133,9 @@ impl Document {
     pub fn parse(v: &Value) -> Result<Document, String> {
         let mut doc = Document::default();
         doc.schemas.push(None);
-        let root = doc.read(v, "")?.unwrap_or_default();
-        doc.schemas[0] = Some(root);
+        // A document that is just null reads as false.
+        let v = if v.is_null() { &Value::Bool(false) } else { v };
+        doc.schemas[0] = doc.read(v, "")?;
         Ok(doc)
     }
 
@@ -152,7 +157,11 @@ impl Document {
     fn list(&mut self, v: &Value, field: &str) -> Result<Option<Vec<Id>>, String> {
         match v {
             Value::Null => Ok(None),
-            Value::Array(a) => a.iter().map(|e| self.add(e, field)).collect::<Result<_, _>>().map(Some),
+            Value::Array(a) => a
+                .iter()
+                .map(|e| self.add(e, field))
+                .collect::<Result<_, _>>()
+                .map(Some),
             v => Err(mismatch(v, field, "[]*jsonschema.Schema")),
         }
     }
@@ -205,7 +214,8 @@ impl Document {
                 "$dynamicAnchor" => s.dynamic_anchor = string(v, key)?,
                 "$dynamicRef" => s.dynamic_ref = string(v, key)?,
                 "pattern" => s.pattern = string(v, key)?,
-                "$comment" | "title" | "description" | "contentEncoding" | "contentMediaType" | "format" => {
+                "$comment" | "title" | "description" | "contentEncoding" | "contentMediaType"
+                | "format" => {
                     string(v, key)?;
                 }
                 "deprecated" | "readOnly" | "writeOnly" => {
@@ -261,7 +271,12 @@ impl Document {
                         }
                         s.types = Some(types);
                     }
-                    v => return Err(format!("invalid value for \"type\": {}", quote(&v.to_string()))),
+                    v => {
+                        return Err(format!(
+                            "invalid value for \"type\": {}",
+                            quote(&v.to_string())
+                        ))
+                    }
                 },
                 "items" => match v {
                     Value::Array(a) => {
@@ -271,8 +286,8 @@ impl Document {
                         }
                         s.items_array = Some(ids);
                     }
-                    // A null is the schema that says nothing.
-                    Value::Null => s.items = Some(self.add(&Value::Bool(true), "")?),
+                    // Here a null reads as false.
+                    Value::Null => s.items = Some(self.add(&Value::Bool(false), "")?),
                     v => s.items = Some(self.add(v, "")?),
                 },
                 "dependencies" => match v {
@@ -281,10 +296,15 @@ impl Document {
                         for (k, d) in o {
                             if d.is_array() {
                                 let names = strings(d, "")?;
-                                s.dependency_strings.get_or_insert_with(BTreeMap::new).insert(k.clone(), names);
+                                s.dependency_strings
+                                    .get_or_insert_with(BTreeMap::new)
+                                    .insert(k.clone(), names);
                             } else {
-                                let id = self.add(if d.is_null() { &Value::Bool(true) } else { d }, "")?;
-                                s.dependency_schemas.get_or_insert_with(BTreeMap::new).insert(k.clone(), id);
+                                let id = self
+                                    .add(if d.is_null() { &Value::Bool(false) } else { d }, "")?;
+                                s.dependency_schemas
+                                    .get_or_insert_with(BTreeMap::new)
+                                    .insert(k.clone(), id);
                             }
                         }
                     }
@@ -313,7 +333,11 @@ impl Document {
                     Value::Object(o) => {
                         let mut out = BTreeMap::new();
                         for (k, names) in o {
-                            let names = if names.is_null() { Vec::new() } else { strings(names, key)? };
+                            let names = if names.is_null() {
+                                Vec::new()
+                            } else {
+                                strings(names, key)?
+                            };
                             out.insert(k.clone(), names);
                         }
                         s.dependent_required = Some(out);

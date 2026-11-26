@@ -15,8 +15,23 @@ pub fn detect_content_type(data: &[u8]) -> &'static str {
     let trimmed = &data[first_non_ws..];
 
     const HTML: [&[u8]; 17] = [
-        b"<!DOCTYPE HTML", b"<HTML", b"<HEAD", b"<SCRIPT", b"<IFRAME", b"<H1", b"<DIV", b"<FONT",
-        b"<TABLE", b"<A", b"<STYLE", b"<TITLE", b"<B", b"<BODY", b"<BR", b"<P", b"<!--",
+        b"<!DOCTYPE HTML",
+        b"<HTML",
+        b"<HEAD",
+        b"<SCRIPT",
+        b"<IFRAME",
+        b"<H1",
+        b"<DIV",
+        b"<FONT",
+        b"<TABLE",
+        b"<A",
+        b"<STYLE",
+        b"<TITLE",
+        b"<B",
+        b"<BODY",
+        b"<BR",
+        b"<P",
+        b"<!--",
     ];
     for sig in HTML {
         // The tag, in any case, followed by a space or `>`.
@@ -82,9 +97,9 @@ pub fn detect_content_type(data: &[u8]) -> &'static str {
     if data.len() >= 12 && &data[4..8] == b"ftyp" {
         return "video/mp4";
     }
-    let binary = trimmed
-        .iter()
-        .any(|&b| b <= 0x08 || b == 0x0B || (0x0E..=0x1A).contains(&b) || (0x1C..=0x1F).contains(&b));
+    let binary = trimmed.iter().any(|&b| {
+        b <= 0x08 || b == 0x0B || (0x0E..=0x1A).contains(&b) || (0x1C..=0x1F).contains(&b)
+    });
     if !binary {
         return "text/plain; charset=utf-8";
     }
@@ -101,7 +116,10 @@ mod tests {
             (&b"hello"[..], "text/plain; charset=utf-8"),
             (b"{\"ok\":true}", "text/plain; charset=utf-8"),
             (b"", "text/plain; charset=utf-8"),
-            (b"  <!doctype html><title>x</title>", "text/html; charset=utf-8"),
+            (
+                b"  <!doctype html><title>x</title>",
+                "text/html; charset=utf-8",
+            ),
             (b"<html>", "text/html; charset=utf-8"),
             (b"<p>hi</p>", "text/html; charset=utf-8"),
             (b"<pre>", "text/plain; charset=utf-8"),

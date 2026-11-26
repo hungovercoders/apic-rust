@@ -64,7 +64,9 @@ enum Field<'a> {
 
 /// The keywords that hold subschemas, in the order they are walked.
 fn schema_fields(s: &Schema) -> Vec<(&'static str, Field<'_>)> {
-    let list = |l: &'_ Option<Vec<Id>>| -> &'_ [Id] { l.as_deref().unwrap_or(&[]) };
+    fn list(l: &Option<Vec<Id>>) -> &[Id] {
+        l.as_deref().unwrap_or(&[])
+    }
     let mut fields = vec![
         ("$defs", Field::Map(s.defs.as_ref())),
         ("additionalItems", Field::One(s.additional_items)),
@@ -84,13 +86,19 @@ fn schema_fields(s: &Schema) -> Vec<(&'static str, Field<'_>)> {
         ("items", Field::List(list(&s.items_array))),
         ("not", Field::One(s.not)),
         ("oneOf", Field::List(list(&s.one_of))),
-        ("patternProperties", Field::Map(s.pattern_properties.as_ref())),
+        (
+            "patternProperties",
+            Field::Map(s.pattern_properties.as_ref()),
+        ),
         ("prefixItems", Field::List(&s.prefix_items)),
         ("properties", Field::Map(s.properties.as_ref())),
         ("propertyNames", Field::One(s.property_names)),
         ("then", Field::One(s.then)),
         ("unevaluatedItems", Field::One(s.unevaluated_items)),
-        ("unevaluatedProperties", Field::One(s.unevaluated_properties)),
+        (
+            "unevaluatedProperties",
+            Field::One(s.unevaluated_properties),
+        ),
     ]);
     fields
 }
@@ -121,15 +129,18 @@ fn children(s: &Schema) -> Vec<(String, Id)> {
 /// reference lands on it.
 fn other_field_type(name: &str) -> Option<&'static str> {
     Some(match name {
-        "$id" | "$schema" | "$ref" | "$comment" | "$anchor" | "$dynamicAnchor" | "$dynamicRef" | "title"
-        | "description" | "pattern" | "contentEncoding" | "contentMediaType" | "format" => "string",
+        "$id" | "$schema" | "$ref" | "$comment" | "$anchor" | "$dynamicAnchor" | "$dynamicRef"
+        | "title" | "description" | "pattern" | "contentEncoding" | "contentMediaType"
+        | "format" => "string",
         "deprecated" | "readOnly" | "writeOnly" | "uniqueItems" => "bool",
         "required" => "[]string",
         "enum" | "examples" => "[]interface {}",
         "const" => "*interface {}",
-        "multipleOf" | "minimum" | "maximum" | "exclusiveMinimum" | "exclusiveMaximum" => "*float64",
-        "minLength" | "maxLength" | "minItems" | "maxItems" | "minContains" | "maxContains" | "minProperties"
-        | "maxProperties" => "*int",
+        "multipleOf" | "minimum" | "maximum" | "exclusiveMinimum" | "exclusiveMaximum" => {
+            "*float64"
+        }
+        "minLength" | "maxLength" | "minItems" | "maxItems" | "minContains" | "maxContains"
+        | "minProperties" | "maxProperties" => "*int",
         "default" => "json.RawMessage",
         "$vocabulary" => "map[string]bool",
         "dependentRequired" => "map[string][]string",
@@ -160,16 +171,32 @@ impl Resolved {
             for (step, child) in children(s).into_iter().rev() {
                 stack.push((child, format!("{path}{step}")));
             }
-            paths[id] = Some(if path.is_empty() { "root".to_string() } else { path });
+            paths[id] = Some(if path.is_empty() {
+                "root".to_string()
+            } else {
+                path
+            });
         }
         // Schemas no keyword reaches (the inside of a `false`) keep their
         // slot so that indexes hold.
-        let schemas: Vec<Schema> = doc.schemas.into_iter().map(Option::unwrap_or_default).collect();
+        let schemas: Vec<Schema> = doc
+            .schemas
+            .into_iter()
+            .map(Option::unwrap_or_default)
+            .collect();
         let infos: Vec<Info> = paths
             .into_iter()
-            .map(|p| Info { path: p.unwrap_or_default(), ..Info::default() })
+            .map(|p| Info {
+                path: p.unwrap_or_default(),
+                ..Info::default()
+            })
             .collect();
-        let mut rs = Resolved { schemas, infos, draft, resolved_uris: HashMap::new() };
+        let mut rs = Resolved {
+            schemas,
+            infos,
+            draft,
+            resolved_uris: HashMap::new(),
+        };
         rs.check_local(&order)?;
         rs.resolve_uris()?;
         rs.resolve_refs(&order)?;
@@ -197,7 +224,9 @@ impl Resolved {
         for &id in order {
             let s = &self.schemas[id];
             let name = s.name();
-            let addf = |errs: &mut Vec<String>, msg: String| errs.push(format!("jsonschema.Schema: {name}: {msg}"));
+            let addf = |errs: &mut Vec<String>, msg: String| {
+                errs.push(format!("jsonschema.Schema: {name}: {msg}"))
+            };
             if !s.type_.is_empty() && s.types.is_some() {
                 errs.push("both Type and Types are set; at most one should be".to_string());
                 continue;
@@ -216,7 +245,10 @@ impl Resolved {
                 }
             }
             if s.vocabulary && s.schema != DRAFT2020 {
-                addf(&mut errs, "cannot validate a schema with $vocabulary".to_string());
+                addf(
+                    &mut errs,
+                    "cannot validate a schema with $vocabulary".to_string(),
+                );
             }
             let mut pattern = None;
             if !s.pattern.is_empty() {
@@ -229,7 +261,10 @@ impl Resolved {
             for (re_string, sub) in s.pattern_properties.iter().flatten() {
                 match compile_regex(re_string) {
                     Ok(re) => pattern_properties.push((re, *sub)),
-                    Err(e) => addf(&mut errs, format!("patternProperties[{}]: {e}", quote(re_string))),
+                    Err(e) => addf(
+                        &mut errs,
+                        format!("patternProperties[{}]: {e}", quote(re_string)),
+                    ),
                 }
             }
             let info = &mut self.infos[id];
@@ -263,7 +298,12 @@ impl Resolved {
         while let Some((id, mut base)) = stack.pop() {
             let (sid, has_ref, anchor, dynamic_anchor) = {
                 let s = &self.schemas[id];
-                (s.id.clone(), !s.ref_.is_empty(), s.anchor.clone(), s.dynamic_anchor.clone())
+                (
+                    s.id.clone(),
+                    !s.ref_.is_empty(),
+                    s.anchor.clone(),
+                    s.dynamic_anchor.clone(),
+                )
             };
             // In draft-07 a $ref makes its siblings, $id included, mean
             // nothing.
@@ -279,9 +319,12 @@ impl Resolved {
                     let base_uri = self.infos[base].uri.clone().unwrap_or_default();
                     let uri = base_uri.resolve(&id_uri);
                     if !uri.is_abs() {
+                        // A schema that is its own base is named by the
+                        // URI it just failed to get.
+                        let shown = if id == base { &uri } else { &base_uri };
                         return Err(format!(
                             "$id {sid} does not resolve to an absolute URI (base is {})",
-                            quote(&base_uri.to_string())
+                            quote(&shown.to_string())
                         ));
                     }
                     self.resolved_uris.insert(uri.to_string(), id);
@@ -328,7 +371,11 @@ impl Resolved {
     fn resolve_ref(&self, s: Id, reference: &str) -> Result<(Id, String), String> {
         let ref_uri = Uri::parse(reference)?;
         let base = self.infos[s].base;
-        let ref_uri = self.infos[base].uri.clone().unwrap_or_default().resolve(&ref_uri);
+        let ref_uri = self.infos[base]
+            .uri
+            .clone()
+            .unwrap_or_default()
+            .resolve(&ref_uri);
         let fragless = ref_uri.without_fragment().to_string();
         let Some(&referenced) = self.resolved_uris.get(&fragless) else {
             return Err(format!(
@@ -338,9 +385,17 @@ impl Resolved {
         let frag = &ref_uri.fragment;
         if !frag.is_empty() && !frag.starts_with('/') {
             let Some(anchor) = self.infos[referenced].anchors.get(frag) else {
-                return Err(format!("no anchor {} in {}", quote(frag), self.schemas[s].name()));
+                return Err(format!(
+                    "no anchor {} in {}",
+                    quote(frag),
+                    self.schemas[s].name()
+                ));
             };
-            let dynamic = if anchor.dynamic { frag.clone() } else { String::new() };
+            let dynamic = if anchor.dynamic {
+                frag.clone()
+            } else {
+                String::new()
+            };
             return Ok((anchor.schema, dynamic));
         }
         let target = self
@@ -390,7 +445,11 @@ impl Resolved {
                     }
                     match found {
                         Some(at) => at,
-                        None if seg == "type" => At::Other(if s.types.is_some() { "[]string" } else { "string" }),
+                        None if seg == "type" => At::Other(if s.types.is_some() {
+                            "[]string"
+                        } else {
+                            "string"
+                        }),
                         None => match other_field_type(seg) {
                             Some(t) => At::Other(t),
                             None => return Err(format!("no schema field {}", quote(seg))),
@@ -399,19 +458,27 @@ impl Resolved {
                 }
                 At::List(l) => {
                     if seg == "-" {
-                        return Err("the JSON Pointer array segment '-' is not supported".to_string());
+                        return Err(
+                            "the JSON Pointer array segment '-' is not supported".to_string()
+                        );
                     }
                     if seg.len() > 1 && seg.starts_with('0') {
                         return Err(format!("segment {} has leading zeroes", quote(seg)));
                     }
                     let digits = seg.strip_prefix(['+', '-']).unwrap_or(seg);
-                    let n: i64 = if !digits.is_empty() && digits.bytes().all(|c| c.is_ascii_digit()) {
-                        seg.parse().map_err(|_| format!("invalid int: {}", quote(seg)))?
+                    let n: i64 = if !digits.is_empty() && digits.bytes().all(|c| c.is_ascii_digit())
+                    {
+                        seg.parse()
+                            .map_err(|_| format!("invalid int: {}", quote(seg)))?
                     } else {
                         return Err(format!("invalid int: {}", quote(seg)));
                     };
                     if n < 0 || n >= l.len() as i64 {
-                        return Err(format!("index {} is out of bounds for array of length {}", n, l.len()));
+                        return Err(format!(
+                            "index {} is out of bounds for array of length {}",
+                            n,
+                            l.len()
+                        ));
                     }
                     At::Schema(l[n as usize])
                 }
@@ -419,21 +486,29 @@ impl Resolved {
                     Some(id) => At::Schema(*id),
                     None => return Err(format!("no key {} in map", quote(seg))),
                 },
-                At::Other(t) => return Err(format!("value of type {t} is not a schema, slice or map")),
+                At::Other(t) => {
+                    return Err(format!("value of type {t} is not a schema, slice or map"))
+                }
             };
         }
         match at {
             At::Schema(id) => Ok(id),
             At::Nil => Err("navigated to nil reference".to_string()),
-            At::List(_) => Err("does not refer to a schema, but to a []*jsonschema.Schema".to_string()),
-            At::Map(_) => Err("does not refer to a schema, but to a map[string]*jsonschema.Schema".to_string()),
+            At::List(_) => {
+                Err("does not refer to a schema, but to a []*jsonschema.Schema".to_string())
+            }
+            At::Map(_) => Err(
+                "does not refer to a schema, but to a map[string]*jsonschema.Schema".to_string(),
+            ),
             At::Other(t) => Err(format!("does not refer to a schema, but to a {t}")),
         }
     }
 
     /// Whether the schema is `false`, or `{"not": {}}` spelt out.
     pub(crate) fn is_false(&self, id: Id) -> bool {
-        self.schemas[id].not.is_some_and(|not| !self.schemas[not].nonzero)
+        self.schemas[id]
+            .not
+            .is_some_and(|not| !self.schemas[not].nonzero)
     }
 
     pub(crate) fn version(&self) -> &str {

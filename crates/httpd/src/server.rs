@@ -76,7 +76,11 @@ impl Listener {
         };
         let inner = std::net::TcpListener::bind(parsed).map_err(|e| {
             let text = e.to_string();
-            let text = text.split(" (os error").next().unwrap_or(&text).to_lowercase();
+            let text = text
+                .split(" (os error")
+                .next()
+                .unwrap_or(&text)
+                .to_lowercase();
             fail(format!("bind: {text}"))
         })?;
         let addr = inner.local_addr().map_err(|e| fail(e.to_string()))?;
@@ -275,12 +279,16 @@ fn server_config(options: &TlsOptions) -> Result<rustls::ServerConfig, String> {
         Some(pem) => {
             let mut roots = rustls::RootCertStore::empty();
             for cert in rustls_pemfile::certs(&mut &pem[..]).flatten() {
-                roots.add(cert).map_err(|e| format!("tls: client CA: {e}"))?;
-            }
-            let verifier =
-                rustls::server::WebPkiClientVerifier::builder_with_provider(Arc::new(roots), provider)
-                    .build()
+                roots
+                    .add(cert)
                     .map_err(|e| format!("tls: client CA: {e}"))?;
+            }
+            let verifier = rustls::server::WebPkiClientVerifier::builder_with_provider(
+                Arc::new(roots),
+                provider,
+            )
+            .build()
+            .map_err(|e| format!("tls: client CA: {e}"))?;
             builder.with_client_cert_verifier(verifier)
         }
         None => builder.with_no_client_auth(),
@@ -346,10 +354,8 @@ fn run(listener: std::net::TcpListener, shared: Arc<Shared>) {
             }
         }
         drop(listener);
-        let _ = tokio::time::timeout(GRACE, async {
-            while conns.join_next().await.is_some() {}
-        })
-        .await;
+        let _ =
+            tokio::time::timeout(GRACE, async { while conns.join_next().await.is_some() {} }).await;
     });
     // A handler still running is left to finish on its own.
     rt.shutdown_background();
@@ -501,9 +507,15 @@ fn into_hyper(mut response: Response, is_head: bool, is_h2: bool) -> hyper::Resp
         let body = &response.body;
         if !body.is_empty()
             && !response.headers.contains("Content-Type")
-            && response.headers.get("Content-Encoding").unwrap_or("").is_empty()
+            && response
+                .headers
+                .get("Content-Encoding")
+                .unwrap_or("")
+                .is_empty()
         {
-            response.headers.set("Content-Type", detect_content_type(body));
+            response
+                .headers
+                .set("Content-Type", detect_content_type(body));
         }
         let buffered = if is_h2 { 4096 } else { 2048 };
         if response.headers.contains("Content-Length") {

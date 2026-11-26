@@ -104,7 +104,12 @@ pub(crate) async fn http_connect<S>(io: &mut S, target: &str, proxy: &Proxy) -> 
 where
     S: AsyncRead + AsyncWrite + Unpin,
 {
-    let broken = |e: std::io::Error| Fail::new(ErrorKind::Connect, format!("proxyconnect tcp: {}", io_message(&e)));
+    let broken = |e: std::io::Error| {
+        Fail::new(
+            ErrorKind::Connect,
+            format!("proxyconnect tcp: {}", io_message(&e)),
+        )
+    };
     let mut head = format!(
         "CONNECT {target} HTTP/1.1\r\nHost: {target}\r\nUser-Agent: Go-http-client/1.1\r\n"
     );
@@ -120,7 +125,10 @@ where
     let mut byte = [0u8; 1];
     while !reply.ends_with(b"\r\n\r\n") {
         if reply.len() > 64 << 10 {
-            return Err(Fail::new(ErrorKind::Proxy, "proxy sent an oversized CONNECT reply"));
+            return Err(Fail::new(
+                ErrorKind::Proxy,
+                "proxy sent an oversized CONNECT reply",
+            ));
         }
         match io.read(&mut byte).await {
             Ok(0) => {
@@ -143,7 +151,9 @@ where
     // The proxy's reason is the error, as curl and browsers show it.
     Err(Fail::new(
         ErrorKind::Proxy,
-        reason.filter(|r| !r.is_empty()).unwrap_or("unknown status code"),
+        reason
+            .filter(|r| !r.is_empty())
+            .unwrap_or("unknown status code"),
     ))
 }
 
@@ -271,7 +281,9 @@ mod tests {
         assert_eq!(p.basic_auth().unwrap(), "Basic YWxpY2U6czNjckB0");
         assert_eq!(Proxy::parse("socks5h://[::1]").unwrap().port, 1080);
         assert_eq!(Proxy::parse("https://p").unwrap().port, 443);
-        assert!(Proxy::parse("ftp://p:21").unwrap_err().contains("not supported"));
+        assert!(Proxy::parse("ftp://p:21")
+            .unwrap_err()
+            .contains("not supported"));
         assert!(Proxy::parse("http://").is_err());
         assert!(Proxy::parse("proxy:3128").is_err());
     }

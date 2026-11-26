@@ -14,7 +14,8 @@ mod schema;
 
 pub use apic_selector::Number;
 pub use assert::{
-    eval, eval_with, parse, parse_number, redact, schemas, Expr, Options, Result, SchemaLoader, OPERATORS, PREDICATES,
+    eval, eval_with, parse, parse_number, redact, schemas, Expr, Options, Result, SchemaLoader,
+    OPERATORS, PREDICATES,
 };
 pub use schema::Resolved;
 

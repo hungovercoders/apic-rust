@@ -160,7 +160,10 @@ impl Request {
 
     /// The first value of a query parameter.
     pub fn query_get(&self, name: &str) -> Option<String> {
-        self.query().into_iter().find(|(k, _)| k == name).map(|(_, v)| v)
+        self.query()
+            .into_iter()
+            .find(|(k, _)| k == name)
+            .map(|(_, v)| v)
     }
 
     /// Every value of a query parameter, in order.
@@ -194,7 +197,10 @@ impl Request {
             return v;
         }
         if let Ok(parts) = self.multipart() {
-            if let Some(p) = parts.iter().find(|p| p.name == name && p.filename.is_none()) {
+            if let Some(p) = parts
+                .iter()
+                .find(|p| p.name == name && p.filename.is_none())
+            {
                 return String::from_utf8_lossy(&p.data).into_owned();
             }
         }
@@ -232,7 +238,13 @@ impl Request {
     /// The Content-Type without its parameters, in lower case.
     fn media_type(&self) -> Option<String> {
         let ct = self.headers.get("Content-Type")?;
-        Some(ct.split(';').next().unwrap_or("").trim().to_ascii_lowercase())
+        Some(
+            ct.split(';')
+                .next()
+                .unwrap_or("")
+                .trim()
+                .to_ascii_lowercase(),
+        )
     }
 
     /// The parts of a `multipart/form-data` body.
@@ -365,9 +377,7 @@ fn disposition_param(header: &str, key: &str) -> Option<String> {
     let mut rest = header;
     while let Some(i) = rest.find(';') {
         rest = rest[i + 1..].trim_start();
-        let Some((name, after)) = rest.split_once('=') else {
-            return None;
-        };
+        let (name, after) = rest.split_once('=')?;
         let value = if let Some(quoted) = after.strip_prefix('"') {
             let mut out = String::new();
             let mut chars = quoted.chars();
@@ -458,18 +468,27 @@ mod tests {
         assert_eq!(r.query_get("done").as_deref(), Some("1"));
         assert_eq!(r.query_values("tag"), ["x y", "z"]);
         assert_eq!(r.query_get("none"), None);
-        assert_eq!(r.basic_auth(), Some(("alice".to_string(), "s3cret".to_string())));
+        assert_eq!(
+            r.basic_auth(),
+            Some(("alice".to_string(), "s3cret".to_string()))
+        );
         assert_eq!(r.cookie("theme").as_deref(), Some("dark"));
         assert_eq!(r.host, "example.com");
         let r = Request::new("GET", "http://api.example.test/ping?x=1");
-        assert_eq!((r.host.as_str(), r.path.as_str(), r.raw_query.as_str()), ("api.example.test", "/ping", "x=1"));
+        assert_eq!(
+            (r.host.as_str(), r.path.as_str(), r.raw_query.as_str()),
+            ("api.example.test", "/ping", "x=1")
+        );
         assert_eq!(r.url(), "http://api.example.test/ping?x=1");
     }
 
     #[test]
     fn forms() {
         let r = Request::new("POST", "/token?client_id=query")
-            .with_header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
+            .with_header(
+                "Content-Type",
+                "application/x-www-form-urlencoded; charset=utf-8",
+            )
             .with_body("client_id=demo&scope=a+b");
         assert_eq!(r.form_value("client_id"), "demo");
         assert_eq!(r.form_value("scope"), "a b");
@@ -484,7 +503,10 @@ mod tests {
             .with_body(body);
         let parts = r.multipart().unwrap();
         assert_eq!(parts.len(), 2);
-        assert_eq!((parts[0].name.as_str(), &parts[0].data[..]), ("title", &b"hello"[..]));
+        assert_eq!(
+            (parts[0].name.as_str(), &parts[0].data[..]),
+            ("title", &b"hello"[..])
+        );
         assert_eq!(parts[1].filename.as_deref(), Some("a \"b\".txt"));
         assert_eq!(parts[1].data, b"line one\r\nline two");
         assert_eq!(parts[1].headers.get("content-type"), Some("text/plain"));
@@ -499,7 +521,10 @@ mod tests {
     #[test]
     fn common_name() {
         let pem = include_str!("../testdata/client.pem");
-        let der = rustls_pemfile::certs(&mut pem.as_bytes()).next().unwrap().unwrap();
+        let der = rustls_pemfile::certs(&mut pem.as_bytes())
+            .next()
+            .unwrap()
+            .unwrap();
         assert_eq!(certificate_common_name(&der).as_deref(), Some("alice"));
         assert_eq!(certificate_common_name(b"junk"), None);
     }

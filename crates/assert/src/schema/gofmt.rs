@@ -33,13 +33,7 @@ pub(crate) fn display_value(v: &Value) -> String {
 
 fn inner(v: &Value, text: bool) -> String {
     match v {
-        Value::Null => {
-            if text {
-                "%!s(<nil>)".to_string()
-            } else {
-                "<nil>".to_string()
-            }
-        }
+        Value::Null => "<nil>".to_string(),
         Value::Bool(b) => {
             if text {
                 format!("%!s(bool={b})")
@@ -61,7 +55,10 @@ fn inner(v: &Value, text: bool) -> String {
             format!("[{}]", parts.join(" "))
         }
         Value::Object(o) => {
-            let parts: Vec<String> = o.iter().map(|(k, v)| format!("{}:{}", k, inner(v, text))).collect();
+            let parts: Vec<String> = o
+                .iter()
+                .map(|(k, v)| format!("{}:{}", k, inner(v, text)))
+                .collect();
             format!("map[{}]", parts.join(" "))
         }
     }
@@ -126,11 +123,23 @@ mod tests {
     #[test]
     fn values_read_as_they_did() {
         let v = json!({"b": [1, "x", null, true, 1.5], "a": {"k": 1e21}});
-        assert_eq!(display(Some(&v)), "map[a:map[k:1e+21] b:[1 x <nil> true 1.5]]");
+        assert_eq!(
+            display(Some(&v)),
+            "map[a:map[k:1e+21] b:[1 x <nil> true 1.5]]"
+        );
         assert_eq!(display(Some(&Value::Null)), "<invalid reflect.Value>");
-        assert_eq!(display_text(&json!([1, "a", true, null])), "[%!s(float64=1) a %!s(bool=true) %!s(<nil>)]");
-        assert_eq!(display_list(&[json!("a"), json!(2), Value::Null]), "[a 2 <nil>]");
-        assert_eq!(quoted_list(&["a".to_string(), "b c".to_string()]), "[\"a\" \"b c\"]");
+        assert_eq!(
+            display_text(&json!([1, "a", true, null])),
+            "[%!s(float64=1) a %!s(bool=true) <nil>]"
+        );
+        assert_eq!(
+            display_list(&[json!("a"), json!(2), Value::Null]),
+            "[a 2 <nil>]"
+        );
+        assert_eq!(
+            quoted_list(&["a".to_string(), "b c".to_string()]),
+            "[\"a\" \"b c\"]"
+        );
     }
 
     #[test]

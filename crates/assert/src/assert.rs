@@ -30,7 +30,14 @@ pub const OPERATORS: [&str; 13] = [
 /// Predicates take no value: `body.$.id isInteger`, `body.$.items not
 /// isEmpty`. Each also has a `not` form.
 pub const PREDICATES: [&str; 8] = [
-    "isString", "isNumber", "isInteger", "isBoolean", "isArray", "isObject", "isNull", "isEmpty",
+    "isString",
+    "isNumber",
+    "isInteger",
+    "isBoolean",
+    "isArray",
+    "isObject",
+    "isNull",
+    "isEmpty",
 ];
 
 /// The operators `length` takes: `body.$.items length == 3`.
@@ -67,7 +74,11 @@ impl Expr {
     /// How an expression reads in results: the selector, the operator and
     /// the rendered value.
     pub fn display(&self, expected: &str) -> String {
-        let op = if self.length { format!("length {}", self.op) } else { self.op.clone() };
+        let op = if self.length {
+            format!("length {}", self.op)
+        } else {
+            self.op.clone()
+        };
         if self.unary() {
             return format!("{} {}", self.selector, op);
         }
@@ -95,7 +106,8 @@ pub struct Options<'a> {
 pub fn schemas<'a>(
     read: impl Fn(&str) -> std::result::Result<Vec<u8>, String> + 'a,
 ) -> impl Fn(&str) -> std::result::Result<Arc<Resolved>, String> + 'a {
-    let cache: RefCell<HashMap<String, std::result::Result<Arc<Resolved>, String>>> = RefCell::new(HashMap::new());
+    let cache: RefCell<HashMap<String, std::result::Result<Arc<Resolved>, String>>> =
+        RefCell::new(HashMap::new());
     move |path: &str| {
         if let Some(entry) = cache.borrow().get(path) {
             return entry.clone();
@@ -113,7 +125,8 @@ fn load_schema(
     let data = read(path)?;
     let wrap = |e: String| format!("schema {path}: {e}");
     check_json(&data).map_err(wrap)?;
-    let value: serde_json::Value = serde_json::from_slice(&data).map_err(|e| wrap(e.to_string()))?;
+    let value: serde_json::Value =
+        serde_json::from_slice(&data).map_err(|e| wrap(e.to_string()))?;
     Resolved::new(&value).map(Arc::new).map_err(wrap)
 }
 
@@ -140,16 +153,28 @@ pub fn parse(expr: &str) -> std::result::Result<Expr, String> {
     fields.extend(rest.split_whitespace());
     let sel = sel.to_string();
     if fields.len() < 2 {
-        return Err(format!("assert {}: expected `<selector> <op> <value>`", quote(expr)));
+        return Err(format!(
+            "assert {}: expected `<selector> <op> <value>`",
+            quote(expr)
+        ));
     }
     if rest == "exists" || rest == "not exists" {
-        return Ok(Expr { selector: sel, op: rest.to_string(), ..Expr::default() });
+        return Ok(Expr {
+            selector: sel,
+            op: rest.to_string(),
+            ..Expr::default()
+        });
     }
     let unary = fields[1..].join(" ");
     if is_predicate(without_not(&unary)) {
-        return Ok(Expr { selector: sel, op: unary, ..Expr::default() });
+        return Ok(Expr {
+            selector: sel,
+            op: unary,
+            ..Expr::default()
+        });
     }
-    if is_predicate(fields[1]) || fields[1] == "not" && fields.len() > 2 && is_predicate(fields[2]) {
+    if is_predicate(fields[1]) || fields[1] == "not" && fields.len() > 2 && is_predicate(fields[2])
+    {
         return Err(format!(
             "assert {}: {} does not take a value",
             quote(expr),
@@ -174,10 +199,19 @@ pub fn parse(expr: &str) -> std::result::Result<Expr, String> {
         }
         let after = rest.strip_prefix("length").unwrap_or(rest).trim();
         let val = after.strip_prefix(op).unwrap_or(after).trim();
-        return Ok(Expr { selector: sel, op: op.to_string(), value: val.to_string(), length: true });
+        return Ok(Expr {
+            selector: sel,
+            op: op.to_string(),
+            value: val.to_string(),
+            length: true,
+        });
     }
     if rest.starts_with("exists ") {
-        return Err(format!("assert {}: {} does not take a value", quote(expr), quote("exists")));
+        return Err(format!(
+            "assert {}: {} does not take a value",
+            quote(expr),
+            quote("exists")
+        ));
     }
     if rest.starts_with("not exists ") {
         return Err(format!(
@@ -198,13 +232,23 @@ pub fn parse(expr: &str) -> std::result::Result<Expr, String> {
     }
     let mut val = rest[op.len()..].trim();
     if val.is_empty() {
-        return Err(format!("assert {}: expected `<selector> <op> <value>`", quote(expr)));
+        return Err(format!(
+            "assert {}: expected `<selector> <op> <value>`",
+            quote(expr)
+        ));
     }
     let b = val.as_bytes();
-    if b.len() >= 2 && (b[0] == b'"' && b[b.len() - 1] == b'"' || b[0] == b'\'' && b[b.len() - 1] == b'\'') {
+    if b.len() >= 2
+        && (b[0] == b'"' && b[b.len() - 1] == b'"' || b[0] == b'\'' && b[b.len() - 1] == b'\'')
+    {
         val = &val[1..val.len() - 1];
     }
-    Ok(Expr { selector: sel, op: op.to_string(), value: val.to_string(), length: false })
+    Ok(Expr {
+        selector: sel,
+        op: op.to_string(),
+        value: val.to_string(),
+        length: false,
+    })
 }
 
 /// Keeps an assertion's selector and operator and replaces its value with
@@ -235,7 +279,10 @@ pub fn eval(e: &Expr, expected: &str, resp: &Response) -> Result {
 
 /// [`eval`] with what `matchesSchema` needs.
 pub fn eval_with(e: &Expr, expected: &str, resp: &Response, opts: Options<'_>) -> Result {
-    let mut res = Result { expr: e.display(expected), ..Result::default() };
+    let mut res = Result {
+        expr: e.display(expected),
+        ..Result::default()
+    };
     if !e.unary() {
         res.expected = expected.to_string();
     }
@@ -311,11 +358,16 @@ fn length(v: &Value) -> std::result::Result<usize, String> {
         Kind::String => Ok(v.text.chars().count()),
         Kind::Array => match parse_json(&v.text)? {
             serde_json::Value::Array(a) => Ok(a.len()),
-            _ => Err("json: cannot unmarshal value into Go value of type []json.RawMessage".to_string()),
+            _ => Err(
+                "json: cannot unmarshal value into Go value of type []json.RawMessage".to_string(),
+            ),
         },
         Kind::Object => match parse_json(&v.text)? {
             serde_json::Value::Object(o) => Ok(o.len()),
-            _ => Err("json: cannot unmarshal value into Go value of type map[string]json.RawMessage".to_string()),
+            _ => Err(
+                "json: cannot unmarshal value into Go value of type map[string]json.RawMessage"
+                    .to_string(),
+            ),
         },
         _ => Err(format!(
             "length needs a string, an array or an object, got {} {}",
@@ -328,7 +380,9 @@ fn predicate(op: &str, v: &Value) -> std::result::Result<bool, String> {
     match op {
         "isString" => Ok(v.kind == Kind::String),
         "isNumber" => Ok(v.kind == Kind::Number),
-        "isInteger" => Ok(v.kind == Kind::Number && parse_number(&v.text).is_some_and(|n| n.is_int())),
+        "isInteger" => {
+            Ok(v.kind == Kind::Number && parse_number(&v.text).is_some_and(|n| n.is_int()))
+        }
         "isBoolean" => Ok(v.kind == Kind::Bool),
         "isArray" => Ok(v.kind == Kind::Array),
         "isObject" => Ok(v.kind == Kind::Object),
@@ -349,7 +403,12 @@ fn predicate(op: &str, v: &Value) -> std::result::Result<bool, String> {
 /// Validates the selected value against a JSON Schema file (draft 2020-12
 /// or draft-07, `$ref` within the file). It returns what does not match,
 /// or "" when it does; the error is a schema that cannot be read.
-fn matches_schema(sel: &str, v: &Value, path: &str, opts: Options<'_>) -> std::result::Result<String, String> {
+fn matches_schema(
+    sel: &str,
+    v: &Value,
+    path: &str,
+    opts: Options<'_>,
+) -> std::result::Result<String, String> {
     let Some(loader) = opts.schema else {
         return Err("matchesSchema is not available here".to_string());
     };
@@ -357,15 +416,17 @@ fn matches_schema(sel: &str, v: &Value, path: &str, opts: Options<'_>) -> std::r
     let instance = if v.kind == Kind::String && sel != "body" {
         serde_json::Value::String(v.text.clone()) // a JSON string value, already unquoted
     } else {
-        parse_json(&v.text).map_err(|e| format!("matchesSchema needs JSON, and {sel} is not: {e}"))?
+        parse_json(&v.text)
+            .map_err(|e| format!("matchesSchema needs JSON, and {sel} is not: {e}"))?
     };
     Ok(resolved.validate(&instance).err().unwrap_or_default())
 }
 
 /// The decimal syntax assertions treat as numeric: an optional sign,
 /// digits with an optional fraction, an optional exponent.
-static RE_NUMBER: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE]([+-]?[0-9]+))?$").unwrap());
+static RE_NUMBER: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE]([+-]?[0-9]+))?$").unwrap()
+});
 
 // Bounds on the digits parse_number expands: response values are
 // untrusted, so 1e1000000000 must not be parsed.
@@ -390,7 +451,11 @@ pub fn parse_number(s: &str) -> Option<Number> {
             // ±4096 needs four digits; anything longer is out of range anyway
             return None;
         }
-        let exp: i64 = if digits.is_empty() { 0 } else { digits.parse().ok()? };
+        let exp: i64 = if digits.is_empty() {
+            0
+        } else {
+            digits.parse().ok()?
+        };
         if exp > MAX_NUMBER_EXPONENT {
             return None;
         }
@@ -398,7 +463,7 @@ pub fn parse_number(s: &str) -> Option<Number> {
     Number::parse(s)
 }
 
-fn compare(actual: &str, op: &str, expected: &str) -> (bool, String) {
+pub(crate) fn compare(actual: &str, op: &str, expected: &str) -> (bool, String) {
     let cmp = match (parse_number(actual), parse_number(expected)) {
         (Some(a), Some(e)) => Some(a.cmp(&e)),
         _ => None,
@@ -411,7 +476,12 @@ fn compare(actual: &str, op: &str, expected: &str) -> (bool, String) {
             let Some(cmp) = cmp else {
                 return (
                     false,
-                    format!("{} needs numeric operands, got {} and {}", op, quote(actual), quote(expected)),
+                    format!(
+                        "{} needs numeric operands, got {} and {}",
+                        op,
+                        quote(actual),
+                        quote(expected)
+                    ),
                 );
             };
             ok(match op {

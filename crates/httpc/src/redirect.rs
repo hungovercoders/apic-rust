@@ -33,7 +33,8 @@ pub trait CookieJar {
 /// request about to be sent, which it may change (to drop a header, say),
 /// and the requests already sent, oldest first, their bodies left out.
 /// `Err` stops with that message as the error.
-pub type CheckRedirect<'a> = dyn Fn(&mut Request, &[Request]) -> Result<RedirectAction, String> + 'a;
+pub type CheckRedirect<'a> =
+    dyn Fn(&mut Request, &[Request]) -> Result<RedirectAction, String> + 'a;
 
 /// How `follow_redirects` behaves. The default follows up to ten
 /// redirects and keeps no cookies.
@@ -83,10 +84,11 @@ pub fn follow_redirects(
     let initial_headers = req.headers.clone();
     // The cookies the caller wrote by hand; a server that sets one of
     // them on the way takes it over from then on.
-    let mut initial_cookies: Option<BTreeMap<String, Vec<String>>> = match (policy.jar, req.headers.get("Cookie")) {
-        (Some(_), Some(_)) => Some(parse_cookie_header(&req.headers.values("Cookie"))),
-        _ => None,
-    };
+    let mut initial_cookies: Option<BTreeMap<String, Vec<String>>> =
+        match (policy.jar, req.headers.get("Cookie")) {
+            (Some(_), Some(_)) => Some(parse_cookie_header(&req.headers.values("Cookie"))),
+            _ => None,
+        };
     let mut copied_headers = initial_headers.clone();
     let mut strip_sensitive = false;
     let mut include_body = true;
@@ -149,9 +151,8 @@ pub fn follow_redirects(
             return Ok(resp);
         };
         let location = location.to_string();
-        let fail = |url: &str, message: String| {
-            Error::new(ErrorKind::Other, &first_method, url, message)
-        };
+        let fail =
+            |url: &str, message: String| Error::new(ErrorKind::Other, &first_method, url, message);
         let next_url = match url::Url::parse(&current.url).and_then(|base| base.join(&location)) {
             Ok(u) => u.to_string(),
             Err(e) => {
@@ -178,7 +179,11 @@ pub fn follow_redirects(
             url: next_url,
             headers: Headers::new(),
             host,
-            body: if include_body { req.body.clone() } else { Vec::new() },
+            body: if include_body {
+                req.body.clone()
+            } else {
+                Vec::new()
+            },
             timeout: None,
             deadline,
             cancel: req.cancel.clone(),
@@ -186,13 +191,23 @@ pub fn follow_redirects(
             max_body: req.max_body,
         };
 
-        if !strip_sensitive && !same_host(&via[0].url, &next.url) && !is_subdomain(&next.url, &via[0].url) {
+        if !strip_sensitive
+            && !same_host(&via[0].url, &next.url)
+            && !is_subdomain(&next.url, &via[0].url)
+        {
             strip_sensitive = true;
         }
         if let Some(cookies) = &mut initial_cookies {
             let mut changed = false;
             for set in resp.headers.values("Set-Cookie") {
-                let name = set.split(';').next().unwrap_or("").split('=').next().unwrap_or("").trim();
+                let name = set
+                    .split(';')
+                    .next()
+                    .unwrap_or("")
+                    .split('=')
+                    .next()
+                    .unwrap_or("")
+                    .trim();
                 changed |= cookies.remove(name).is_some();
             }
             if changed {
@@ -211,7 +226,9 @@ pub fn follow_redirects(
             next.headers.add(name, value);
         }
         let last_url = &via[via.len() - 1].url;
-        if !(last_url.starts_with("https://") && next.url.starts_with("http://")) && !next.headers.contains("Referer") {
+        if !(last_url.starts_with("https://") && next.url.starts_with("http://"))
+            && !next.headers.contains("Referer")
+        {
             next.headers.set("Referer", &without_userinfo(last_url));
         }
 

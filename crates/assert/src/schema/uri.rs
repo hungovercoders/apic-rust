@@ -22,7 +22,9 @@ fn unescape(s: &str, whole: &str) -> Result<String, String> {
     let mut i = 0;
     while i < b.len() {
         if b[i] == b'%' {
-            let hex = b.get(i + 1..i + 3).and_then(|h| std::str::from_utf8(h).ok());
+            let hex = b
+                .get(i + 1..i + 3)
+                .and_then(|h| std::str::from_utf8(h).ok());
             match hex.and_then(|h| u8::from_str_radix(h, 16).ok()) {
                 Some(v) => out.push(v),
                 None => {
@@ -59,7 +61,9 @@ impl Uri {
         if let Some(colon) = rest.find(':') {
             let scheme = &rest[..colon];
             let ok = scheme.starts_with(|c: char| c.is_ascii_alphabetic())
-                && scheme.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '+' | '-' | '.'));
+                && scheme
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || matches!(c, '+' | '-' | '.'));
             if ok {
                 u.scheme = scheme.to_ascii_lowercase();
                 rest = &rest[colon + 1..];
@@ -101,7 +105,10 @@ impl Uri {
 
     /// This URI without its fragment.
     pub fn without_fragment(&self) -> Uri {
-        Uri { fragment: String::new(), ..self.clone() }
+        Uri {
+            fragment: String::new(),
+            ..self.clone()
+        }
     }
 
     /// Resolves `reference` against this URI.
@@ -147,7 +154,9 @@ impl std::fmt::Display for Uri {
         if !self.opaque.is_empty() {
             out.push_str(&self.opaque);
         } else {
-            if (!self.scheme.is_empty() || !self.host.is_empty()) && (!self.host.is_empty() || !self.path.is_empty()) {
+            if (!self.scheme.is_empty() || !self.host.is_empty())
+                && (!self.host.is_empty() || !self.path.is_empty())
+            {
                 out.push_str("//");
                 out.push_str(&self.host);
             }
@@ -225,7 +234,10 @@ mod tests {
     use super::*;
 
     fn resolved(base: &str, reference: &str) -> String {
-        Uri::parse(base).unwrap().resolve(&Uri::parse(reference).unwrap()).to_string()
+        Uri::parse(base)
+            .unwrap()
+            .resolve(&Uri::parse(reference).unwrap())
+            .to_string()
     }
 
     #[test]
@@ -241,7 +253,10 @@ mod tests {
         assert_eq!(resolved("urn:example:root", "#a"), "urn:example:root#a");
         assert_eq!(resolved("http://x/a/", "urn:example:b"), "urn:example:b");
         assert_eq!(Uri::parse("#a%2Fb").unwrap().fragment, "a/b");
-        assert_eq!(Uri::parse("%zz").unwrap_err(), "parse \"%zz\": invalid URL escape \"%zz\"");
+        assert_eq!(
+            Uri::parse("%zz").unwrap_err(),
+            "parse \"%zz\": invalid URL escape \"%zz\""
+        );
         assert!(Uri::parse("http://x/y").unwrap().is_abs() && !Uri::parse("x/y").unwrap().is_abs());
         assert_eq!(Uri::parse("HTTP://x").unwrap().to_string(), "http://x");
     }

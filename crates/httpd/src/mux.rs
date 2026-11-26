@@ -75,7 +75,10 @@ impl Pattern {
         let host = &rest[..i];
         rest = &rest[i..];
         if let Some(j) = host.find('{') {
-            return Err(at(off + j, "host contains '{' (missing initial '/'?)".to_string()));
+            return Err(at(
+                off + j,
+                "host contains '{' (missing initial '/'?)".to_string(),
+            ));
         }
         off += i;
         if !method.is_empty() && method != "CONNECT" && rest != clean_path(rest) {
@@ -115,7 +118,10 @@ impl Pattern {
                         ));
                     }
                     if !seg.ends_with('}') {
-                        return Err(at(off, "bad wildcard segment (must end with '}')".to_string()));
+                        return Err(at(
+                            off,
+                            "bad wildcard segment (must end with '}')".to_string(),
+                        ));
                     }
                     let name = &seg[1..seg.len() - 1];
                     if name == "$" {
@@ -418,6 +424,9 @@ fn strip_host_port(host: &str) -> &str {
     }
 }
 
+/// The values a pattern's named wildcards matched.
+type PathValues = Vec<(String, String)>;
+
 /// What a `Mux` would do with a request.
 #[derive(Debug)]
 pub enum Lookup<'a, H> {
@@ -511,8 +520,8 @@ impl<H> Mux<H> {
     /// host beats one without; then the method's own pattern beats GET
     /// standing in for HEAD, which beats a pattern without a method; then
     /// the more specific path wins.
-    fn find(&self, host: &str, method: &str, path: &str) -> Option<(usize, Vec<(String, String)>)> {
-        let mut best: Option<(usize, (bool, u8), Vec<(String, String)>)> = None;
+    fn find(&self, host: &str, method: &str, path: &str) -> Option<(usize, PathValues)> {
+        let mut best: Option<(usize, (bool, u8), PathValues)> = None;
         for (i, (pattern, _)) in self.routes.iter().enumerate() {
             if !pattern.host.is_empty() && pattern.host != host {
                 continue;
@@ -541,7 +550,7 @@ impl<H> Mux<H> {
 
     /// Reports whether the pattern at `found` matches `path` itself and
     /// not merely something under it.
-    fn exact(&self, found: &Option<(usize, Vec<(String, String)>)>, path: &str) -> bool {
+    fn exact(&self, found: &Option<(usize, PathValues)>, path: &str) -> bool {
         let Some((i, _)) = found else { return false };
         let pattern = &self.routes[*i].0;
         if !pattern.last_multi() {
@@ -665,7 +674,14 @@ mod tests {
 
     fn named(name: &'static str) -> Handler {
         Box::new(move |r| {
-            Response::text(200, format!("{name} id={} rest={}", r.path_value("id"), r.path_value("rest")))
+            Response::text(
+                200,
+                format!(
+                    "{name} id={} rest={}",
+                    r.path_value("id"),
+                    r.path_value("rest")
+                ),
+            )
         })
     }
 
@@ -705,17 +721,44 @@ mod tests {
         let m = mux();
         assert_eq!(body(&m, "GET", "/todos"), (200, "list id= rest=".into()));
         assert_eq!(body(&m, "POST", "/todos"), (200, "create id= rest=".into()));
-        assert_eq!(body(&m, "GET", "/todos/42"), (200, "get id=42 rest=".into()));
-        assert_eq!(body(&m, "GET", "/todos/a%2Fb"), (200, "get id=a/b rest=".into()));
-        assert_eq!(body(&m, "GET", "/todos/latest"), (200, "latest id= rest=".into()));
+        assert_eq!(
+            body(&m, "GET", "/todos/42"),
+            (200, "get id=42 rest=".into())
+        );
+        assert_eq!(
+            body(&m, "GET", "/todos/a%2Fb"),
+            (200, "get id=a/b rest=".into())
+        );
+        assert_eq!(
+            body(&m, "GET", "/todos/latest"),
+            (200, "latest id= rest=".into())
+        );
         assert_eq!(body(&m, "HEAD", "/todos/7"), (200, "get id=7 rest=".into()));
-        assert_eq!(body(&m, "DELETE", "/todos/7"), (200, "delete id=7 rest=".into()));
-        assert_eq!(body(&m, "GET", "/static/css/site.css"), (200, "static id= rest=css/site.css".into()));
-        assert_eq!(body(&m, "GET", "/files/a/b"), (200, "files id= rest=".into()));
+        assert_eq!(
+            body(&m, "DELETE", "/todos/7"),
+            (200, "delete id=7 rest=".into())
+        );
+        assert_eq!(
+            body(&m, "GET", "/static/css/site.css"),
+            (200, "static id= rest=css/site.css".into())
+        );
+        assert_eq!(
+            body(&m, "GET", "/files/a/b"),
+            (200, "files id= rest=".into())
+        );
         assert_eq!(body(&m, "GET", "/exact/"), (200, "exact id= rest=".into()));
-        assert_eq!(body(&m, "GET", "/exact/more"), (200, "root id= rest=".into()));
-        assert_eq!(body(&m, "PATCH", "/any"), (200, "any-method id= rest=".into()));
-        assert_eq!(body(&m, "GET", "/nothing/here"), (200, "root id= rest=".into()));
+        assert_eq!(
+            body(&m, "GET", "/exact/more"),
+            (200, "root id= rest=".into())
+        );
+        assert_eq!(
+            body(&m, "PATCH", "/any"),
+            (200, "any-method id= rest=".into())
+        );
+        assert_eq!(
+            body(&m, "GET", "/nothing/here"),
+            (200, "root id= rest=".into())
+        );
         let r = m.serve(&Request::new("GET", "/x").with_host("api.example.com:8443"));
         assert_eq!(r.body, b"api-host id= rest=");
     }
@@ -723,8 +766,10 @@ mod tests {
     #[test]
     fn method_not_allowed_and_not_found() {
         let mut m = Mux::new();
-        m.handle_fn("GET /todos/{id}", |_| Response::new(200)).unwrap();
-        m.handle_fn("DELETE /todos/{id}", |_| Response::new(204)).unwrap();
+        m.handle_fn("GET /todos/{id}", |_| Response::new(200))
+            .unwrap();
+        m.handle_fn("DELETE /todos/{id}", |_| Response::new(204))
+            .unwrap();
         m.handle_fn("POST /todos", |_| Response::new(201)).unwrap();
         let r = m.serve(&Request::new("PUT", "/todos/1"));
         assert_eq!(r.status, 405);
@@ -735,19 +780,34 @@ mod tests {
         let r = m.serve(&Request::new("GET", "/nope"));
         assert_eq!(r.status, 404);
         assert_eq!(r.body, b"404 page not found\n");
-        assert_eq!(r.headers.get("Content-Type"), Some("text/plain; charset=utf-8"));
+        assert_eq!(
+            r.headers.get("Content-Type"),
+            Some("text/plain; charset=utf-8")
+        );
         assert_eq!(r.headers.get("X-Content-Type-Options"), Some("nosniff"));
-        assert!(matches!(m.lookup(&Request::new("GET", "/nope")), Lookup::NotFound));
+        assert!(matches!(
+            m.lookup(&Request::new("GET", "/nope")),
+            Lookup::NotFound
+        ));
     }
 
     #[test]
     fn redirects() {
         let m = mux();
         let r = m.serve(&Request::new("GET", "/files?x=1"));
-        assert_eq!((r.status, r.headers.get("Location")), (301, Some("/files/?x=1")));
-        assert_eq!(r.body, b"<a href=\"/files/?x=1\">Moved Permanently</a>.\n\n");
+        assert_eq!(
+            (r.status, r.headers.get("Location")),
+            (301, Some("/files/?x=1"))
+        );
+        assert_eq!(
+            r.body,
+            b"<a href=\"/files/?x=1\">Moved Permanently</a>.\n\n"
+        );
         let r = m.serve(&Request::new("GET", "/todos/../todos//7"));
-        assert_eq!((r.status, r.headers.get("Location")), (301, Some("/todos/7")));
+        assert_eq!(
+            (r.status, r.headers.get("Location")),
+            (301, Some("/todos/7"))
+        );
         assert!(matches!(
             m.lookup(&Request::new("GET", "/exact")),
             Lookup::Redirect { location } if location == "/exact/"
@@ -774,10 +834,19 @@ mod tests {
         }
         m.handle("GET /a/{x}", 1).unwrap();
         let e = m.handle("GET /a/{y}", 2).unwrap_err();
-        assert!(e.starts_with("pattern \"GET /a/{y}\" conflicts with pattern \"GET /a/{x}\":\n"), "{e}");
+        assert!(
+            e.starts_with("pattern \"GET /a/{y}\" conflicts with pattern \"GET /a/{x}\":\n"),
+            "{e}"
+        );
         assert!(m.handle("/a/{x}/b", 3).is_ok());
-        assert!(m.handle("/{x}/a/b", 4).unwrap_err().contains("conflicts with"));
-        assert!(m.handle("/a/b", 5).unwrap_err().contains("matches more methods"));
+        assert!(m
+            .handle("/{x}/a/b", 4)
+            .unwrap_err()
+            .contains("conflicts with"));
+        assert!(m
+            .handle("/a/b", 5)
+            .unwrap_err()
+            .contains("matches more methods"));
         assert_eq!(m.patterns().len(), 2);
     }
 
@@ -786,7 +855,11 @@ mod tests {
         let mut m: Mux<&str> = Mux::new();
         m.handle("GET /pets/{p0}", "pets").unwrap();
         match m.lookup(&Request::new("GET", "/pets/rex")) {
-            Lookup::Found { handler, pattern, path_values } => {
+            Lookup::Found {
+                handler,
+                pattern,
+                path_values,
+            } => {
                 assert_eq!((*handler, pattern), ("pets", "GET /pets/{p0}"));
                 assert_eq!(path_values, [("p0".to_string(), "rex".to_string())]);
             }
@@ -800,7 +873,14 @@ mod tests {
 
     #[test]
     fn cleaning() {
-        for (give, want) in [("", "/"), ("a", "/a"), ("/a/", "/a/"), ("//a/./b/../c", "/a/c"), ("/..", "/"), ("/a/b/..", "/a")] {
+        for (give, want) in [
+            ("", "/"),
+            ("a", "/a"),
+            ("/a/", "/a/"),
+            ("//a/./b/../c", "/a/c"),
+            ("/..", "/"),
+            ("/a/b/..", "/a"),
+        ] {
             assert_eq!(clean_path(give), want);
         }
         assert_eq!(strip_host_port("h:80"), "h");

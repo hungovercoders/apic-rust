@@ -1,0 +1,414 @@
+[
+ {
+  "Steps": [
+   {
+    "URL": "https://api.example.com/auth/login",
+    "Lines": [
+     "sid=abc",
+     "pref=dark; Domain=example.com; Path=/; Expires=Wed, 06 Oct 2100 09:00:00 GMT",
+     "old=x; Expires=Wed, 06 Oct 2000 09:00:00 GMT",
+     "other=y; Domain=evil.com",
+     "gone=z; Max-Age=0",
+     "up=1; Domain=.EXAMPLE.com",
+     "tld=1; Domain=com",
+     "sub=1; Domain=sub.api.example.com",
+     "dot=1; Domain=example.com.",
+     "sec=1; Secure; HttpOnly",
+     "p=1; Path=/auth/login/deep",
+     "rel=1; Path=relative",
+     "q=\"quoted v\"",
+     "sp=a b",
+     "comma=a,b",
+     "bad name=1",
+     "=noname",
+     "ctl=a\u0001b"
+    ]
+   }
+  ],
+  "Queries": [
+   "https://api.example.com/auth/me",
+   "https://api.example.com/auth",
+   "https://api.example.com/authx",
+   "https://api.example.com/",
+   "https://api.example.com",
+   "http://api.example.com/auth/login/deep/er",
+   "https://www.example.com/",
+   "https://example.com/x",
+   "https://API.Example.COM.:8443/auth/login",
+   "https://evil.com/",
+   "https://other.com/",
+   "ftp://api.example.com/auth",
+   "https://xexample.com/"
+  ],
+  "Headers": [
+   "sid=abc; up=1; tld=1; sec=1; rel=1; q=\"quoted v\"; sp=\"a b\"; comma=\"a,b\"; pref=dark",
+   "sid=abc; up=1; tld=1; sec=1; rel=1; q=\"quoted v\"; sp=\"a b\"; comma=\"a,b\"; pref=dark",
+   "pref=dark",
+   "pref=dark",
+   "pref=dark",
+   "p=1; sid=abc; up=1; tld=1; rel=1; q=\"quoted v\"; sp=\"a b\"; comma=\"a,b\"; pref=dark",
+   "pref=dark",
+   "pref=dark",
+   "sid=abc; up=1; tld=1; sec=1; rel=1; q=\"quoted v\"; sp=\"a b\"; comma=\"a,b\"; pref=dark",
+   "",
+   "",
+   "",
+   ""
+  ],
+  "Stored": [
+   {
+    "name": "comma",
+    "value": "a,b",
+    "domain": "api.example.com",
+    "path": "/auth",
+    "host_only": true
+   },
+   {
+    "name": "q",
+    "value": "quoted v",
+    "domain": "api.example.com",
+    "path": "/auth",
+    "host_only": true
+   },
+   {
+    "name": "rel",
+    "value": "1",
+    "domain": "api.example.com",
+    "path": "/auth",
+    "host_only": true
+   },
+   {
+    "name": "sec",
+    "value": "1",
+    "domain": "api.example.com",
+    "path": "/auth",
+    "secure": true,
+    "http_only": true,
+    "host_only": true
+   },
+   {
+    "name": "sid",
+    "value": "abc",
+    "domain": "api.example.com",
+    "path": "/auth",
+    "host_only": true
+   },
+   {
+    "name": "sp",
+    "value": "a b",
+    "domain": "api.example.com",
+    "path": "/auth",
+    "host_only": true
+   },
+   {
+    "name": "p",
+    "value": "1",
+    "domain": "api.example.com",
+    "path": "/auth/login/deep",
+    "host_only": true
+   },
+   {
+    "name": "pref",
+    "value": "dark",
+    "domain": "example.com",
+    "path": "/",
+    "expires": "2100-10-06T09:00:00Z"
+   },
+   {
+    "name": "up",
+    "value": "1",
+    "domain": "example.com",
+    "path": "/auth"
+   }
+  ]
+ },
+ {
+  "Steps": [
+   {
+    "URL": "http://localhost:8080/app/login",
+    "Lines": [
+     "a=1",
+     "b=2; Secure",
+     "c=3; Domain=localhost",
+     "d=4; Path=/"
+    ]
+   },
+   {
+    "URL": "http://localhost:8080/app/other",
+    "Lines": [
+     "a=one",
+     "d=; Max-Age=0",
+     "e=5; Path=/app/"
+    ]
+   }
+  ],
+  "Queries": [
+   "http://localhost:8080/app/x",
+   "http://localhost/app",
+   "http://localhost:1/",
+   "https://localhost/app/",
+   "http://sub.localhost/app/x",
+   "http://localhost./app/x"
+  ],
+  "Headers": [
+   "e=5; a=one; b=2; c=3; d=4",
+   "a=one; b=2; c=3; d=4",
+   "d=4",
+   "e=5; a=one; b=2; c=3; d=4",
+   "",
+   "e=5; a=one; b=2; c=3; d=4"
+  ],
+  "Stored": [
+   {
+    "name": "d",
+    "value": "4",
+    "domain": "localhost",
+    "path": "/",
+    "host_only": true
+   },
+   {
+    "name": "a",
+    "value": "one",
+    "domain": "localhost",
+    "path": "/app",
+    "host_only": true
+   },
+   {
+    "name": "b",
+    "value": "2",
+    "domain": "localhost",
+    "path": "/app",
+    "secure": true,
+    "host_only": true
+   },
+   {
+    "name": "c",
+    "value": "3",
+    "domain": "localhost",
+    "path": "/app"
+   },
+   {
+    "name": "e",
+    "value": "5",
+    "domain": "localhost",
+    "path": "/app/",
+    "host_only": true
+   }
+  ]
+ },
+ {
+  "Steps": [
+   {
+    "URL": "http://127.0.0.1:9000/x/y",
+    "Lines": [
+     "a=1",
+     "b=2; Domain=127.0.0.1",
+     "c=3; Domain=0.0.1",
+     "d=4; Secure"
+    ]
+   },
+   {
+    "URL": "http://[::1]:9000/",
+    "Lines": [
+     "v6=1",
+     "v6s=1; Secure",
+     "v6d=1; Domain=::1"
+    ]
+   }
+  ],
+  "Queries": [
+   "http://127.0.0.1/x/z",
+   "http://127.0.0.1/",
+   "https://127.0.0.1/x/",
+   "http://[::1]/",
+   "http://[::1]:1/a",
+   "http://::1/"
+  ],
+  "Headers": [
+   "a=1; b=2; d=4",
+   "",
+   "a=1; b=2; d=4",
+   "",
+   "v6=1; v6s=1; v6d=1",
+   "!parse \"http://::1/\": invalid port \"::1\" after host"
+  ],
+  "Stored": [
+   {
+    "name": "a",
+    "value": "1",
+    "domain": "127.0.0.1",
+    "path": "/x",
+    "host_only": true
+   },
+   {
+    "name": "b",
+    "value": "2",
+    "domain": "127.0.0.1",
+    "path": "/x"
+   },
+   {
+    "name": "d",
+    "value": "4",
+    "domain": "127.0.0.1",
+    "path": "/x",
+    "secure": true,
+    "host_only": true
+   },
+   {
+    "name": "v6",
+    "value": "1",
+    "domain": "::1",
+    "path": "/",
+    "host_only": true
+   },
+   {
+    "name": "v6d",
+    "value": "1",
+    "domain": "::1",
+    "path": "/"
+   },
+   {
+    "name": "v6s",
+    "value": "1",
+    "domain": "::1",
+    "path": "/",
+    "secure": true,
+    "host_only": true
+   }
+  ]
+ },
+ {
+  "Steps": [
+   {
+    "URL": "https://bücher.example/a/b/c",
+    "Lines": [
+     "u=1",
+     "v=2; Domain=bücher.example",
+     "w=3; Domain=xn--bcher-kva.example",
+     "x=4; Domain=example"
+    ]
+   },
+   {
+    "URL": "https://single/",
+    "Lines": [
+     "s=1",
+     "t=2; Domain=single"
+    ]
+   }
+  ],
+  "Queries": [
+   "https://xn--bcher-kva.example/a/b/x",
+   "https://BÜCHER.example/a/b",
+   "https://www.xn--bcher-kva.example/a/b/",
+   "https://single/",
+   "https://other.example/a/b/"
+  ],
+  "Headers": [
+   "u=1; v=2; w=3; x=4",
+   "",
+   "w=3; x=4",
+   "s=1; t=2",
+   ""
+  ],
+  "Stored": [
+   {
+    "name": "u",
+    "value": "1",
+    "domain": "bücher.example",
+    "path": "/a/b",
+    "host_only": true
+   },
+   {
+    "name": "v",
+    "value": "2",
+    "domain": "bücher.example",
+    "path": "/a/b",
+    "host_only": true
+   },
+   {
+    "name": "s",
+    "value": "1",
+    "domain": "single",
+    "path": "/",
+    "host_only": true
+   },
+   {
+    "name": "t",
+    "value": "2",
+    "domain": "single",
+    "path": "/"
+   },
+   {
+    "name": "w",
+    "value": "3",
+    "domain": "xn--bcher-kva.example",
+    "path": "/a/b"
+   }
+  ]
+ },
+ {
+  "Steps": [
+   {
+    "URL": "https://a.b.example.org/one/two",
+    "Lines": [
+     "k=1; Path=/one",
+     "k=2; Path=/one/two",
+     "k=3",
+     "k=4; Domain=example.org",
+     "k=5; Domain=b.example.org; Path=/",
+     "z=9; Path=/one/"
+    ]
+   },
+   {
+    "URL": "https://a.b.example.org/one/two",
+    "Lines": [
+     "k=3b",
+     "k=4; Domain=example.org; Max-Age=0"
+    ]
+   }
+  ],
+  "Queries": [
+   "https://a.b.example.org/one/two",
+   "https://a.b.example.org/one/two/three",
+   "https://b.example.org/one/x",
+   "https://example.org/one/two",
+   "https://c.example.org/"
+  ],
+  "Headers": [
+   "k=2; z=9; k=3b; k=5",
+   "k=2; z=9; k=3b; k=5",
+   "k=5",
+   "",
+   ""
+  ],
+  "Stored": [
+   {
+    "name": "k",
+    "value": "3b",
+    "domain": "a.b.example.org",
+    "path": "/one",
+    "host_only": true
+   },
+   {
+    "name": "z",
+    "value": "9",
+    "domain": "a.b.example.org",
+    "path": "/one/",
+    "host_only": true
+   },
+   {
+    "name": "k",
+    "value": "2",
+    "domain": "a.b.example.org",
+    "path": "/one/two",
+    "host_only": true
+   },
+   {
+    "name": "k",
+    "value": "5",
+    "domain": "b.example.org",
+    "path": "/"
+   }
+  ]
+ }
+]

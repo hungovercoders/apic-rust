@@ -212,7 +212,10 @@ mod tests {
         assert_eq!(t.authority, "example.com:8443");
         assert_eq!(t.path_and_query, "/a/../b?q=a%20b");
         let t = parse_target("http://[::1]:8080").unwrap();
-        assert_eq!((t.host.as_str(), t.port, t.authority.as_str()), ("::1", 8080, "[::1]:8080"));
+        assert_eq!(
+            (t.host.as_str(), t.port, t.authority.as_str()),
+            ("::1", 8080, "[::1]:8080")
+        );
         assert_eq!(t.host_port(), "[::1]:8080");
         let t = parse_target("http://example.com?x=1").unwrap();
         assert_eq!((t.port, t.path_and_query.as_str()), (80, "/?x=1"));
@@ -224,12 +227,18 @@ mod tests {
             ("ftp://x/", "unsupported protocol scheme \"ftp\""),
             ("example.com/x", "unsupported protocol scheme \"\""),
             ("http:///x", "http: no Host in request URL"),
-            ("http://h:x/", "parse \"http://h:x/\": invalid port \":x\" after host"),
+            (
+                "http://h:x/",
+                "parse \"http://h:x/\": invalid port \":x\" after host",
+            ),
         ] {
             assert_eq!(parse_target(raw).unwrap_err().message, want);
         }
         assert!(check_method("GET").is_ok());
-        assert_eq!(check_method("G ET").unwrap_err(), "net/http: invalid method \"G ET\"");
+        assert_eq!(
+            check_method("G ET").unwrap_err(),
+            "net/http: invalid method \"G ET\""
+        );
     }
 
     #[test]

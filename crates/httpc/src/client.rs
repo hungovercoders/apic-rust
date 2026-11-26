@@ -3,8 +3,10 @@
 use std::collections::HashMap;
 use std::error::Error as _;
 use std::io::{self, Write as _};
+use std::pin::Pin;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
+use std::task::{Context, Poll};
 use std::time::{Duration, Instant};
 
 use base64::Engine;
@@ -15,7 +17,7 @@ use hyper::header::{HeaderName, HeaderValue};
 use hyper_util::rt::{TokioExecutor, TokioIo};
 use rustls::pki_types::ServerName;
 use rustls::ClientConfig;
-use tokio::io::{AsyncRead, AsyncWrite};
+use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::net::TcpStream;
 
 use crate::cancel::CancelToken;
@@ -368,7 +370,11 @@ impl Client {
 
     /// Closes the connections that are idle in the pool.
     pub fn close_idle_connections(&self) {
-        self.inner.pool.lock().unwrap_or_else(|e| e.into_inner()).clear();
+        self.inner
+            .pool
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clear();
     }
 }
 
@@ -448,7 +454,10 @@ enum Sender {
 }
 
 impl Sender {
-    async fn send(&mut self, req: hyper::Request<ReqBody>) -> hyper::Result<hyper::Response<Incoming>> {
+    async fn send(
+        &mut self,
+        req: hyper::Request<ReqBody>,
+    ) -> hyper::Result<hyper::Response<Incoming>> {
         match self {
             Sender::H1(s) => s.send_request(req).await,
             Sender::H2(s) => s.send_request(req).await,
@@ -471,6 +480,22 @@ struct Conn {
     absolute_form: bool,
     /// The `Proxy-Authorization` each request on the connection carries.
     proxy_auth: Option<String>,
+    /// Why the connection itself failed, once it has. A request on a
+    /// connection that broke is only told that it broke; the reason (a
+    /// TLS alert, say) is known to the connection.
+    broke: Arc<Mutex<Option<Fail>>>,
+}
+
+impl Conn {
+    /// The failure for a request on this connection: the connection's
+    /// own TLS failure when it has one, else the request's.
+    fn fail(&self, err: &hyper::Error, host: &str) -> Fail {
+        let own = self.broke.lock().unwrap_or_else(|e| e.into_inner()).clone();
+        match own {
+            Some(fail) if matches!(fail.kind, ErrorKind::Tls(_)) => fail,
+            _ => hyper_fail(err, host),
+        }
+    }
 }
 
 struct Idle {
@@ -500,6 +525,7 @@ impl Inner {
                     sender: Sender::H2(s.clone()),
                     absolute_form: idle.conn.absolute_form,
                     proxy_auth: idle.conn.proxy_auth.clone(),
+                    broke: idle.conn.broke.clone(),
                 };
                 list.push(Idle {
                     conn: idle.conn,
@@ -537,7 +563,11 @@ impl Inner {
 
     /// Opens a connection for the target, through the proxy when there
     /// is one, and starts HTTP on it.
-    async fn dial(&self, target: &Target, proxy: Option<&Proxy>) -> Result<(Conn, DialTimes), Fail> {
+    async fn dial(
+        &self,
+        target: &Target,
+        proxy: Option<&Proxy>,
+    ) -> Result<(Conn, DialTimes), Fail> {
         let mut times = DialTimes::default();
         let mut absolute_form = false;
         let mut proxy_auth = None;
@@ -591,13 +621,22 @@ impl Inner {
         } else if self.protocols == Protocols::Http2 {
             return Err(Fail::other("http2: unsupported scheme"));
         }
+        let broke = Arc::new(Mutex::new(None));
+        let record = |slot: Arc<Mutex<Option<Fail>>>, host: String| {
+            move |err: hyper::Error| {
+                *slot.lock().unwrap_or_else(|e| e.into_inner()) = Some(hyper_fail(&err, &host));
+            }
+        };
         let sender = if h2 {
             let (sender, conn) = http2::Builder::new(TokioExecutor::new())
                 .handshake::<_, ReqBody>(TokioIo::new(io))
                 .await
                 .map_err(|e| hyper_fail(&e, &target.host))?;
+            let record = record(broke.clone(), target.host.clone());
             tokio::spawn(async move {
-                let _ = conn.await;
+                if let Err(e) = conn.await {
+                    record(e);
+                }
             });
             Sender::H2(sender)
         } else {
@@ -606,8 +645,11 @@ impl Inner {
                 .handshake::<_, ReqBody>(TokioIo::new(io))
                 .await
                 .map_err(|e| hyper_fail(&e, &target.host))?;
+            let record = record(broke.clone(), target.host.clone());
             tokio::spawn(async move {
-                let _ = conn.await;
+                if let Err(e) = conn.await {
+                    record(e);
+                }
             });
             Sender::H1(sender)
         };
@@ -616,6 +658,7 @@ impl Inner {
                 sender,
                 absolute_form,
                 proxy_auth,
+                broke,
             },
             times,
         ))
@@ -698,7 +741,93 @@ async fn tls_handshake(
         .map_err(|e| io_fail(&e, host))?;
     times.tls += started.elapsed();
     let alpn = stream.get_ref().1.alpn_protocol().map(<[u8]>::to_vec);
-    Ok((Box::new(stream), alpn))
+    Ok((Box::new(AlertFirst::new(stream)), alpn))
+}
+
+/// A TLS stream whose failed writes look for the reason first. A server
+/// that refuses the client's certificate under TLS 1.3 says so only after
+/// the handshake has finished here, and then closes; a write that follows
+/// fails with a reset connection while the alert that explains it is
+/// still on its way in. Waiting for it turns `connection reset by peer`
+/// into `certificate required`.
+struct AlertFirst<S> {
+    inner: S,
+    /// A write that failed, held back until the read side has spoken.
+    broken: Option<io::Error>,
+}
+
+impl<S: AsyncRead + AsyncWrite + Unpin> AlertFirst<S> {
+    fn new(inner: S) -> AlertFirst<S> {
+        AlertFirst {
+            inner,
+            broken: None,
+        }
+    }
+
+    /// Settles a failed write: with the TLS failure the peer sent, if the
+    /// read side has one, else with the write's own error.
+    fn explain<T>(&mut self, cx: &mut Context<'_>, err: io::Error) -> Poll<io::Result<T>> {
+        if !matches!(
+            err.kind(),
+            io::ErrorKind::BrokenPipe
+                | io::ErrorKind::ConnectionReset
+                | io::ErrorKind::ConnectionAborted
+        ) {
+            return Poll::Ready(Err(err));
+        }
+        let mut scratch = [0u8; 512];
+        let mut buf = ReadBuf::new(&mut scratch);
+        match Pin::new(&mut self.inner).poll_read(cx, &mut buf) {
+            Poll::Ready(Err(reason)) if tls_error_in(&reason).is_some() => Poll::Ready(Err(reason)),
+            Poll::Ready(_) => Poll::Ready(Err(err)),
+            Poll::Pending => {
+                // The read wakes this task when the socket has something
+                // to say, and a reset socket always does.
+                self.broken = Some(err);
+                Poll::Pending
+            }
+        }
+    }
+}
+
+impl<S: AsyncRead + AsyncWrite + Unpin> AsyncRead for AlertFirst<S> {
+    fn poll_read(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &mut ReadBuf<'_>,
+    ) -> Poll<io::Result<()>> {
+        Pin::new(&mut self.inner).poll_read(cx, buf)
+    }
+}
+
+impl<S: AsyncRead + AsyncWrite + Unpin> AsyncWrite for AlertFirst<S> {
+    fn poll_write(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        data: &[u8],
+    ) -> Poll<io::Result<usize>> {
+        if let Some(err) = self.broken.take() {
+            return self.explain(cx, err);
+        }
+        match Pin::new(&mut self.inner).poll_write(cx, data) {
+            Poll::Ready(Err(e)) => self.explain(cx, e),
+            other => other,
+        }
+    }
+
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+        if let Some(err) = self.broken.take() {
+            return self.explain(cx, err);
+        }
+        match Pin::new(&mut self.inner).poll_flush(cx) {
+            Poll::Ready(Err(e)) => self.explain(cx, e),
+            other => other,
+        }
+    }
+
+    fn poll_shutdown(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+        Pin::new(&mut self.inner).poll_shutdown(cx)
+    }
 }
 
 /// The failure for an error from the HTTP connection.
@@ -725,12 +854,8 @@ fn hyper_fail(err: &hyper::Error, host: &str) -> Fail {
         Some(s) => format!("{text}: {s}"),
         None => text,
     };
-    if let Some(i) = detail.find("received fatal alert: ") {
-        let alert = detail[i + "received fatal alert: ".len()..].trim();
-        return Fail::new(
-            ErrorKind::Tls(TlsFailure::Other),
-            format!("remote error: tls: {alert}"),
-        );
+    if let Some(fail) = crate::tls::alert_in_text(&detail) {
+        return fail;
     }
     Fail::other(detail)
 }
@@ -778,10 +903,16 @@ async fn run(inner: Arc<Inner>, mut req: Request) -> Result<Response, Error> {
             None => std::future::pending().await,
         }
     };
+    // The timer rounds up to its own tick, so a deadline already past is
+    // checked by hand: such a request must not get as far as the wire.
+    let expired = deadline.is_some_and(|at| at <= Instant::now());
     let outcome = tokio::select! {
         biased;
         () = cancel => Err(Fail::new(ErrorKind::Cancelled, "context canceled")),
         () = timer => Err(Fail::new(ErrorKind::Timeout, "context deadline exceeded")),
+        () = std::future::ready(()), if expired => {
+            Err(Fail::new(ErrorKind::Timeout, "context deadline exceeded"))
+        }
         r = round_trip(&inner, &req, body, started, &in_body) => r,
     };
     outcome.map_err(|f| {
@@ -817,6 +948,7 @@ async fn round_trip(
                             sender: Sender::H2(s.clone()),
                             absolute_form: conn.absolute_form,
                             proxy_auth: conn.proxy_auth.clone(),
+                            broke: conn.broke.clone(),
                         },
                     );
                 }
@@ -827,7 +959,7 @@ async fn round_trip(
         match conn.sender.send(http_req).await {
             Ok(head) => break (conn, reused, times, head, asked_gzip),
             Err(e) if reused && !retried && may_retry(&e, &req.method) => retried = true,
-            Err(e) => return Err(hyper_fail(&e, &target.host)),
+            Err(e) => return Err(conn.fail(&e, &target.host)),
         }
     };
     let first_byte = Instant::now();
@@ -863,7 +995,7 @@ async fn round_trip(
     }
 
     let mut sink = if gzip {
-        Sink::Gzip(flate2::write::MultiGzDecoder::new(Vec::new()))
+        Sink::Gzip(Box::new(flate2::write::MultiGzDecoder::new(Vec::new())))
     } else {
         Sink::Plain(Vec::new())
     };
@@ -873,7 +1005,7 @@ async fn round_trip(
         match incoming.frame().await {
             None => break true,
             Some(Err(e)) => {
-                let fail = hyper_fail(&e, &target.host);
+                let fail = conn.fail(&e, &target.host);
                 return Err(if fail.message == "EOF" {
                     Fail::other("unexpected EOF")
                 } else {
@@ -881,7 +1013,9 @@ async fn round_trip(
                 });
             }
             Some(Ok(frame)) => {
-                let Ok(data) = frame.into_data() else { continue };
+                let Ok(data) = frame.into_data() else {
+                    continue;
+                };
                 if data.is_empty() {
                     continue;
                 }
@@ -937,14 +1071,21 @@ async fn round_trip(
 /// Where the body goes as it arrives: as it is, or through gzip.
 enum Sink {
     Plain(Vec<u8>),
-    Gzip(flate2::write::MultiGzDecoder<Vec<u8>>),
+    Gzip(Box<flate2::write::MultiGzDecoder<Vec<u8>>>),
 }
 
 impl Sink {
     fn write(&mut self, data: &[u8]) -> Result<(), Fail> {
         match self {
             Sink::Plain(out) => out.extend_from_slice(data),
-            Sink::Gzip(decoder) => decoder.write_all(data).map_err(|e| gzip_fail(&e))?,
+            Sink::Gzip(decoder) => {
+                // Flushed, so that what has been decoded can be counted
+                // against the cap.
+                decoder
+                    .write_all(data)
+                    .and_then(|()| decoder.flush())
+                    .map_err(|e| gzip_fail(&e))?;
+            }
         }
         Ok(())
     }
